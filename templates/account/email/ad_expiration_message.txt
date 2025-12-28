@@ -1,0 +1,30 @@
+Bonjour {{ user.username }},
+
+Votre annonce a expiré et n'est plus visible sur HABIKO.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANNONCE EXPIRÉE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Date d'expiration : {{ ad.expires_at|date:"d/m/Y à H:i" }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 Que faire maintenant ?
+
+Pour republier cette annonce ou en créer une nouvelle :
+{{ site_url }}/post/
+
+Pour gérer toutes vos annonces :
+{{ site_url }}/dashboard/
+
+Conseil : Pour éviter l'expiration, pensez à renouveler vos annonces régulièrement.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cordialement,
+L'équipe HABIKO
+https://ci-habiko.com

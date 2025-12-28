@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+{% block title %}HABIKO · 18+{% endblock %}
+{% block description %}Vérification d'âge requise - Site réservé aux adultes de 18 ans et plus{% endblock %}
+{% block canonical_url %}https://ci-habiko.com/age-gate/{% endblock %}
+{% block tailwind_css %}{% comment %}Skip Tailwind CSS on age-gate - using inline CSS instead{% endcomment %}{% endblock %}
+{% block htmx_js %}{% comment %}Skip HTMX on age-gate - not needed{% endcomment %}{% endblock %}
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  /* Minimal CSS for age-gate page - complete styling without Tailwind */
+  
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #eff6ff, #ffffff);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: #111827;
+  }
+  
+  /* Header styles */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    backdrop-filter: saturate(180%) blur(10px);
+    background-color: rgba(255, 255, 255, 0.7);
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .header-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .header-logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: #111827;
+    text-decoration: none;
+  }
+  
+  .header-logo img {
+    height: 2rem;
+    width: auto;
+    display: block;
+  }
+  
+  .header-nav {
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+  
+  .nav-link {
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+  
+  .nav-link:hover {
+    color: #111827;
+  }
+  
+  .nav-button {
+    background-color: #2563eb;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: inline-block;
+  }
+  
+  .nav-button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .nav-button-gray {
+    background-color: #4b5563;
+  }
+  
+  .nav-button-gray:hover {
+    background-color: #374151;
+  }
+  
+  .mobile-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-nav {
+      display: none;
+    }
+  }
+  
+  .mobile-button {
+    background-color: #2563eb;
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  /* CTA Section */
+  .cta-section {
+    background: linear-gradient(to bottom right, #f97316, #22c55e);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+  
+  @media (min-width: 768px) {
+    .cta-section {
+      padding: 1rem;
+    }
+  }
+  
+  .cta-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .cta-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  @media (min-width: 768px) {
+    .cta-title {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .cta-text {
+    color: #ffedd5;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #fff;
+    color: #ea580c;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  .cta-button:hover {
+    background-color: #fff7ed;
+  }
+  
+  .cta-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  /* Counter section */
+  .counter-section {
+    background-color: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+  
+  .counter-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Main content */
+  main.age-gate-main,
+  main {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.75rem 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    main.age-gate-main,
+    main {
+      padding: 1rem;
+    }
+  }
+  
+  /* Age gate container */
+  .age-gate-container {
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .age-gate-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    margin-top: 0;
+  }
+  
+  .age-gate-text {
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    color: #374151;
+  }
+  
+  .age-gate-form {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .age-gate-button {
+    background-color: #111827;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  
+  .age-gate-button:hover {
+    background-color: #1f2937;
+  }
+  
+  .age-gate-link {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .age-gate-link:hover {
+    background-color: #f9fafb;
+  }
+  
+  @media (min-width: 768px) {
+    .age-gate-container {
+      padding: 1.5rem;
+    }
+    .age-gate-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* Footer */
+  footer {
+    background-color: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 2rem;
+    padding: 1.5rem;
+  }
+  
+  .footer-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .footer-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  .footer-title {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .footer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footer-list li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .footer-link {
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+  
+  .footer-link:hover {
+    color: #111827;
+    text-decoration: underline;
+  }
+  
+  .footer-copyright {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+</style>
+{% endblock %}
+{% block header %}
+{% load static %}
+<header>
+  <div class="header-container">
+    <a href="/" class="header-logo">
+      <img
+        src="{% static 'img/logo.png' %}"
+        alt="HABIKO - Site de immobilier en Côte d'Ivoire"
+        loading="eager"
+        width="264"
+        height="112"
+      />
+    </a>
+    <nav class="header-nav">
+      <a href="/ads" class="nav-link">Annonces</a>
+      {% if user.is_authenticated %}
+      <a href="/dashboard/" class="nav-button">Mon compte</a>
+      {% else %}
+      <a href="/auth/login/" class="nav-button nav-button-gray">Se connecter</a>
+      {% endif %}
+    </nav>
+    <div class="mobile-nav">
+      {% if user.is_authenticated %}
+      <a href="/dashboard/" class="mobile-button">Mon compte</a>
+      {% else %}
+      <a href="/auth/login/" class="mobile-button nav-button-gray">Se connecter</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% endblock %}
+{% block cta_section %}
+<section class="cta-section">
+  <div class="cta-container">
+    <h2 class="cta-title">Vous êtes propriétaire ?</h2>
+    <p class="cta-text">Publiez votre annonce gratuitement et trouvez vos acheteurs ou locataires</p>
+    <a href="/post/" class="cta-button">
+      <svg class="cta-icon" viewBox="0 0 24 24">
+        <path d="M12 4v16m8-8H4"></path>
+      </svg>
+      Publier une annonce
+    </a>
+  </div>
+</section>
+{% endblock %}
+{% block counter_section %}
+<section class="counter-section">
+  <div class="counter-container">
+    <span>Nombre total d'annonces en ligne : <strong>{{ total_approved_ads }}</strong></span>
+  </div>
+</section>
+{% endblock %}
+{% block main_class %}age-gate-main{% endblock %}
+{% block content %}
+<section class="age-gate-container">
+  <h1 class="age-gate-title">Accès réservé aux 18+</h1>
+  <p class="age-gate-text">En entrant, vous confirmez être majeur(e) et accepter notre politique de contenu (aucune image explicite, modération stricte).</p>
+  <form method="post" class="age-gate-form">{% csrf_token %}
+    <button class="age-gate-button" type="submit">J'ai 18+ ans</button>
+    <a href="/legal/content-policy" class="age-gate-link">Politique de contenu</a>
+  </form>
+</section>
+{% endblock %}
+{% block footer %}
+<footer>
+  <div class="footer-container">
+    <div class="footer-grid">
+      <div>
+        <h3 class="footer-title">Navigation</h3>
+        <ul class="footer-list">
+          <li><a href="/ads" class="footer-link">Annonces</a></li>
+          <li><a href="/post" class="footer-link">Publier une annonce</a></li>
+          <li><a href="/legal/tos" class="footer-link">CGU</a></li>
+          <li><a href="/legal/privacy" class="footer-link">Confidentialité</a></li>
+          <li><a href="/legal/content-policy" class="footer-link">Politique de contenu</a></li>
+        </ul>
+      </div>
+      {% if popular_cities_footer %}
+      <div>
+        <h3 class="footer-title">Villes populaires</h3>
+        <ul class="footer-list">
+          {% for city in popular_cities_footer %}
+          <li><a href="/ads?city={{ city.slug }}" class="footer-link">Annonces à {{ city.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div>
+        <h3 class="footer-title">Contact</h3>
+        <ul class="footer-list">
+          <li>Email: <a href="mailto:support@ci-habiko.com" class="footer-link">support@ci-habiko.com</a></li>
+          <li>© 2025 HABIKO</li>
+          <li style="font-size: 0.75rem; color: #6b7280;">Côte d'Ivoire</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <p>© 2025 HABIKO - Site de immobilier en Côte d'Ivoire</p>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+

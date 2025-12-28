@@ -1,0 +1,42 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Votre annonce a expiré - HABIKO{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Votre annonce a expiré</h1>
+
+<p>Votre annonce a expiré et n'est plus visible sur HABIKO.</p>
+
+<div class="details">
+    <h3>Détails de l'annonce expirée :</h3>
+    <dl>
+        <dt>Titre :</dt>
+        <dd>{{ ad.title }}</dd>
+        
+        <dt>Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+        
+        <dt>Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+        
+        <dt>Date d'expiration :</dt>
+        <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
+    </dl>
+</div>
+
+<div class="info-box">
+    <h3>💡 Que faire maintenant ?</h3>
+    <p style="margin-bottom: 0;">Pour republier cette annonce ou en créer une nouvelle, cliquez sur le bouton ci-dessous.</p>
+</div>
+
+<div class="button-container">
+    <a href="{{ site_url }}/post/" class="button">Créer une nouvelle annonce</a>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/">Accéder à mon tableau de bord</a>
+</p>
+
+<p style="font-size: 13px; color: #666666;"><strong>Conseil :</strong> Pour éviter l'expiration, pensez à renouveler vos annonces régulièrement.</p>
+{% endblock %}
+

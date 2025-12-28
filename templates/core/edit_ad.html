@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Modifier l'annonce · HABIKO CI{% endblock %}
+{% block description %}Modifiez votre annonce sur HABIKO CI - Site de immobilier en Côte d'Ivoire{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto bg-white rounded-2xl p-4 md:p-6 border border-gray-200 shadow-sm">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Modifier l'annonce</h1>
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mb-4 p-3 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+    
+    <!-- Titre -->
+    <div>
+      <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.title.label }}</label>
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div class="text-red-600 text-sm mt-1">{{ form.title.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Catégorie -->
+    <div>
+      <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.category.label }}</label>
+      {{ form.category }}
+      {% if form.category.errors %}
+        <div class="text-red-600 text-sm mt-1">{{ form.category.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Sous-catégories -->
+    <div>
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-700 mb-2">{{ form.subcategories.label }}</legend>
+        <div id="subcategories-container" class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {% for choice in form.subcategories %}
+            <label for="{{ choice.id_for_label }}" class="flex items-center space-x-2 text-sm p-2 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
+              {{ choice.tag }}
+              <span>{{ choice.choice_label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        {% if form.subcategories.errors %}
+          <div class="text-red-600 text-sm mt-1">{{ form.subcategories.errors.0 }}</div>
+        {% endif %}
+      </fieldset>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.description.label }}</label>
+      {{ form.description }}
+      {% if form.description.errors %}
+        <div class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Ville -->
+    <div>
+      <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.city.label }}</label>
+      {{ form.city }}
+      {% if form.city.errors %}
+        <div class="text-red-600 text-sm mt-1">{{ form.city.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Téléphones -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="{{ form.phone1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.phone1.label }}</label>
+        {{ form.phone1 }}
+        {% if form.phone1.errors %}
+          <div class="text-red-600 text-sm mt-1">{{ form.phone1.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label for="{{ form.phone2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.phone2.label }}</label>
+        {{ form.phone2 }}
+        {% if form.phone2.errors %}
+          <div class="text-red-600 text-sm mt-1">{{ form.phone2.errors.0 }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Méthodes de contact -->
+    <div>
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-700 mb-2">{{ form.contact_methods.label }}</legend>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {% for choice in form.contact_methods %}
+            <label for="{{ choice.id_for_label }}" class="flex items-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+              {{ choice.tag }}
+              <span class="text-sm font-medium">{{ choice.choice_label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <p class="text-gray-500 text-sm mt-2">{{ form.contact_methods.help_text }}</p>
+        {% if form.contact_methods.errors %}
+          <div class="text-red-600 text-sm mt-1">{{ form.contact_methods.errors.0 }}</div>
+        {% endif %}
+      </fieldset>
+    </div>
+
+    <!-- Photos existantes -->
+    {% if ad.media.all %}
+      <div>
+        <h3 class="block text-sm font-medium text-gray-700 mb-4">Photos actuelles</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {% for media in ad.media.all %}
+            <div class="relative group">
+              <img src="{{ media.image.url }}" alt="Photo {{ forloop.counter }}" class="w-full h-24 object-cover rounded-lg">
+              <span class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+                {% if media.is_primary %}Principale{% else %}{{ forloop.counter }}{% endif %}
+              </span>
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                <span class="text-white text-xs opacity-0 group-hover:opacity-100">Sera remplacée</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <p class="text-gray-500 text-sm mt-2">⚠️ Les nouvelles photos remplaceront toutes les photos actuelles.</p>
+      </div>
+    {% endif %}
+
+    <!-- Photos -->
+    <div>
+      <h3 class="block text-sm font-medium text-gray-700 mb-4">Nouvelles photos (optionnelles)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.image1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.image1.label }}</label>
+          {{ form.image1 }}
+          {% if form.image1.errors %}
+            <div class="text-red-600 text-sm mt-1">{{ form.image1.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div>
+          <label for="{{ form.image2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.image2.label }}</label>
+          {{ form.image2 }}
+          {% if form.image2.errors %}
+            <div class="text-red-600 text-sm mt-1">{{ form.image2.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div>
+          <label for="{{ form.image3.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.image3.label }}</label>
+          {{ form.image3 }}
+          {% if form.image3.errors %}
+            <div class="text-red-600 text-sm mt-1">{{ form.image3.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div>
+          <label for="{{ form.image4.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.image4.label }}</label>
+          {{ form.image4 }}
+          {% if form.image4.errors %}
+            <div class="text-red-600 text-sm mt-1">{{ form.image4.errors.0 }}</div>
+          {% endif %}
+        </div>
+        
+        <div>
+          <label for="{{ form.image5.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.image5.label }}</label>
+          {{ form.image5 }}
+          {% if form.image5.errors %}
+            <div class="text-red-600 text-sm mt-1">{{ form.image5.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mt-2">Vous pouvez ajouter jusqu'à 5 photos. Toutes les photos sont optionnelles.</p>
+    </div>
+
+    <!-- Boutons submit -->
+    <div class="flex justify-end space-x-3">
+      <a href="/dashboard" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">Annuler</a>
+      <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium">
+        Modifier l'annonce
+      </button>
+    </div>
+  </form>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.querySelector('select[id*="category"]');
+    const subcategoriesContainer = document.getElementById('subcategories-container');
+    
+    const subcategoryMapping = {
+        'maisons_appartements': [
+            'Maison à vendre',
+            'Appartement à vendre',
+            'Studio à vendre',
+            'Duplex à vendre',
+            'Villa à vendre',
+            'Maison meublée à vendre',
+            'Appartement meublé à vendre'
+        ],
+        'villas_residences': [
+            'Villa de luxe',
+            'Résidence meublée',
+            'Résidence de standing',
+            'Villa avec piscine',
+            'Résidence sécurisée'
+        ],
+        'terrains': [
+            'Terrain à vendre',
+            'Terrain constructible',
+            'Terrain viabilisé',
+            'Parcelle à vendre',
+            'Terrain commercial'
+        ],
+        'locations': [
+            'Maison à louer',
+            'Appartement à louer',
+            'Studio à louer',
+            'Villa à louer',
+            'Résidence meublée à louer'
+        ]
+    };
+    
+    function updateSubcategories() {
+        const selectedCategory = categorySelect.value;
+        const subcategories = subcategoryMapping[selectedCategory] || [];
+        
+        // Vider le conteneur
+        subcategoriesContainer.innerHTML = '';
+        
+        // Ajouter les nouvelles sous-catégories
+        subcategories.forEach((subcategory, index) => {
+            const label = document.createElement('label');
+            label.className = 'flex items-center space-x-2 text-sm p-2 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer';
+            
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'subcategories';
+            input.value = subcategory;
+            input.id = `id_subcategories_${index}`;
+            input.className = 'mr-2';
+            
+            const span = document.createElement('span');
+            span.textContent = subcategory;
+            
+            label.appendChild(input);
+            label.appendChild(span);
+            subcategoriesContainer.appendChild(label);
+        });
+    }
+    
+    // Écouter les changements de catégorie
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateSubcategories);
+        // Initialiser au chargement
+        updateSubcategories();
+    }
+});
+</script>
+{% endblock %}

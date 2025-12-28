@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+{% block title %}{{ ad.title }} · {{ ad.city.name }} · HABIKO{% endblock %}
+{% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:25|striptags }}. Contactez directement sur HABIKO, alternative à Bizi, Jedolo et Locanto.{% endblock %}
+{% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, habiko, habiko ci, habiko {{ ad.city.name|lower }}, habiko ci, habiko ci, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
+{% block hreflang_fr_ci %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
+{% block hreflang_default %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
+{% block canonical_url %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "{{ ad.title|escapejs }}",
+  "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
+  "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{ ad.city.name }}",
+    "addressCountry": "CI"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Accueil",
+      "item": "https://ci-habiko.com"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Annonces",
+      "item": "https://ci-habiko.com/ads"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ ad.city.name }}",
+      "item": "https://ci-habiko.com/ads?city={{ ad.city.slug }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ ad.title|escapejs }}",
+      "item": "https://ci-habiko.com/ads/{{ ad.slug }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<!-- Breadcrumbs with Schema.org -->
+<nav class="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
+  <ol class="flex items-center space-x-2 flex-wrap" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/" class="hover:text-gray-900" itemprop="item">
+        <span itemprop="name">Accueil</span>
+      </a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/ads" class="hover:text-gray-900" itemprop="item">
+        <span itemprop="name">Annonces</span>
+      </a>
+      <meta itemprop="position" content="2" />
+    </li>
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/ads?city={{ ad.city.slug }}" class="hover:text-gray-900" itemprop="item">
+        <span itemprop="name">{{ ad.city.name }}</span>
+      </a>
+      <meta itemprop="position" content="3" />
+    </li>
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name" class="text-gray-900 font-medium">{{ ad.title|truncatewords:5 }}</span>
+      <meta itemprop="position" content="4" />
+    </li>
+  </ol>
+</nav>
+{% endblock %}
+
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+  <!-- Contenu principal -->
+  <div class="flex-1">
+<article class="bg-white border rounded-xl p-4 md:p-6 shadow-sm">
+  <header class="mb-4 md:mb-6">
+    <div class="flex items-start gap-3 mb-3">
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex-1">{{ ad.title }}</h1>
+      <div class="flex gap-2 flex-shrink-0">
+        {% if ad.is_urgent %}
+          <span class="bg-green-600 text-white px-3 py-1 rounded text-sm font-semibold">Urgent</span>
+        {% endif %}
+        {% if ad.is_premium %}
+          <span class="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">VIP</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-3">
+      <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full">{{ ad.get_category_display }}</span>
+      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ ad.city.name }}</span>
+      <span class="text-gray-500">Publié le {{ ad.created_at|date:"d/m/Y à H:i" }}</span>
+    </div>
+    <div class="text-sm text-gray-600">
+      <span>Publié par </span>
+      <a class="underline text-orange-700 hover:text-orange-800 font-medium" href="/ads?provider={{ ad.user.id }}">
+        {% if ad.user.profile %}{{ ad.user.profile.display_name|default:ad.user.username }}{% else %}{{ ad.user.username }}{% endif %}
+      </a>
+      {% if ad.user.role == 'provider' %}
+        <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs ml-2">Professionnel</span>
+      {% endif %}
+      {% if ad.user.profile and ad.user.profile.is_verified %}
+        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs ml-2">COMPTE CERTIFIÉ</span>
+      {% endif %}
+      <span class="text-gray-500 ml-2">{{ ad.city.name }}, Côte d'Ivoire, CI</span>
+    </div>
+  </header>
+
+  <!-- Carousel principal -->
+  <section class="relative rounded-lg overflow-hidden border bg-gray-50">
+    <div class="w-full bg-gray-100 flex justify-center">
+      {% if ad.media.all|length > 0 %}
+        {% with first=ad.media.all.0 %}
+          <img id="mainImage" src="{{ first.image.url }}" alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO" class="max-w-full max-h-96 md:max-h-[500px] object-contain" loading="eager" width="800" height="600">
+        {% endwith %}
+      {% else %}
+        <div class="w-full h-56 md:h-80 flex items-center justify-center text-gray-400">Aucune photo</div>
+      {% endif %}
+    </div>
+    {% if ad.media.all|length > 1 %}
+      <button type="button" id="btnPrev" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow" aria-label="Précédent">‹</button>
+      <button type="button" id="btnNext" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow" aria-label="Suivant">›</button>
+    {% endif %}
+  </section>
+
+  {% if ad.media.all|length > 1 %}
+  <!-- Miniatures -->
+  <section class="mt-2 md:mt-3 flex gap-2 overflow-x-auto">
+    {% for m in ad.media.all %}
+      <img data-idx="{{ forloop.counter0 }}" src="{{ m.image.url }}" alt="{{ ad.title }} - Photo {{ forloop.counter }}" class="thumb w-16 h-16 md:w-20 md:h-20 object-cover rounded-md border cursor-pointer hover:ring-2 hover:ring-orange-500 flex-shrink-0" loading="lazy" width="80" height="80">
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- Sous-catégories -->
+  {% if ad.subcategories %}
+  <section class="mt-4">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2">Services proposés</h3>
+    <div class="flex flex-wrap gap-2">
+      {% for tag in ad.subcategories %}
+        <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-sm font-medium">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Description -->
+  <section class="prose max-w-none mt-6 text-gray-800">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+    <div class="text-gray-700 leading-relaxed">
+      {{ ad.description_sanitized|linebreaksbr }}
+    </div>
+  </section>
+
+  <!-- Section Contact (Mobile uniquement) -->
+  {% if ad.user.phone_e164 %}
+  <section class="lg:hidden mt-6">
+    <div class="bg-white border border-gray-300 shadow-sm rounded-lg overflow-hidden">
+      <button
+        type="button"
+        id="toggleContactMobile"
+        class="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold text-base rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
+          <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+        </svg>
+        <span id="toggleContactMobileText">Cliquez pour afficher le téléphone</span>
+      </button>
+      <div id="contactContentMobile" class="hidden px-4 pb-4">
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-700" fill="currentColor">
+            <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+          </svg>
+          <h3 class="text-lg font-semibold text-gray-900">Contacts téléphoniques</h3>
+        </div>
+
+        <!-- Nom -->
+        <h4 class="text-2xl font-bold text-gray-900 mb-3">
+          {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
+        </h4>
+
+        <!-- Message -->
+        <p class="text-sm text-gray-600 mb-4">
+          Précisez-moi que vous avez trouvé mon annonce sur <strong>HABIKO</strong> Merci
+        </p>
+
+        <!-- Numéro de téléphone -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+          <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-green-600" fill="currentColor">
+              <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+            </svg>
+            <div class="flex-1">
+              <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-orange-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+              <p class="text-sm text-gray-500 mt-1">Référence: CI-A{{ ad.id }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons de contact -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          {% if ad.user.profile %}
+            {% with prefs=ad.user.profile.contact_prefs %}
+              {% if prefs %}
+                {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
+                  {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                    <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
+                      </svg>
+                      <span>WhatsApp</span>
+                    </a>
+                  {% endwith %}
+                {% endif %}
+                {% if 'sms' in prefs and ad.user.phone_e164 %}
+                  <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                      <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                    </svg>
+                    <span>SMS</span>
+                  </a>
+                {% endif %}
+                {% if 'call' in prefs and ad.user.phone_e164 %}
+                  <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                      <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                    </svg>
+                    <span>Appel direct</span>
+                  </a>
+                {% endif %}
+              {% else %}
+                {% if ad.user.profile.whatsapp_e164 %}
+                  {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                    <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
+                      </svg>
+                      <span>WhatsApp</span>
+                    </a>
+                  {% endwith %}
+                {% endif %}
+                {% if ad.user.phone_e164 %}
+                  <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                      <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                    </svg>
+                    <span>SMS</span>
+                  </a>
+                  <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                      <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                    </svg>
+                    <span>Appel direct</span>
+                  </a>
+                {% endif %}
+              {% endif %}
+            {% endwith %}
+          {% else %}
+            {% if ad.user.phone_e164 %}
+              <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                  <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                </svg>
+                <span>SMS</span>
+              </a>
+              <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                  <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                </svg>
+                <span>Appel direct</span>
+              </a>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- Section Évitez les ARNAQUES -->
+        <div class="border-t border-gray-200 pt-4 mt-4">
+          <h5 class="text-base font-bold text-red-600 mb-3">Évitez les ARNAQUES</h5>
+          <ul class="space-y-2 text-sm text-gray-700 mb-3">
+            <li class="flex items-start gap-2">
+              <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <span>Ne JAMAIS payer le transport à un(e) client(e) que vous ne connaissez pas.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <span>Ne JAMAIS avancer de paiement sans être avec la personne concernée.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <span>Ne faites pas confiance aux offres qui semblent trop belles pour être vraies.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span>Signalez l'annonce ci-dessous avec des preuves si vous êtes victime d'une tentative d'arnaque.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Annonces similaires -->
+  {% if similar_ads %}
+    <section class="mt-16 pt-8 border-t border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces similaires</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for similar_ad in similar_ads %}
+          <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 h-40">
+            <div class="flex h-full">
+              <div class="w-40 flex-shrink-0 bg-slate-100">
+                {% if similar_ad.media.count %}
+                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire | HABIKO" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
+                {% else %}
+                  <div class="w-full h-full bg-slate-200 flex items-center justify-center">
+                    <span class="text-slate-400 text-xs">Photo</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors mb-1">{{ similar_ad.title }}</div>
+                  <div class="text-xs text-gray-600 mb-1 font-medium">{{ similar_ad.get_category_display }}</div>
+                  <div class="text-xs text-gray-500 mb-1">{{ similar_ad.city.name }}</div>
+                </div>
+                <div class="flex justify-between items-end mt-1">
+                  <div class="text-xs text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded">
+                    {{ similar_ad.created_at|date:"d/m/Y" }}
+                  </div>
+                  <div class="flex flex-wrap gap-1">
+                    {% for tag in similar_ad.subcategories|slice:":2" %}
+                      <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-100 text-xs font-medium truncate max-w-[85px] block" title="{{ tag }}">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</article>
+  </div>
+
+  <!-- Sidebar (Desktop uniquement) -->
+  <aside class="hidden lg:block w-80 flex-shrink-0">
+    <div class="sticky top-20 space-y-4">
+      <!-- Section Contact -->
+      {% if ad.user.phone_e164 %}
+      <div class="bg-white border border-gray-300 shadow-sm rounded-lg overflow-hidden">
+        <button
+          type="button"
+          id="toggleContactDesktop"
+          class="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold text-base rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
+            <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+          </svg>
+          <span id="toggleContactDesktopText">Cliquez pour afficher le téléphone</span>
+        </button>
+        <div id="contactContentDesktop" class="hidden px-4 pb-4">
+          <!-- Header -->
+          <div class="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-700" fill="currentColor">
+              <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900">Contacts téléphoniques</h3>
+          </div>
+
+          <!-- Nom -->
+          <h4 class="text-2xl font-bold text-gray-900 mb-3">
+            {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
+          </h4>
+
+          <!-- Message -->
+          <p class="text-sm text-gray-600 mb-4">
+            Précisez-moi que vous avez trouvé mon annonce sur <strong>CI-HABIKO.COM</strong> Merci
+          </p>
+
+          <!-- Numéro de téléphone -->
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-green-600" fill="currentColor">
+                <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+              </svg>
+              <div class="flex-1">
+                <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-orange-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+                <p class="text-sm text-gray-500 mt-1">Référence: CI-A{{ ad.id }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Boutons de contact -->
+          <div class="flex flex-wrap gap-2 mb-4">
+            {% if ad.user.profile %}
+              {% with prefs=ad.user.profile.contact_prefs %}
+                {% if prefs %}
+                  {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
+                    {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                      <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                          <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
+                        </svg>
+                        <span>WhatsApp</span>
+                      </a>
+                    {% endwith %}
+                  {% endif %}
+                  {% if 'sms' in prefs and ad.user.phone_e164 %}
+                    <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                      </svg>
+                      <span>SMS</span>
+                    </a>
+                  {% endif %}
+                  {% if 'call' in prefs and ad.user.phone_e164 %}
+                    <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                      </svg>
+                      <span>Appel direct</span>
+                    </a>
+                  {% endif %}
+                {% else %}
+                  {% if ad.user.profile.whatsapp_e164 %}
+                    {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                      <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                          <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
+                        </svg>
+                        <span>WhatsApp</span>
+                      </a>
+                    {% endwith %}
+                  {% endif %}
+                  {% if ad.user.phone_e164 %}
+                    <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                      </svg>
+                      <span>SMS</span>
+                    </a>
+                    <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                        <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                      </svg>
+                      <span>Appel direct</span>
+                    </a>
+                  {% endif %}
+                {% endif %}
+              {% endwith %}
+            {% else %}
+              {% if ad.user.phone_e164 %}
+                <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="sms:{{ ad.user.phone_e164 }}" rel="nofollow">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                    <path d="M4 5h16a2 2 0 0 1 2 2v9.5A1.5 1.5 0 0 1 20.5 18H7l-3.2 2.4A1 1 0 0 1 2 19.6V7a2 2 0 0 1 2-2Z" />
+                  </svg>
+                  <span>SMS</span>
+                </a>
+                <a class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="tel:{{ ad.user.phone_e164 }}" rel="nofollow">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
+                    <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
+                  </svg>
+                  <span>Appel direct</span>
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <!-- Section Évitez les ARNAQUES -->
+          <div class="border-t border-gray-200 pt-4 mt-4">
+            <h5 class="text-base font-bold text-red-600 mb-3">Évitez les ARNAQUES</h5>
+            <ul class="space-y-2 text-sm text-gray-700 mb-3">
+              <li class="flex items-start gap-2">
+                <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span>Ne JAMAIS payer le transport à un(e) client(e) que vous ne connaissez pas.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span>Ne JAMAIS avancer de paiement sans être avec la personne concernée.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span>Ne faites pas confiance aux offres qui semblent trop belles pour être vraies.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Signalez l'annonce ci-dessous avec des preuves si vous êtes victime d'une tentative d'arnaque.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const images = [
+    {% for m in ad.media.all %}"{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}
+  ];
+  if (!images.length) return;
+  let idx = 0;
+  const main = document.getElementById('mainImage');
+  function show(i){
+    idx = (i + images.length) % images.length;
+    if (main) main.src = images[idx];
+    document.querySelectorAll('.thumb').forEach((el)=>{
+      const active = Number(el.getAttribute('data-idx')) === idx;
+      el.classList.toggle('ring-2', active);
+      el.classList.toggle('ring-orange-500', active);
+    });
+  }
+  const prev = document.getElementById('btnPrev');
+  const next = document.getElementById('btnNext');
+  if (prev) prev.addEventListener('click', ()=>show(idx-1));
+  if (next) next.addEventListener('click', ()=>show(idx+1));
+  document.querySelectorAll('.thumb').forEach((el)=>{
+    el.addEventListener('click', ()=>{
+      const i = Number(el.getAttribute('data-idx'))||0;
+      show(i);
+    });
+  });
+  show(0);
+})();
+
+// Gestion du déroulant de contact
+(function(){
+  const toggleBtnMobile = document.getElementById("toggleContactMobile");
+  const toggleBtnDesktop = document.getElementById("toggleContactDesktop");
+  const contentMobile = document.getElementById("contactContentMobile");
+  const contentDesktop = document.getElementById("contactContentDesktop");
+  const textMobile = document.getElementById("toggleContactMobileText");
+  const textDesktop = document.getElementById("toggleContactDesktopText");
+
+  function toggleContent(content, textElement) {
+    if (content && textElement) {
+      const isHidden = content.classList.contains("hidden");
+      if (isHidden) {
+        content.classList.remove("hidden");
+        textElement.textContent = "Masquer le téléphone";
+      } else {
+        content.classList.add("hidden");
+        textElement.textContent = "Cliquez pour afficher le téléphone";
+      }
+    }
+  }
+
+  if (toggleBtnMobile && contentMobile && textMobile) {
+    toggleBtnMobile.addEventListener("click", function() {
+      toggleContent(contentMobile, textMobile);
+    });
+  }
+
+  if (toggleBtnDesktop && contentDesktop && textDesktop) {
+    toggleBtnDesktop.addEventListener("click", function() {
+      toggleContent(contentDesktop, textDesktop);
+    });
+  }
+})();
+</script>
+{% endblock %}
+
+

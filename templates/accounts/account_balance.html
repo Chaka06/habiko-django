@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Mon compte · HABIKO{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <!-- En-tête -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <h1 class="text-xl md:text-2xl font-semibold text-gray-900">Mon compte</h1>
+    <p class="text-gray-600 mt-1">Gérez vos crédits et boostez vos annonces.</p>
+  </section>
+
+  <!-- Solde et crédits -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Solde et crédits</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-orange-50 p-4 rounded-lg">
+        <p class="text-sm text-gray-600">Solde disponible</p>
+        <p class="text-2xl font-bold text-orange-600">{{ account.balance|floatformat:0 }} FCFA</p>
+      </div>
+      <div class="bg-green-50 p-4 rounded-lg">
+        <p class="text-sm text-gray-600">Annonces gratuites</p>
+        <p class="text-2xl font-bold text-green-600">{{ account.free_ads_remaining }}</p>
+      </div>
+      <div class="bg-purple-50 p-4 rounded-lg">
+        <p class="text-sm text-gray-600">Annonces du pack</p>
+        <p class="text-2xl font-bold text-purple-600">{{ account.ads_remaining }}</p>
+      </div>
+    </div>
+    
+    {% if account.is_premium %}
+    <div class="mt-4 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+      <p class="text-sm font-medium text-yellow-800">
+        ⭐ Compte Premium : {{ account.premium_ads_remaining }} annonces premium restantes
+      </p>
+    </div>
+    {% endif %}
+    
+    {% if account.free_boosters_remaining > 0 %}
+    <div class="mt-4 bg-green-50 p-4 rounded-lg border border-green-200">
+      <p class="text-sm font-medium text-green-800">
+        🎁 {{ account.free_boosters_remaining }} booster(s) gratuit(s) disponible(s)
+      </p>
+    </div>
+    {% endif %}
+    
+    <div class="mt-6">
+      <a href="{% url 'accounts:recharge_account' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium inline-block">
+        Recharger mon compte
+      </a>
+    </div>
+  </section>
+
+  <!-- Formules de recharge -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Formules de recharge</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for package in packages %}
+      <div class="border rounded-lg p-4 hover:shadow-md transition">
+        <h3 class="font-semibold text-lg">{{ package.name }}</h3>
+        <p class="text-2xl font-bold text-green-600 mt-2">{{ package.amount|floatformat:0 }} FCFA</p>
+        <ul class="mt-3 space-y-1 text-sm text-gray-600">
+          <li>✓ {{ package.ads_included }} annonces</li>
+          {% if package.credit_amount > 0 %}
+          <li>✓ {{ package.credit_amount|floatformat:0 }} FCFA crédit</li>
+          {% endif %}
+          {% if package.free_boosters > 0 %}
+          <li>✓ {{ package.free_boosters }} booster(s) gratuit(s)</li>
+          {% endif %}
+          {% if package.is_premium %}
+          <li>✓ Toutes en premium</li>
+          {% endif %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Liens rapides -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
+    <div class="flex flex-wrap gap-3">
+      <a href="/post/" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+        Poster une annonce
+      </a>
+      <a href="/dashboard/" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+        Mes annonces
+      </a>
+      <a href="/accounts/profile/" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+        Modifier mon profil
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+
+

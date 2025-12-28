@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Connexion · HABIKO CI{% endblock %}
+{% block description %}Connectez-vous à votre compte HABIKO CI - Site de immobilier en Côte d'Ivoire. Alternative à Bizi, Jedolo et Locanto.{% endblock %}
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow" />
+{% endblock %}
+{% block content %}
+<section class="max-w-md mx-auto bg-white rounded-2xl p-6 md:p-8 border shadow-lg">
+  <h1 class="text-xl md:text-2xl font-semibold text-slate-900 mb-3">Connexion</h1>
+  <form method="post" action="{% url 'account_login' %}" class="space-y-3">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ form.login.id_for_label }}">Email</label>
+      {{ form.login }}
+      {{ form.login.errors }}
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ form.password.id_for_label }}">Mot de passe</label>
+      {{ form.password }}
+      {{ form.password.errors }}
+    </div>
+    <div class="flex items-center justify-between">
+      <a href="{% url 'account_reset_password' %}" class="text-sm text-slate-600 underline">Mot de passe oublié ?</a>
+    </div>
+    <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition">Se connecter</button>
+  </form>
+  <p class="mt-3 text-sm text-slate-600">Pas de compte ? <a class="underline" href="{% url 'account_signup' %}">Inscription</a></p>
+</section>
+{% endblock %}

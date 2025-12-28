@@ -1,0 +1,27 @@
+Bonjour {{ user.username }},
+
+Bienvenue sur HABIKO, la plateforme immobilière en Côte d'Ivoire !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACTIVATION DE VOTRE COMPTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pour activer votre compte et commencer à publier vos annonces, veuillez cliquer sur le lien ci-dessous :
+
+{{ activate_url }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Une fois votre compte activé, vous pourrez :
+✓ Publier des annonces gratuitement
+✓ Gérer votre profil et vos préférences de contact
+✓ Suivre les statistiques de vos annonces
+✓ Recevoir des notifications importantes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
+
+Cordialement,
+L'équipe HABIKO
+https://ci-habiko.com

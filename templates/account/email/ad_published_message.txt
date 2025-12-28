@@ -1,0 +1,29 @@
+Bonjour {{ user.username }},
+
+Félicitations ! Votre annonce a été publiée avec succès sur HABIKO et est maintenant visible par tous les visiteurs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAILS DE VOTRE ANNONCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Date de publication : {{ ad.created_at|date:"d/m/Y à H:i" }}
+Expiration : {{ ad.expires_at|date:"d/m/Y à H:i" }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Voir votre annonce :
+{{ ad_url }}
+
+Gérer toutes vos annonces :
+{{ site_url }}/dashboard/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si vous avez des questions ou besoin d'aide, contactez-nous à support@ci-habiko.com
+
+Cordialement,
+L'équipe HABIKO
+https://ci-habiko.com

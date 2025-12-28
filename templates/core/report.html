@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Signaler une annonce · HABIKO{% endblock %}
+{% block content %}
+<section class="max-w-xl mx-auto bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+  <h1 class="text-xl md:text-2xl font-semibold text-gray-900 mb-3">Signaler une annonce</h1>
+  <div class="text-sm text-gray-600 mb-3">Annonce: <a class="underline" href="/ads/{{ ad.slug }}">{{ ad.title }}</a></div>
+  {% if submitted %}
+    <div class="p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">Merci pour votre signalement. Notre équipe va vérifier.</div>
+  {% else %}
+    <form method="post" class="space-y-3">{% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Raison</label>
+        <select name="reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          <option value="contenu_inapproprie">Contenu inapproprié</option>
+          <option value="mineurs_suspectes">Mineurs suspectés</option>
+          <option value="arnaque">Arnaque</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Commentaire</label>
+        <textarea name="comment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+      </div>
+      <button class="bg-gray-900 text-white px-4 py-2 rounded-lg">Envoyer</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}
