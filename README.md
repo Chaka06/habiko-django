@@ -2,6 +2,8 @@
 
 Plateforme web de petites annonces immobilières pour la Côte d'Ivoire, développée avec Django/Python. Permet aux propriétaires de publier leurs annonces (maisons, villas, terrains, locations) et aux acheteurs/locataires de trouver facilement ce qu'ils cherchent.
 
+**Développé par** [Diarrassouba Issiaka Konateh](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
+
 ## ✨ Fonctionnalités principales
 
 - 🏘️ **Publication d'annonces** : Maisons, villas, terrains, locations avec champs dynamiques selon la catégorie
@@ -256,6 +258,12 @@ Pour toute question ou contribution :
 - Ouvrir une issue sur GitHub
 - Proposer une Pull Request
 
+## 👨‍💻 Développeur
+
+Ce projet a été développé par **Diarrassouba Issiaka Konateh**.
+
+📧 Contact : [LinkedIn](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
+
 ## 📄 Licence
 
 Ce projet est open source et disponible sous licence MIT.
@@ -263,3 +271,5 @@ Ce projet est open source et disponible sous licence MIT.
 ---
 
 **HABIKO** - Plateforme Immobilière Côte d'Ivoire © 2024
+
+Développé par [Diarrassouba Issiaka Konateh](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
