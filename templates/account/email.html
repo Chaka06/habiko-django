@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Gestion des emails · HABIKO{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto bg-white rounded-2xl p-6 md:p-8 border shadow-sm">
+  <h1 class="text-2xl font-semibold text-gray-900 mb-6">Gestion des emails</h1>
+  
+  {% if user.emailaddress_set.all %}
+    <div class="space-y-4">
+      {% for emailaddress in user.emailaddress_set.all %}
+        <div class="flex items-center justify-between p-4 border rounded-lg {% if emailaddress.verified %}bg-green-50 border-green-200{% else %}bg-yellow-50 border-yellow-200{% endif %}">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 {% if emailaddress.verified %}bg-green-100{% else %}bg-yellow-100{% endif %}">
+              {% if emailaddress.verified %}
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              {% else %}
+                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              {% endif %}
+            </div>
+            <div>
+              <p class="font-medium text-gray-900">{{ emailaddress.email }}</p>
+              <p class="text-sm {% if emailaddress.verified %}text-green-600{% else %}text-yellow-600{% endif %}">
+                {% if emailaddress.verified %}Vérifié{% else %}En attente de vérification{% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="flex space-x-2">
+            {% if not emailaddress.verified %}
+              <form method="post" action="{% url 'account_email' %}">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                <button type="submit" name="action_send" class="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                  Renvoyer
+                </button>
+              </form>
+            {% endif %}
+            {% if emailaddress.primary %}
+              <span class="text-sm text-gray-500">Principal</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-8">
+      <p class="text-gray-500">Aucun email associé à votre compte.</p>
+    </div>
+  {% endif %}
+  
+  <div class="mt-8 pt-6 border-t">
+    <a href="/dashboard/" class="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Retour au tableau de bord
+    </a>
+  </div>
+</section>
+{% endblock %}

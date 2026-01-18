@@ -1,0 +1,45 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Votre annonce est en ligne - HABIKO{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Votre annonce est en ligne !</h1>
+
+<p>Félicitations ! Votre annonce a été publiée avec succès sur HABIKO et est maintenant visible par tous les visiteurs.</p>
+
+<div class="info-box">
+    <h3>Publication réussie</h3>
+    <p style="margin-bottom: 0;">Les visiteurs peuvent maintenant consulter votre annonce et vous contacter.</p>
+</div>
+
+<div class="details">
+    <h3>Détails de votre annonce :</h3>
+    <dl>
+        <dt>Titre :</dt>
+        <dd>{{ ad.title }}</dd>
+        
+        <dt>Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+        
+        <dt>Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+        
+        <dt>Date de publication :</dt>
+        <dd>{{ ad.created_at|date:"d/m/Y à H:i" }}</dd>
+        
+        <dt>Expiration :</dt>
+        <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
+    </dl>
+</div>
+
+<div class="button-container">
+    <a href="{{ ad_url }}" class="button">Voir mon annonce</a>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/">Accéder à mon tableau de bord</a>
+</p>
+
+<p style="font-size: 13px; color: #666666;">Si vous avez des questions ou besoin d'aide, n'hésitez pas à nous contacter à <a href="mailto:support@ci-habiko.com">support@ci-habiko.com</a>.</p>
+{% endblock %}
+

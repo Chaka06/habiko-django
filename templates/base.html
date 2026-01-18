@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+  {% load static %}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}HABIKO · Immobilier Côte d'Ivoire{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block description %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains et résidences meublées à Abidjan et dans toute la Côte d'Ivoire.{% endblock %}"
+    />
+    <meta
+      name="keywords"
+      content="{% block keywords %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire, abidjan, bouaké, daloa, yamoussoukro{% endblock %}"
+    />
+    <meta name="author" content="HABIKO" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="fr" />
+    <meta name="geo.region" content="CI" />
+    <meta name="geo.country" content="Côte d'Ivoire" />
+    <meta name="geo.placename" content="Abidjan" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="1 days" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="{% block og_url %}https://ci-habiko.com{% endblock %}"
+    />
+    <meta
+      property="og:title"
+      content="{% block og_title %}HABIKO · Immobilier Côte d'Ivoire{% endblock %}"
+    />
+    <meta
+      property="og:description"
+      content="{% block og_description %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains et résidences meublées à Abidjan et dans toute la Côte d'Ivoire.{% endblock %}"
+    />
+    <meta
+      property="og:image"
+      content="{% block og_image %}https://ci-habiko.com{% static 'img/logo.png' %}{% endblock %}"
+    />
+    <meta property="og:site_name" content="HABIKO" />
+    <meta property="og:locale" content="fr_CI" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="{% block twitter_url %}https://ci-habiko.com{% endblock %}"
+    />
+    <meta
+      property="twitter:title"
+      content="{% block twitter_title %}HABIKO · Immobilier Côte d'Ivoire{% endblock %}"
+    />
+    <meta
+      property="twitter:description"
+      content="{% block twitter_description %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains et résidences meublées à Abidjan et dans toute la Côte d'Ivoire.{% endblock %}"
+    />
+    <meta
+      property="twitter:image"
+      content="{% block twitter_image %}https://ci-habiko.com{% static 'img/logo.png' %}{% endblock %}"
+    />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="{% block canonical_url %}https://ci-habiko.com{% endblock %}"
+    />
+
+    <!-- Hreflang Tags for SEO Local -->
+    <link
+      rel="alternate"
+      hreflang="fr-CI"
+      href="{% block hreflang_fr_ci %}https://ci-habiko.com{% endblock %}"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="{% block hreflang_default %}https://ci-habiko.com{% endblock %}"
+    />
+
+    <!-- Google Search Console Verification -->
+    <meta
+      name="google-site-verification"
+      content="uJGTtVemQQT42MBUlLWzHWvX7r3IpCy2iczSO-mXBP0"
+    />
+
+    <!-- Preconnect to external resources for faster loading -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    {% if GA_MEASUREMENT_ID %}
+    <link
+      rel="preconnect"
+      href="https://www.googletagmanager.com"
+      crossorigin
+    />
+    <link
+      rel="preconnect"
+      href="https://www.google-analytics.com"
+      crossorigin
+    />
+    {% endif %}
+
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+
+    <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "HABIKO",
+        "alternateName": "HABIKO Immobilier",
+        "url": "https://ci-habiko.com",
+        "description": "Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains et résidences meublées à Abidjan et dans toute la Côte d'Ivoire.",
+        "inLanguage": "fr-CI",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "https://ci-habiko.com/#organization",
+          "name": "HABIKO",
+          "legalName": "HABIKO",
+          "url": "https://ci-habiko.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://ci-habiko.com/static/img/logo.png",
+            "width": 200,
+            "height": 60
+          },
+          "image": "https://ci-habiko.com/static/img/logo.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "support@ci-habiko.com",
+            "contactType": "customer service",
+            "areaServed": "CI",
+            "availableLanguage": ["fr", "fr-CI"]
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CI",
+            "addressLocality": "Abidjan",
+            "addressRegion": "Lagunes"
+          },
+          "sameAs": ["https://ci-habiko.com"]
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://ci-habiko.com/ads?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "@id": "https://ci-habiko.com/#localbusiness",
+        "name": "HABIKO",
+        "alternateName": "HABIKO Immobilier",
+        "keywords": "habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée",
+        "description": "HABIKO CI - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains et résidences meublées à Abidjan et dans toute la Côte d'Ivoire.",
+        "url": "https://ci-habiko.com",
+        "telephone": "+225",
+        "email": "support@ci-habiko.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "",
+          "addressLocality": "Abidjan",
+          "addressRegion": "Lagunes",
+          "postalCode": "",
+          "addressCountry": "CI"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 5.36,
+          "longitude": -4.0083
+        },
+        "areaServed": [
+          {
+            "@type": "Country",
+            "name": "Côte d'Ivoire",
+            "sameAs": "https://en.wikipedia.org/wiki/Ivory_Coast"
+          },
+          {
+            "@type": "City",
+            "name": "Abidjan"
+          },
+          {
+            "@type": "City",
+            "name": "Bouaké"
+          },
+          {
+            "@type": "City",
+            "name": "Daloa"
+          }
+        ],
+        "priceRange": "Gratuit",
+        "openingHours": "Mo-Su 00:00-23:59",
+        "image": "https://ci-habiko.com/static/img/logo.png",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://ci-habiko.com/static/img/logo.png"
+        }
+      }
+    </script>
+
+    {% block structured_data %}{% endblock %}
+
+    <!-- Précharger le favicon en premier pour éviter le flash -->
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" href="{% static 'favicon.png' %}" />
+    <meta name="theme-color" content="#f97316" />
+
+    {% block tailwind_css %}
+    <!-- Charger Tailwind CSS de manière synchrone pour éviter le FOUC -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    />
+    {% endblock %} {% block htmx_js %}
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    {% endblock %}
+
+    <!-- Police propre pour le bandeau HABIKO -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      /* Styles critiques pour éviter le flash */
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      /* Cacher le body uniquement si on n'est pas en DEBUG (production) */
+      body:not(.loaded) {
+        visibility: hidden;
+      }
+      body.loaded {
+        visibility: visible !important;
+      }
+
+      .glass {
+        backdrop-filter: saturate(180%) blur(10px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+      .line-clamp-1 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+      }
+      .line-clamp-2 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      /* CTA Section - Copié exactement de age_gate.html */
+      .cta-section {
+        background: linear-gradient(to bottom right, #f97316, #22c55e);
+        color: #fff;
+        padding: 0.75rem 1rem;
+        text-align: center;
+      }
+      
+      @media (min-width: 768px) {
+        .cta-section {
+          padding: 1rem;
+        }
+      }
+      
+      .cta-container {
+        max-width: 80rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .cta-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      
+      @media (min-width: 768px) {
+        .cta-title {
+          font-size: 1.25rem;
+        }
+      }
+      
+      .cta-text {
+        color: #ffedd5;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+      }
+      
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        background-color: #fff;
+        color: #ea580c;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+      
+      .cta-button:hover {
+        background-color: #fff7ed;
+      }
+      
+      .cta-icon {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* Bandeau HABIKO (pub interne) */
+      .habiko-banner {
+        background-color: #111827; /* gris très foncé, sobre */
+        border-radius: 0.75rem;
+        border: 1px solid rgba(249, 115, 22, 0.35); /* léger rappel orange */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .habiko-banner-text,
+      .habiko-banner-cta,
+      .habiko-banner-logo {
+        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      /* Texte orange -> dégradé vert animé */
+      .habiko-banner-text {
+        background: linear-gradient(90deg, #f97316, #22c55e);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: habikoTextShift 4s ease-in-out infinite;
+      }
+      @keyframes habikoTextShift {
+        0% {
+          background-position: 0% 0%;
+        }
+        50% {
+          background-position: 100% 0%;
+        }
+        100% {
+          background-position: 0% 0%;
+        }
+      }
+      /* Logo qui tourne doucement */
+      .habiko-banner-logo img {
+        animation: habikoSpin 6s linear infinite;
+        transform-origin: center center;
+      }
+      @keyframes habikoSpin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .habiko-banner-cta {
+        background: linear-gradient(135deg, #f97316, #22c55e);
+        color: #ffffff;
+      }
+      .habiko-banner-cta:hover {
+        background: linear-gradient(135deg, #ea580c, #16a34a);
+      }
+
+      /* Modale de chargement */
+      .loading-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
+      .loading-modal.active {
+        display: flex;
+      }
+      .loading-modal-content {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .loading-modal-content h3 {
+        color: #111827;
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      .spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f3f4f6;
+        border-top: 3px solid #6b7280;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .loading-modal-content p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin: 0;
+      }
+
+      /* Image de fête sur le logo */
+      .logo-container {
+        position: relative;
+        display: inline-block;
+      }
+      .holiday-image {
+        position: absolute;
+        top: -18px;
+        left: -12px;
+        width: 56px;
+        height: auto;
+        z-index: 10;
+        animation: holidayWiggle 2s ease-in-out infinite;
+        transform-origin: bottom center;
+      }
+      @keyframes holidayWiggle {
+        0%, 100% { transform: rotate(-5deg); }
+        50% { transform: rotate(5deg); }
+      }
+    </style>
+
+    <!-- Script pour afficher le body une fois la page chargée -->
+    <script>
+      // Afficher le body immédiatement - le CSS gère la visibilité
+      (function() {
+        // Ajouter la classe loaded immédiatement pour afficher le contenu
+        if (document.body) {
+          document.body.classList.add("loaded");
+        } else {
+          // Si le body n'est pas encore disponible, attendre
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.body.classList.add("loaded");
+            });
+          } else {
+            // Body déjà chargé
+            document.body.classList.add("loaded");
+          }
+        }
+        // Fallback au cas où DOMContentLoaded ne se déclenche pas
+        window.addEventListener("load", function () {
+          if (document.body) {
+            document.body.classList.add("loaded");
+          }
+        });
+      })();
+    </script>
+
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="min-h-full bg-gradient-to-b from-orange-50 to-white">
+    {% block header %}
+    <header class="sticky top-0 z-40 glass border-b">
+      <div
+        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <a href="/" class="text-2xl font-semibold tracking-tight text-gray-900">
+          <div class="logo-container">
+            <img
+              src="{% static 'img/logo.png' %}"
+              alt="HABIKO - Site immobilier en Côte d'Ivoire"
+              class="h-12 md:h-16 w-auto"
+              loading="eager"
+              width="264"
+              height="112"
+            />
+          </div>
+        </a>
+        <nav class="hidden md:flex items-center gap-3">
+          <a href="/ads" class="text-gray-700 hover:text-gray-900">Annonces</a>
+          {% if user.is_authenticated %}
+          <a
+            href="/dashboard/"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            Mon compte
+          </a>
+          {% else %}
+          <a
+            href="/auth/login/"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            Se connecter
+          </a>
+          {% endif %}
+        </nav>
+        <div class="md:hidden flex items-center gap-2">
+          {% if user.is_authenticated %}
+          <a
+            href="/dashboard/"
+            class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
+            >Mon compte</a
+          >
+          {% else %}
+          <a
+            href="/auth/login/"
+            class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
+            >Se connecter</a
+          >
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    {% endblock %}
+
+    {% block cta_section %}
+    <!-- CTA Publier après le header (uniforme sur toutes les pages) -->
+    <section class="cta-section">
+      <div class="cta-container">
+        <h2 class="cta-title">Vous êtes propriétaire ?</h2>
+        <p class="cta-text">Publiez votre annonce gratuitement et trouvez vos acheteurs ou locataires</p>
+        <a href="/post/" class="cta-button">
+          <svg class="cta-icon" viewBox="0 0 24 24">
+            <path d="M12 4v16m8-8H4"></path>
+          </svg>
+          Publier une annonce
+        </a>
+      </div>
+    </section>
+    {% endblock %} {% block counter_section %}
+    <!-- Compteur d'annonces -->
+    <section class="bg-white border-b">
+      <div
+        class="max-w-7xl mx-auto px-4 py-3 text-center text-sm text-gray-700"
+      >
+        <span
+          >Nombre total d'annonces en ligne :
+          <strong>{{ total_approved_ads }}</strong></span
+        >
+      </div>
+    </section>
+    {% endblock %}
+
+    <main
+      class="{% block main_class %}max-w-7xl mx-auto p-3 md:p-4{% endblock %}"
+    >
+      {% if messages %}
+      <div class="max-w-3xl mx-auto mb-4 space-y-2">
+        {% for message in messages %}
+        <div
+          class="rounded-lg border px-4 py-3 text-sm {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800 {% endif %} {% if message.tags == 'info' %} bg-orange-50 border-orange-200 text-orange-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Breadcrumbs -->
+      {% block breadcrumbs %}{% endblock %} {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-50 border-t border-gray-200 mt-8">
+      <div class="max-w-7xl mx-auto p-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+          <!-- Navigation -->
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-3">Navigation</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>
+                <a href="/ads" class="hover:text-gray-900 underline"
+                  >Annonces</a
+                >
+              </li>
+              <li>
+                <a href="/post" class="hover:text-gray-900 underline"
+                  >Publier une annonce</a
+                >
+              </li>
+              <li>
+                <a href="/legal/tos" class="hover:text-gray-900 underline"
+                  >CGU</a
+                >
+              </li>
+              <li>
+                <a href="/legal/privacy" class="hover:text-gray-900 underline"
+                  >Confidentialité</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/legal/content-policy"
+                  class="hover:text-gray-900 underline"
+                  >Politique de contenu</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Villes populaires (SEO - maillage interne) -->
+          {% if popular_cities_footer %}
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-3">Villes populaires</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              {% for city in popular_cities_footer %}
+              <li>
+                <a
+                  href="/ads?city={{ city.slug }}"
+                  class="hover:text-gray-900 underline"
+                  >Annonces à {{ city.name }}</a
+                >
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <!-- Contact -->
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-3">Contact</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>
+                Email:
+                <a
+                  href="mailto:support@ci-habiko.com"
+                  class="hover:text-gray-900 underline"
+                  >support@ci-habiko.com</a
+                >
+              </li>
+              <li>© 2025 HABIKO</li>
+              <li class="text-xs text-gray-500">Côte d'Ivoire</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Copyright -->
+        <div
+          class="border-t border-gray-200 pt-4 text-center text-xs text-gray-500"
+        >
+          <p>
+            © 2025 HABIKO - Site immobilier en Côte d'Ivoire
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modale de chargement -->
+    <div id="loadingModal" class="loading-modal">
+      <div class="loading-modal-content">
+        <div class="spinner"></div>
+        <h3 id="loadingTitle">Chargement...</h3>
+        <p id="loadingMessage">Veuillez patienter</p>
+      </div>
+    </div>
+
+    <!-- Script pour gérer les modales de chargement -->
+    <script>
+      // Fonction pour afficher la modale de chargement
+      function showLoadingModal(title, message) {
+        const modal = document.getElementById('loadingModal');
+        const titleEl = document.getElementById('loadingTitle');
+        const messageEl = document.getElementById('loadingMessage');
+        
+        if (title) titleEl.textContent = title;
+        if (message) messageEl.textContent = message;
+        
+        modal.classList.add('active');
+      }
+
+      // Fonction pour masquer la modale de chargement
+      function hideLoadingModal() {
+        const modal = document.getElementById('loadingModal');
+        modal.classList.remove('active');
+      }
+
+      // Gérer la soumission des formulaires
+      document.addEventListener('DOMContentLoaded', function() {
+        // Détecter le formulaire de création d'annonce (formulaire avec enctype="multipart/form-data")
+        const postForm = document.querySelector('form[enctype="multipart/form-data"]');
+        if (postForm) {
+          postForm.addEventListener('submit', function(e) {
+            // Vérifier que le formulaire est valide avant d'afficher le loader
+            if (this.checkValidity()) {
+              showLoadingModal('Création de l\'annonce', 'Votre annonce est en cours de création, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer la soumission du formulaire de connexion
+        const loginForm = document.querySelector('form[action*="login"]');
+        if (loginForm) {
+          loginForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal('Connexion en cours', 'Authentification en cours, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer la soumission du formulaire d'inscription
+        const signupForm = document.querySelector('form[action*="signup"]');
+        if (signupForm) {
+          signupForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal('Inscription en cours', 'Création de votre compte, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer les liens de déconnexion
+        const logoutLinks = document.querySelectorAll('a[href*="logout"]');
+        logoutLinks.forEach(function(link) {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+            showLoadingModal('Déconnexion', 'Déconnexion en cours...');
+            
+            // Rediriger après un court délai pour que la modale s'affiche
+            setTimeout(function() {
+              window.location.href = url;
+            }, 300);
+          });
+        });
+
+        // Masquer la modale si la page se recharge (en cas d'erreur)
+        window.addEventListener('pageshow', function(event) {
+          if (event.persisted) {
+            hideLoadingModal();
+          }
+        });
+
+        // Masquer la modale si on revient en arrière
+        window.addEventListener('popstate', function() {
+          hideLoadingModal();
+        });
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Google Analytics - Deferred loading -->
+    {% if GA_MEASUREMENT_ID %}
+    <script>
+      // Defer GA loading until after page load
+      window.addEventListener("load", function () {
+        var script = document.createElement("script");
+        script.async = true;
+        script.src =
+          "https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}";
+        document.head.appendChild(script);
+
+        script.onload = function () {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag("js", new Date());
+          gtag("config", "{{ GA_MEASUREMENT_ID }}");
+        };
+      });
+    </script>
+    {% endif %}
+  </body>
+</html>

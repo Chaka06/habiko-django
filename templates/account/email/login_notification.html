@@ -1,0 +1,36 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Connexion détectée - HABIKO{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Connexion détectée</h1>
+
+<p>Une connexion à votre compte HABIKO a été détectée.</p>
+
+<div class="details">
+    <h3>Détails de la connexion :</h3>
+    <dl>
+        <dt>Utilisateur :</dt>
+        <dd>{{ user.username }}</dd>
+        
+        <dt>Email :</dt>
+        <dd>{{ user.email }}</dd>
+        
+        <dt>Date et heure :</dt>
+        <dd>{% now "d/m/Y à H:i" %}</dd>
+    </dl>
+</div>
+
+<div class="security-note">
+    <p style="margin: 0;"><strong>⚠️ Sécurité :</strong> Si cette connexion n'a pas été effectuée par vous, veuillez :</p>
+    <ol style="margin: 10px 0 0 20px; padding: 0;">
+        <li>Changer immédiatement votre mot de passe</li>
+        <li>Nous contacter à <a href="mailto:support@ci-habiko.com">support@ci-habiko.com</a></li>
+    </ol>
+</div>
+
+<div class="button-container">
+    <a href="{{ site_url }}/accounts/password/change/" class="button">Changer mon mot de passe</a>
+</div>
+{% endblock %}
+

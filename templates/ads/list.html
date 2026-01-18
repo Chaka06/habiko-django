@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces{% if selected_category %} {{ selected_category|title }}{% endif %} · HABIKO{% endblock %}
+{% block description %}{% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire. Maisons, villas, appartements, terrains.{% else %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains à Abidjan et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
+{% block keywords %}{% if selected_city %}immobilier {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire{% endblock %}
+{% block canonical_url %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_default %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+    "name": "{% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}{% else %}Annonces immobilières en Côte d'Ivoire{% endif %}",
+    "description": "{% if selected_city %}Découvrez les meilleures annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces immobilières en Côte d'Ivoire{% endif %}",
+  "url": "https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
+  "numberOfItems": "{{ ads|length }}",
+  "itemListElement": [
+    {% for ad in ads %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "item": {
+        "@type": "Person",
+        "name": "{{ ad.title|escapejs }}",
+        "description": "{{ ad.description_sanitized|truncatewords:20|escapejs }}",
+        "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "{{ ad.city.name }}",
+          "addressCountry": "CI"
+        }
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+  {% if is_paginated %}
+    {% if page_obj.has_previous %}
+      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+    {% endif %}
+    {% if page_obj.has_next %}
+      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<!-- Breadcrumbs with Schema.org -->
+<nav class="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
+  <ol class="flex items-center space-x-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/" class="hover:text-gray-900" itemprop="item">
+        <span itemprop="name">Accueil</span>
+      </a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name" class="text-gray-900 font-medium">Annonces</span>
+      <meta itemprop="position" content="2" />
+    </li>
+    {% if selected_city %}
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name" class="text-gray-900 font-medium">{{ selected_city.name }}</span>
+      <meta itemprop="position" content="3" />
+    </li>
+    {% endif %}
+    {% if selected_category %}
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name" class="text-gray-900 font-medium">{{ selected_category|title }}</span>
+      <meta itemprop="position" content="{% if selected_city %}4{% else %}3{% endif %}" />
+    </li>
+    {% endif %}
+  </ol>
+</nav>
+{% endblock %}
+
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+  <!-- Contenu principal -->
+  <div class="flex-1">
+<header class="mb-3 md:mb-4">
+  <h1 class="text-2xl font-bold text-gray-900">
+    {% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire · HABIKO{% elif selected_category %}Annonces {{ selected_category|title }} en Côte d'Ivoire · HABIKO{% else %}Annonces Immobilières en Côte d'Ivoire · HABIKO{% endif %}
+  </h1>
+  <p class="text-sm text-gray-600 mt-1">
+    {% if selected_city %}
+      Découvrez les meilleures annonces {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire. Maisons, villas, appartements, terrains.
+    {% else %}
+      Parcourez des annonces vérifiées dans toute la Côte d'Ivoire.
+    {% endif %}
+  </p>
+</header>
+<section class="mb-4 md:mb-6">
+  <form class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
+    <input name="q" placeholder="Rechercher" class="col-span-2 md:col-span-2 border rounded-lg px-3 py-2" value="{{ request.GET.q }}">
+    <select name="city" class="col-span-1 border rounded-lg px-3 py-2">
+      <option value="">Toutes villes</option>
+      {% for c in cities %}
+        <option value="{{ c.slug }}" {% if request.GET.city == c.slug %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="category" class="col-span-1 border rounded-lg px-3 py-2">
+      <option value="">Catégorie</option>
+      <option value="maisons_appartements" {% if request.GET.category == 'maisons_appartements' %}selected{% endif %}>Maisons et Appartements</option>
+      <option value="villas_residences" {% if request.GET.category == 'villas_residences' %}selected{% endif %}>Villas et Résidences</option>
+      <option value="terrains" {% if request.GET.category == 'terrains' %}selected{% endif %}>Terrains</option>
+      <option value="locations" {% if request.GET.category == 'locations' %}selected{% endif %}>Locations</option>
+    </select>
+    <div class="col-span-2 md:col-span-1 flex gap-2">
+      <button type="submit" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition shadow-sm">Filtrer</button>
+      <a href="/ads" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium inline-flex items-center justify-center transition">Reset</a>
+    </div>
+  </form>
+</section>
+
+<div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+  {% for ad in ads %}
+    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition h-40">
+      <div class="flex h-full">
+        <div class="w-40 flex-shrink-0 bg-slate-100">
+          {% if ad.media.count %}
+            <img src="{{ ad.media.first.image.url }}" alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
+          {% else %}
+            <div class="w-full h-full bg-slate-200 flex items-center justify-center">
+              <span class="text-slate-400 text-xs">Photo</span>
+            </div>
+          {% endif %}
+        </div>
+        <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
+          <div class="min-w-0 flex-1">
+            <div class="font-medium text-slate-900 line-clamp-2 mb-1">{{ ad.title }}</div>
+            <div class="text-xs text-slate-600 mb-1 font-medium">{{ ad.get_category_display }}</div>
+            <div class="text-xs text-slate-500 mb-1">{{ ad.city.name }}</div>
+          </div>
+          <div class="flex justify-between items-end mt-1">
+            <div class="text-xs text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded">
+              {{ ad.created_at|date:"d/m/Y" }}
+            </div>
+            <div class="flex flex-wrap gap-1">
+              {% for tag in ad.subcategories|slice:":2" %}
+                <span class="px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-xs truncate max-w-[85px] block" title="{{ tag }}">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  {% empty %}
+    <div class="text-center text-slate-600 py-8">Aucune annonce trouvée.</div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+  <div class="mt-8 flex justify-center">
+    <nav class="flex items-center space-x-2" aria-label="Pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+           class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+          ← Précédent
+        </a>
+      {% else %}
+        <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+          ← Précédent
+        </span>
+      {% endif %}
+
+      <!-- Numéros de page -->
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="px-3 py-2 rounded-lg bg-green-600 text-white font-medium">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+             class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+            {{ num }}
+          </a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+           class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+          Suivant →
+        </a>
+      {% else %}
+        <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+          Suivant →
+        </span>
+      {% endif %}
+    </nav>
+  </div>
+{% endif %}
+
+<!-- Bouton Créer une annonce en bas -->
+<section class="mt-8" style="background: linear-gradient(to right, #f97316, #22c55e); color: #fff; padding: 2rem 1rem; border-radius: 0.5rem; text-align: center;">
+  <div>
+    <a href="/post/" style="display: inline-flex; align-items: center; background-color: #ffffff; color: #ea580c; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+      <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Créer une annonce
+    </a>
+    <p style="color: #ffffff; font-size: 0.875rem; margin-top: 0.75rem;">Publiez votre annonce gratuitement et trouvez vos acheteurs ou locataires</p>
+  </div>
+</section>
+
+{% endblock %}
+
+

@@ -1,0 +1,167 @@
+# French translation for Django admin
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr\n"
+
+msgid "Django administration"
+msgstr "Administration de Django"
+
+msgid "Welcome, %(name)s."
+msgstr "Bienvenue, %(name)s."
+
+msgid "View site"
+msgstr "Voir le site"
+
+msgid "Change password"
+msgstr "Modifier le mot de passe"
+
+msgid "Log out"
+msgstr "Déconnexion"
+
+msgid "Change theme (currently: %(theme)s)"
+msgstr "Changer de thème (actuellement : %(theme)s)"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Action:"
+msgstr "Action :"
+
+msgid "Go"
+msgstr "Envoyer"
+
+msgid "selected"
+msgstr "sélectionné"
+
+msgid "Filter"
+msgstr "Filtre"
+
+msgid "Show numbers"
+msgstr "Afficher les nombres"
+
+msgid "By %(field)s"
+msgstr "Par %(field)s"
+
+msgid "All"
+msgstr "Tout"
+
+msgid "Today"
+msgstr "Aujourd'hui"
+
+msgid "Past 7 days"
+msgstr "Les 7 derniers jours"
+
+msgid "This month"
+msgstr "Ce mois-ci"
+
+msgid "This year"
+msgstr "Cette année"
+
+msgid "All dates"
+msgstr "Toutes les dates"
+
+msgid "No date"
+msgstr "Aucune date"
+
+msgid "Has date"
+msgstr "Possède une date"
+
+msgid "Add %(name)s"
+msgstr "Ajouter %(name)s"
+
+msgid "Annonces"
+msgstr "Annonces"
+
+msgid "Villes"
+msgstr "Villes"
+
+msgid "Fonctionnalités"
+msgstr "Fonctionnalités"
+
+msgid "Rapports"
+msgstr "Rapports"
+
+msgid "Logs d'audit"
+msgstr "Logs d'audit"
+
+msgid "Disponibilités"
+msgstr "Disponibilités"
+
+msgid "Fonctionnalités d'annonce"
+msgstr "Fonctionnalités d'annonce"
+
+msgid "Sites"
+msgstr "Sites"
+
+msgid "Groupes"
+msgstr "Groupes"
+
+msgid "Utilisateurs"
+msgstr "Utilisateurs"
+
+msgid "Sessions"
+msgstr "Sessions"
+
+msgid "Comptes"
+msgstr "Comptes"
+
+msgid "Profils"
+msgstr "Profils"
+
+msgid "Modération"
+msgstr "Modération"
+
+msgid "Approuver"
+msgstr "Approuver"
+
+msgid "Rejeter"
+msgstr "Rejeter"
+
+msgid "Archiver"
+msgstr "Archiver"
+
+msgid "En attente"
+msgstr "En attente"
+
+msgid "Approuvée"
+msgstr "Approuvée"
+
+msgid "Rejetée"
+msgstr "Rejetée"
+
+msgid "Archivée"
+msgstr "Archivée"
+
+msgid "Brouillon"
+msgstr "Brouillon"
+
+msgid "Draft"
+msgstr "Brouillon"
+
+msgid "Pending"
+msgstr "En attente"
+
+msgid "Approved"
+msgstr "Approuvée"
+
+msgid "Rejected"
+msgstr "Rejetée"
+
+msgid "Archived"
+msgstr "Archivée"
+
+msgid "Rencontres et escortes"
+msgstr "Rencontres et escortes"
+
+msgid "Massages et services"
+msgstr "Massages et services"
+
+msgid "Produits adultes"
+msgstr "Produits adultes"
+
+msgid "Skip to main content"
+msgstr "Passer au contenu principal"

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Recharger mon compte · HABIKO{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <!-- En-tête -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <h1 class="text-xl md:text-2xl font-semibold text-gray-900">Recharger mon compte</h1>
+    <p class="text-gray-600 mt-1">Choisissez une formule pour recharger votre compte.</p>
+  </section>
+
+  <!-- Formulaire de recharge -->
+  <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-3">Choisissez une formule</label>
+        <div class="space-y-3">
+          {% for package in packages %}
+          <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition {% if form.package.value == package.id %}border-green-500 bg-green-50{% endif %}">
+            <input type="radio" name="package" value="{{ package.id }}" class="mt-1 mr-3" required>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-lg">{{ package.name }}</h3>
+                <span class="text-2xl font-bold text-green-600">{{ package.amount|floatformat:0 }} FCFA</span>
+              </div>
+              <ul class="mt-2 space-y-1 text-sm text-gray-600">
+                <li>✓ {{ package.ads_included }} annonces incluses</li>
+                {% if package.credit_amount > 0 %}
+                <li>✓ {{ package.credit_amount|floatformat:0 }} FCFA de crédit pour booster</li>
+                {% endif %}
+                {% if package.free_boosters > 0 %}
+                <li>✓ {{ package.free_boosters }} booster(s) gratuit(s) sur vos 2 premières annonces</li>
+                {% endif %}
+                {% if package.is_premium %}
+                <li>✓ Toutes les annonces en premium (en tête de liste)</li>
+                {% endif %}
+              </ul>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+          Payer avec CinetPay
+        </button>
+        <a href="{% url 'accounts:account_balance' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium">
+          Annuler
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Info -->
+  <section class="bg-orange-50 rounded-2xl p-4 md:p-6 border border-orange-200">
+    <h3 class="font-semibold text-orange-900 mb-2">💡 Comment ça marche ?</h3>
+    <ul class="space-y-1 text-sm text-orange-800">
+      <li>• Choisissez une formule de recharge</li>
+      <li>• Payez via CinetPay (Mobile Money, Carte bancaire)</li>
+      <li>• Vos crédits sont ajoutés automatiquement</li>
+      <li>• Utilisez vos crédits pour poster et booster vos annonces</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}
+
+
+

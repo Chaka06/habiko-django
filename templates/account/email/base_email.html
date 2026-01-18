@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block email_title %}HABIKO{% endblock %}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .email-header {
+            padding: 20px 10px 20px 10px;
+            text-align: left;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin: 0;
+            display: block;
+        }
+        .email-content {
+            padding: 0 10px 20px 10px;
+        }
+        .greeting {
+            color: #666666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .main-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000000;
+            margin: 0 0 20px 0;
+            text-align: center;
+        }
+        .code-box {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 0;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: 700;
+            color: #000000;
+            letter-spacing: 4px;
+            margin: 10px 0;
+        }
+        .security-note {
+            background-color: #f8f9fa;
+            border-left: 4px solid #FF0000;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .security-note strong {
+            color: #000000;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: #FFFF00;
+            color: #000000;
+            text-decoration: none;
+            border-radius: 0;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #FFD700;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 0;
+            margin: 25px 0;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #000000;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 0;
+            margin: 25px 0;
+        }
+        .details dt {
+            font-weight: 600;
+            margin-top: 12px;
+            color: #000000;
+        }
+        .details dd {
+            margin-left: 0;
+            margin-bottom: 8px;
+            color: #666666;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #FFFF00;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 0;
+            font-size: 14px;
+        }
+        .footer-logo {
+            text-align: center;
+            padding: 30px 0 20px 0;
+        }
+        .footer-logo img {
+            max-width: 100px;
+            height: auto;
+        }
+        .footer-separator {
+            border-top: 1px solid #e9ecef;
+            margin: 20px 0;
+        }
+        .footer-links {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+        .footer-links a {
+            color: #FF0000;
+            text-decoration: none;
+            padding: 0 10px;
+            border-right: 1px solid #e9ecef;
+        }
+        .footer-links a:last-child {
+            border-right: none;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .social-icons {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .social-icon {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: #6c757d;
+            border-radius: 0;
+            margin: 0 8px;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .social-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: #ffffff;
+            display: block;
+            margin: 0 auto;
+        }
+        .footer-text {
+            padding: 20px 10px;
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.6;
+        }
+        .footer-text a {
+            color: #FF0000;
+            text-decoration: none;
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+        .footer-text strong {
+            color: #000000;
+        }
+        p {
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333333;
+        }
+        ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        a {
+            color: #FF0000;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .link-text {
+            word-break: break-all;
+            color: #666666;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <!-- Header avec logo -->
+        <div class="email-header">
+            <img src="https://ci-habiko.com/static/img/logo.png" alt="HABIKO" class="logo" />
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="email-content">
+            {% block email_greeting %}
+            <p class="greeting">Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+            {% endblock %}
+
+            {% block email_content %}{% endblock %}
+        </div>
+
+        <!-- Footer avec logo -->
+        <div class="footer-logo">
+            <img src="https://ci-habiko.com/static/img/logo.png" alt="HABIKO" class="logo" />
+        </div>
+
+        <!-- Séparateur -->
+        <div class="footer-separator"></div>
+
+        <!-- Liens footer -->
+        <div class="footer-links">
+            <a href="https://ci-habiko.com/help/">Aide et Contact</a>
+            <a href="https://ci-habiko.com/security/">Sécurité</a>
+            <a href="https://ci-habiko.com/">Application</a>
+        </div>
+
+        <!-- Icônes réseaux sociaux -->
+        <div class="social-icons">
+            <a href="https://www.facebook.com/habiko" class="social-icon" style="background-color: #1877f2;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M13.397 20.997v-8.196h2.765l.411-3.209h-3.176V7.548c0-.926.258-1.56 1.587-1.56h1.684V3.127A22.336 22.336 0 0 0 14.201 3c-2.444 0-4.122 1.492-4.122 4.231v2.355H7.332v3.209h2.753v8.202h3.312z"/>
+                </svg>
+            </a>
+            <a href="https://www.tiktok.com/@habiko" class="social-icon" style="background-color: #FF0000;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Texte footer -->
+        <div class="footer-text">
+            <p style="margin: 0 0 15px 0;">
+                Nous nous engageons à lutter contre l'envoi d'emails frauduleux. Les emails <strong>HABIKO</strong> contiennent toujours votre nom complet. 
+                <a href="https://ci-habiko.com/security/phishing">Apprenez à reconnaître les tentatives de phishing</a>.
+            </p>
+            <p style="margin: 0 0 15px 0;">
+                Merci de ne pas répondre à cet email. Pour nous contacter, cliquez sur <a href="https://ci-habiko.com/help/">Aide et Contact</a>.
+            </p>
+            <p style="margin: 0;">
+                Vous ne savez pas pourquoi vous avez reçu cet email ? <a href="https://ci-habiko.com/help/email">En savoir plus</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
