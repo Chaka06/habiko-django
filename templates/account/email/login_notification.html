@@ -1,36 +1,63 @@
 {% extends "account/email/base_email.html" %}
 
-{% block email_title %}Connexion détectée - HABIKO{% endblock %}
+{% block email_title %}Connexion détectée - {{ site_name }}{% endblock %}
 
 {% block email_content %}
-<h1 class="main-title">Connexion détectée</h1>
+<h1 class="main-title"><i class="bx bx-bell"></i> Connexion détectée</h1>
 
-<p>Une connexion à votre compte HABIKO a été détectée.</p>
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Une connexion à votre compte <strong>{{ site_name }}</strong> a été détectée.</p>
+
+<div class="info-box">
+    <h3><i class="bx bx-lock-alt"></i> Connexion réussie</h3>
+    <p style="margin-bottom: 0;">Cette notification est automatique pour assurer la sécurité de votre compte.</p>
+</div>
 
 <div class="details">
-    <h3>Détails de la connexion :</h3>
+    <h3>📋 Détails de la connexion :</h3>
     <dl>
-        <dt>Utilisateur :</dt>
+        <dt><i class="bx bx-user"></i> Utilisateur :</dt>
         <dd>{{ user.username }}</dd>
         
-        <dt>Email :</dt>
+        <dt><i class="bx bx-envelope"></i> Email :</dt>
         <dd>{{ user.email }}</dd>
         
-        <dt>Date et heure :</dt>
-        <dd>{% now "d/m/Y à H:i" %}</dd>
+        <dt><i class="bx bx-time-five"></i> Date et heure :</dt>
+        <dd>{% now "d/m/Y à H:i" %} (UTC)</dd>
     </dl>
 </div>
 
 <div class="security-note">
-    <p style="margin: 0;"><strong>⚠️ Sécurité :</strong> Si cette connexion n'a pas été effectuée par vous, veuillez :</p>
+    <p style="margin: 0;">
+        <strong><i class="bx bx-error"></i> Ce n'était pas vous ?</strong>
+        <br><br>
+        Si vous n'êtes pas à l'origine de cette connexion, votre compte est peut-être compromis. 
+        <strong>Actions recommandées :</strong>
+    </p>
     <ol style="margin: 10px 0 0 20px; padding: 0;">
-        <li>Changer immédiatement votre mot de passe</li>
-        <li>Nous contacter à <a href="mailto:support@ci-habiko.com">support@ci-habiko.com</a></li>
+        <li><strong>Changez immédiatement votre mot de passe</strong> en cliquant sur le bouton ci-dessous</li>
+        <li>Vérifiez les paramètres de votre compte et vos annonces</li>
+        <li>Contactez-nous d'urgence : <a href="mailto:{{ support_email }}" style="color: #FF0000; font-weight: 600;">{{ support_email }}</a></li>
     </ol>
 </div>
 
 <div class="button-container">
-    <a href="{{ site_url }}/accounts/password/change/" class="button">Changer mon mot de passe</a>
+    <a href="{{ site_url }}/accounts/password/change/" class="button"><i class="bx bx-lock-alt"></i> Changer mon mot de passe</a>
 </div>
+
+<div class="info-box">
+    <h3><i class="bx bx-bulb"></i> Conseils de sécurité :</h3>
+    <ul>
+        <li><i class="bx bx-lock"></i> Utilisez un mot de passe unique et complexe</li>
+        <li><i class="bx bx-refresh"></i> Changez votre mot de passe régulièrement</li>
+        <li><i class="bx bx-x-circle"></i> Ne partagez jamais vos identifiants</li>
+        <li><i class="bx bx-envelope"></i> Méfiez-vous des emails suspects (phishing)</li>
+    </ul>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center; margin-top: 30px;">
+    <strong>{{ site_name }}</strong> ne vous demandera jamais vos identifiants par email ou téléphone.
+</p>
 {% endblock %}
 

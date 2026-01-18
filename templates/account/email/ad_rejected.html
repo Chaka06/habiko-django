@@ -1,0 +1,71 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Annonce rejetée - {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title"><i class="bx bx-error"></i> Annonce rejetée</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Nous vous informons que votre annonce a été <strong>rejetée</strong> par notre équipe de modération.</p>
+
+<div class="warning-box">
+    <p style="margin: 0;"><strong><i class="bx bx-megaphone"></i> Non conforme</strong> - Cette annonce ne respecte pas nos conditions d'utilisation ou notre politique de contenu.</p>
+</div>
+
+<div class="details">
+    <h3>📋 Détails de l'annonce rejetée :</h3>
+    <dl>
+        <dt><i class="bx bx-pin"></i> Titre :</dt>
+        <dd><strong>{{ ad.title }}</strong></dd>
+        
+        <dt><i class="bx bx-purchase-tag"></i> Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+        
+        <dt><i class="bx bx-map"></i> Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+        
+        <dt><i class="bx bx-x-circle"></i> Statut :</dt>
+        <dd><span style="color: #dc3545; font-weight: 600;">Rejetée</span></dd>
+    </dl>
+</div>
+
+{% if reason %}
+<div class="security-note">
+    <p style="margin: 0;">
+        <strong><i class="bx bx-edit"></i> Raison du rejet :</strong>
+        <br><br>
+        {{ reason }}
+    </p>
+</div>
+{% endif %}
+
+<div class="info-box">
+    <h3><i class="bx bx-bulb"></i> Que faire maintenant ?</h3>
+    <p>Voici les actions possibles :</p>
+    <ul>
+        <li><i class="bx bx-book-open"></i> <strong>Consultez nos conditions d'utilisation</strong> pour comprendre les règles</li>
+        <li>✏️ <strong>Modifiez votre annonce</strong> pour la rendre conforme</li>
+        <li><i class="bx bx-edit"></i> <strong>Créez une nouvelle annonce</strong> en respectant nos politiques</li>
+        <li><i class="bx bx-envelope"></i> <strong>Contactez notre support</strong> si vous avez des questions</li>
+    </ul>
+</div>
+
+<div class="button-container">
+    <a href="{{ site_url }}/legal/content-policy/" class="button"><i class="bx bx-book-open"></i> Politique de contenu</a>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;"><i class="bx bx-bar-chart-alt-2"></i> Accéder à mon tableau de bord</a>
+</p>
+
+<div class="security-note">
+    <p style="margin: 0;">
+        <strong><i class="bx bx-message-detail"></i> Besoin d'aide ?</strong>
+        <br>
+        Notre équipe est là pour vous aider. Contactez-nous : <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+    </p>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Nous nous excusons pour ce désagrément. Nous veillons à maintenir la qualité de la plateforme pour tous les utilisateurs.</p>
+{% endblock %}

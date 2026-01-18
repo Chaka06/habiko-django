@@ -1,0 +1,50 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+=================================================================
+ANNONCE REJETÉE SUR {{ site_name|upper }}
+=================================================================
+
+Nous vous informons que votre annonce a été REJETÉE par notre équipe de modération.
+
+Cette annonce ne respecte pas nos conditions d'utilisation ou notre politique de contenu.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAILS DE L'ANNONCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Statut : REJETÉE
+
+{% if reason %}
+RAISON DU REJET :
+{{ reason }}
+{% endif %}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+QUE FAIRE MAINTENANT ?
+
+✓ Consultez nos conditions d'utilisation pour comprendre les règles
+✓ Modifiez votre annonce pour la rendre conforme
+✓ Créez une nouvelle annonce en respectant nos politiques
+✓ Contactez notre support si vous avez des questions
+
+Politique de contenu : {{ site_url }}/legal/content-policy/
+Accéder à votre tableau de bord : {{ site_url }}/dashboard/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BESOIN D'AIDE ?
+Notre équipe est là pour vous aider.
+Contactez-nous : {{ support_email }}
+
+Nous nous excusons pour ce désagrément. 
+Nous veillons à maintenir la qualité de la plateforme pour tous les utilisateurs.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cet email a été envoyé par {{ site_name }}
+Pour nous contacter : {{ support_email }}
+{{ site_url }}

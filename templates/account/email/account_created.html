@@ -3,40 +3,48 @@
 {% block email_title %}Bienvenue sur HABIKO{% endblock %}
 
 {% block email_content %}
-<h1 class="main-title">Bienvenue sur HABIKO</h1>
+<h1 class="main-title"><i class="bx bx-party"></i> Bienvenue sur {{ site_name }} !</h1>
 
-<p>Bienvenue sur <strong>HABIKO</strong>, la plateforme de immobilier et petites annonces pour adultes en Côte d'Ivoire !</p>
+<p>Bienvenue sur <strong>{{ site_name }}</strong>, la plateforme immobilière N°1 en Côte d'Ivoire !</p>
+
+<p>Votre compte a été créé avec succès. Nous sommes ravis de vous compter parmi nos utilisateurs.</p>
 
 <div class="info-box">
-    <h3>Activation de votre compte</h3>
-    <p style="margin-bottom: 0;">Pour activer votre compte et commencer à publier vos annonces, cliquez sur le bouton ci-dessous.</p>
+    <h3><i class="bx bx-lock-alt"></i> Activation de votre compte</h3>
+    <p style="margin-bottom: 0;">Pour activer votre compte et commencer à publier vos annonces immobilières, cliquez sur le bouton ci-dessous.</p>
 </div>
 
 {% if confirmation_url %}
 <div class="button-container">
-    <a href="{{ confirmation_url }}" class="button">Activer mon compte</a>
+    <a href="{{ confirmation_url }}" class="button"><i class="bx bx-check"></i> Activer mon compte</a>
 </div>
 
-<p style="font-size: 12px; color: #666666;">Ou copiez ce lien dans votre navigateur :</p>
+<p style="font-size: 12px; color: #666666; text-align: center;">Ou copiez ce lien dans votre navigateur :</p>
 <p class="link-text">{{ confirmation_url }}</p>
 {% else %}
 <div class="security-note">
-    <p style="margin: 0;"><strong>📧 Un email de confirmation vous sera envoyé séparément.</strong> Vérifiez votre boîte mail (et les spams) pour recevoir le lien d'activation.</p>
+    <p style="margin: 0;"><strong><i class="bx bx-envelope"></i> Un email de confirmation vous sera envoyé séparément.</strong> Vérifiez votre boîte mail (et les spams) pour recevoir le lien d'activation.</p>
 </div>
 {% endif %}
 
 <div class="details">
-    <h3>Une fois votre compte activé, vous pourrez :</h3>
+    <h3><i class="bx bx-star"></i> Une fois votre compte activé, vous pourrez :</h3>
     <ul>
-        <li>✓ Publier des annonces gratuitement</li>
-        <li>✓ Gérer votre profil et vos préférences de contact</li>
-        <li>✓ Suivre les statistiques de vos annonces</li>
-        <li>✓ Recevoir des notifications importantes</li>
+        <li><i class="bx bx-edit"></i> Publier des annonces immobilières gratuitement</li>
+        <li><i class="bx bx-home"></i> Gérer vos biens (maisons, villas, terrains, locations)</li>
+        <li><i class="bx bx-user"></i> Personnaliser votre profil et vos préférences de contact</li>
+        <li><i class="bx bx-bar-chart-alt-2"></i> Suivre les statistiques de vos annonces (vues, clics)</li>
+        <li><i class="bx bxs-star"></i> Booster vos annonces pour plus de visibilité</li>
+        <li><i class="bx bx-bell"></i> Recevoir des notifications importantes</li>
     </ul>
 </div>
 
 <div class="security-note">
-    <p style="margin: 0;"><strong>⚠️ Important :</strong> Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.</p>
+    <p style="margin: 0;"><strong><i class="bx bx-error"></i> Important :</strong> Si vous n'avez pas créé de compte sur {{ site_name }}, veuillez ignorer cet email et le supprimer.</p>
 </div>
+
+<p style="text-align: center; margin-top: 30px; font-size: 14px; color: #666666;">
+    Besoin d'aide ? Contactez-nous à <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+</p>
 {% endblock %}
 

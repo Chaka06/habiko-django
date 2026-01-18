@@ -139,7 +139,7 @@ L'équipe KIABA
         EmailService.send_email(
             subject=subject,
             to_emails=[user.email],
-            template_name="account_created",
+            template_name="account/email/account_created",
             context={
                 "user": user,
                 "confirmation_url": confirmation_url,

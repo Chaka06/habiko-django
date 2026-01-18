@@ -1,42 +1,60 @@
 {% extends "account/email/base_email.html" %}
 
-{% block email_title %}Votre annonce a expiré - HABIKO{% endblock %}
+{% block email_title %}Votre annonce a expiré - {{ site_name }}{% endblock %}
 
 {% block email_content %}
-<h1 class="main-title">Votre annonce a expiré</h1>
+<h1 class="main-title"><i class="bx bx-time"></i> Votre annonce a expiré</h1>
 
-<p>Votre annonce a expiré et n'est plus visible sur HABIKO.</p>
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Votre annonce sur <strong>{{ site_name }}</strong> a expiré et n'est plus visible sur la plateforme.</p>
+
+<div class="warning-box">
+    <p style="margin: 0;"><strong><i class="bx bx-megaphone"></i> Annonce expirée</strong> - Les visiteurs ne peuvent plus consulter cette annonce ni vous contacter via celle-ci.</p>
+</div>
 
 <div class="details">
-    <h3>Détails de l'annonce expirée :</h3>
+    <h3>📋 Détails de l'annonce expirée :</h3>
     <dl>
-        <dt>Titre :</dt>
-        <dd>{{ ad.title }}</dd>
+        <dt><i class="bx bx-pin"></i> Titre :</dt>
+        <dd><strong>{{ ad.title }}</strong></dd>
         
-        <dt>Catégorie :</dt>
+        <dt><i class="bx bx-purchase-tag"></i> Catégorie :</dt>
         <dd>{{ ad.get_category_display }}</dd>
         
-        <dt>Ville :</dt>
+        <dt><i class="bx bx-map"></i> Ville :</dt>
         <dd>{{ ad.city.name }}</dd>
         
-        <dt>Date d'expiration :</dt>
+        <dt><i class="bx bx-calendar"></i> Date de publication :</dt>
+        <dd>{{ ad.created_at|date:"d/m/Y à H:i" }}</dd>
+        
+        <dt><i class="bx bx-time"></i> Date d'expiration :</dt>
         <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
     </dl>
 </div>
 
 <div class="info-box">
-    <h3>💡 Que faire maintenant ?</h3>
-    <p style="margin-bottom: 0;">Pour republier cette annonce ou en créer une nouvelle, cliquez sur le bouton ci-dessous.</p>
+    <h3><i class="bx bx-bulb"></i> Que faire maintenant ?</h3>
+    <p>Votre bien est toujours disponible ? Vous avez deux options :</p>
+    <ul>
+        <li><i class="bx bx-refresh"></i> <strong>Republier l'annonce</strong> - Publiez à nouveau votre bien en quelques clics</li>
+        <li><i class="bx bx-star"></i> <strong>Créer une nouvelle annonce</strong> - Publiez un nouveau bien immobilier</li>
+        <li><i class="bx bxs-star"></i> <strong>Booster votre prochaine annonce</strong> - Augmentez sa visibilité dès le départ</li>
+    </ul>
 </div>
 
 <div class="button-container">
-    <a href="{{ site_url }}/post/" class="button">Créer une nouvelle annonce</a>
+    <a href="{{ site_url }}/post/" class="button"><i class="bx bx-edit"></i> Créer une nouvelle annonce</a>
 </div>
 
 <p style="text-align: center; margin-top: 25px;">
-    <a href="{{ site_url }}/dashboard/">Accéder à mon tableau de bord</a>
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;"><i class="bx bx-bar-chart-alt-2"></i> Accéder à mon tableau de bord</a>
 </p>
 
-<p style="font-size: 13px; color: #666666;"><strong>Conseil :</strong> Pour éviter l'expiration, pensez à renouveler vos annonces régulièrement.</p>
+<div class="security-note">
+    <p style="margin: 0;"><strong><i class="bx bx-bulb"></i> Conseil :</strong> Pour éviter l'expiration de vos futures annonces, pensez à utiliser l'option <strong>"Prolongation"</strong> disponible dans votre tableau de bord avant la date d'expiration.</p>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Besoin d'aide ? Contactez-nous : <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
 {% endblock %}
 

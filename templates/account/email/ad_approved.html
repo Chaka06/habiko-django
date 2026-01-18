@@ -1,0 +1,56 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Annonce approuvée - {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title"><i class="bx bx-check-circle"></i> Annonce approuvée !</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Excellente nouvelle ! Votre annonce a été <strong>approuvée</strong> par notre équipe de modération.</p>
+
+<div class="info-box">
+    <h3><i class="bx bx-check-circle"></i> Validation réussie</h3>
+    <p style="margin-bottom: 0;">Votre annonce est maintenant <strong>visible publiquement</strong> sur {{ site_name }}. Les visiteurs peuvent la consulter et vous contacter.</p>
+</div>
+
+<div class="details">
+    <h3>📋 Détails de l'annonce approuvée :</h3>
+    <dl>
+        <dt><i class="bx bx-pin"></i> Titre :</dt>
+        <dd><strong>{{ ad.title }}</strong></dd>
+        
+        <dt><i class="bx bx-purchase-tag"></i> Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+        
+        <dt><i class="bx bx-map"></i> Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+        
+        <dt><i class="bx bx-check-circle"></i> Statut :</dt>
+        <dd><span style="color: #28a745; font-weight: 600;">Approuvée</span></dd>
+        
+        <dt><i class="bx bx-time"></i> Expiration :</dt>
+        <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
+    </dl>
+</div>
+
+<div class="button-container">
+    <a href="{{ ad_url }}" class="button"><i class="bx bx-show"></i> Voir mon annonce</a>
+</div>
+
+<div class="info-box">
+    <h3><i class="bx bx-bulb"></i> Maximisez votre visibilité :</h3>
+    <ul>
+        <li><i class="bx bxs-star"></i> <strong>Boostez votre annonce</strong> pour la placer en tête de liste</li>
+        <li><i class="bx bxs-hot"></i> Ajoutez le badge <strong>"URGENT"</strong> pour plus d'impact</li>
+        <li><i class="bx bx-camera"></i> Complétez avec plus de photos si nécessaire</li>
+        <li><i class="bx bx-refresh"></i> Partagez votre annonce sur les réseaux sociaux</li>
+    </ul>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;"><i class="bx bx-bar-chart-alt-2"></i> Accéder à mon tableau de bord</a>
+</p>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Merci d'utiliser {{ site_name }} pour vos annonces immobilières !</p>
+{% endblock %}
