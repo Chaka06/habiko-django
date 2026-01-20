@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ ad.title }} · {{ ad.city.name }} · HABIKO{% endblock %}
 {% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:25|striptags }}. Contactez directement sur HABIKO, alternative à Bizi, Jedolo et Locanto.{% endblock %}
 {% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, habiko, habiko ci, habiko {{ ad.city.name|lower }}, habiko ci, habiko ci, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
@@ -130,10 +131,27 @@
     <div class="w-full bg-gray-100 flex justify-center">
       {% if ad.media.all|length > 0 %}
         {% with first=ad.media.all.0 %}
-          <img id="mainImage" src="{{ first.image.url }}" alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO" class="max-w-full max-h-96 md:max-h-[500px] object-contain" loading="eager" width="800" height="600">
+          <img
+            id="mainImage"
+            src="{{ first.image.url }}"
+            onerror="this.onerror=null; this.src='{% static 'page-detail-annonce.PNG' %}';"
+            alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO"
+            class="max-w-full max-h-96 md:max-h-[500px] object-contain"
+            loading="eager"
+            width="800"
+            height="600"
+          >
         {% endwith %}
       {% else %}
-        <div class="w-full h-56 md:h-80 flex items-center justify-center text-gray-400">Aucune photo</div>
+        <img
+          id="mainImage"
+          src="{% static 'page-detail-annonce.PNG' %}"
+          alt="Illustration d'annonce immobilière HABIKO"
+          class="max-w-full max-h-96 md:max-h-[500px] object-contain"
+          loading="eager"
+          width="800"
+          height="600"
+        >
       {% endif %}
     </div>
     {% if ad.media.all|length > 1 %}

@@ -171,7 +171,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "core.middleware.RedirectMiddleware",  # Redirections HTTP->HTTPS et www->non-www
+    # En dev on désactive les redirections HTTP->HTTPS pour pouvoir utiliser http://127.0.0.1
+    "core.middleware.RedirectMiddleware",  # Redirections HTTP->HTTPS et www->non-www (désactivé si DEBUG=True, voir plus bas)
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -182,6 +183,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# En développement, on ne veut AUCUNE redirection automatique HTTP -> HTTPS
+if DEBUG and "core.middleware.RedirectMiddleware" in MIDDLEWARE:
+    MIDDLEWARE.remove("core.middleware.RedirectMiddleware")
 
 ROOT_URLCONF = "kiaba.urls"
 
@@ -416,23 +421,46 @@ USE_TLS = not DEBUG
 # CORS (if needed for future API)
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-# Email - Configuration simple (console backend pour développement)
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="HABIKO <no-reply@example.com>")
-SERVER_EMAIL = env("SERVER_EMAIL", default="HABIKO Errors <errors@example.com>")
+"""
+Email configuration
+- En dev : backend console par défaut
+- En prod : SMTP professionnel configuré via variables d'environnement
+"""
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+
+# Identité d'envoi
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default="HABIKO <no-replay@ci-habiko.com>",
+)
+SERVER_EMAIL = env(
+    "SERVER_EMAIL",
+    default="HABIKO Errors <no-replay@ci-habiko.com>",
+)
+
+# Paramètres SMTP (utilisés si EMAIL_BACKEND est un backend SMTP)
+EMAIL_HOST = env("EMAIL_HOST", default="mail.ci-habiko.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=465)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="no-replay@ci-habiko.com")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+
+# SSL/TLS : pour ton hébergeur, tu peux utiliser soit 465+SSL, soit 587+TLS
+EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="True").lower() in ("true", "1", "yes")
+EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="False").lower() in ("true", "1", "yes")
+
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
-
-# Configuration avancée pour les emails
-# S'assurer que le nom "HABIKO" apparaît dans les emails
-if not DEFAULT_FROM_EMAIL.startswith("HABIKO"):
-    # Si l'email ne contient pas déjà le nom, on le formate
-    if "<" not in DEFAULT_FROM_EMAIL:
-        DEFAULT_FROM_EMAIL = f"HABIKO <{DEFAULT_FROM_EMAIL}>"
-
 EMAIL_USE_LOCALTIME = True
 EMAIL_SUBJECT_PREFIX = "[HABIKO] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
+
+# En développement local, forcer l'utilisation du SMTP au lieu du backend console
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # Storage
 DEFAULT_FILE_STORAGE = env("DEFAULT_FILE_STORAGE")

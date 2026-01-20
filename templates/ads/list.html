@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces{% if selected_category %} {{ selected_category|title }}{% endif %} · HABIKO{% endblock %}
 {% block description %}{% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire. Maisons, villas, appartements, terrains.{% else %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains à Abidjan et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
 {% block keywords %}{% if selected_city %}immobilier {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire{% endblock %}
@@ -84,6 +85,10 @@
 
 
 {% block content %}
+{% static 'page-liste-annonce.PNG' as ph1 %}
+{% static 'page-detail-annonce.PNG' as ph2 %}
+{% static 'responsive-mobile-page-liste-annonce.PNG' as ph3 %}
+{% static 'responsive-mobile-page-detail-annonce.PNG' as ph4 %}
 <div class="flex flex-col lg:flex-row gap-6">
   <!-- Contenu principal -->
   <div class="flex-1">
@@ -128,11 +133,25 @@
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
-            <img src="{{ ad.media.first.image.url }}" alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
+            <img
+              src="{{ ad.media.first.image.url }}"
+              data-placeholder="{% cycle ph1 ph2 ph3 ph4 %}"
+              onerror="this.onerror=null; this.src=this.dataset.placeholder;"
+              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="160"
+              height="160"
+            >
           {% else %}
-            <div class="w-full h-full bg-slate-200 flex items-center justify-center">
-              <span class="text-slate-400 text-xs">Photo</span>
-            </div>
+            <img
+              src="{% cycle ph1 ph2 ph3 ph4 %}"
+              alt="Illustration d'annonce immobilière HABIKO"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="160"
+              height="160"
+            >
           {% endif %}
         </div>
         <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
