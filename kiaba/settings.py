@@ -325,8 +325,13 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # WhiteNoise configuration for media files
 WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
+# En production, désactiver AUTOREFRESH pour forcer la re-collection des fichiers statiques
+WHITENOISE_AUTOREFRESH = DEBUG  # True en dev, False en prod
 # Cache static files for 1 year (31536000 seconds)
+# Note: Avec CompressedManifestStaticFilesStorage, les fichiers avec hash changent automatiquement
+# mais le cache navigateur peut garder l'ancienne version. Pour forcer le refresh, on peut :
+# 1. Vider le cache navigateur (Ctrl+Shift+R ou Cmd+Shift+R)
+# 2. Utiliser un paramètre de version dans l'URL (ex: ?v=2.0)
 WHITENOISE_MAX_AGE = 31536000
 
 # Media

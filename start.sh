@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================="
-echo "Starting KIABA application setup..."
+echo "Starting HABIKO application setup..."
 echo "=========================================="
 
 # Exécuter les migrations avec retry en cas d'erreur de connexion
@@ -44,13 +44,13 @@ try:
     site, created = Site.objects.get_or_create(
         id=settings.SITE_ID,
         defaults={
-            "domain": "ci-kiaba.com",
-            "name": "KIABA",
+            "domain": "ci-habiko.com",
+            "name": "HABIKO",
         }
     )
-    if not created and site.domain != "ci-kiaba.com":
-        site.domain = "ci-kiaba.com"
-        site.name = "KIABA"
+    if not created and site.domain != "ci-habiko.com":
+        site.domain = "ci-habiko.com"
+        site.name = "HABIKO"
         site.save()
     print(f"✓ Site configured: {site.domain} (ID: {site.id})")
 except Exception as e:
