@@ -355,7 +355,7 @@ if is_render and not DEBUG:
     # Créer le dossier ads s'il n'existe pas
     ads_dir = os.path.join(MEDIA_ROOT, "ads")
     os.makedirs(ads_dir, exist_ok=True)
-    logger.info(f"📁 Dossier ads créé/vérifié: {ads_dir}")
+    logger.info(f"📁 Dossier ads créé/vérifié: {ads_dir}")(f"📁 Dossier ads créé/vérifié: {ads_dir}")
 elif not os.path.isabs(_media_root):
     # Développement local : utiliser le chemin relatif
     MEDIA_ROOT = BASE_DIR / _media_root
