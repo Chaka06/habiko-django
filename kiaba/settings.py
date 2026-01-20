@@ -452,11 +452,16 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="True").lower() in ("true", "1", "yes")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="False").lower() in ("true", "1", "yes")
 
-EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
+EMAIL_TIMEOUT = env.int(
+    "EMAIL_TIMEOUT", default=5
+)  # Timeout réduit pour éviter de bloquer l'inscription
 EMAIL_USE_LOCALTIME = True
 EMAIL_SUBJECT_PREFIX = "[HABIKO] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
+
+# Brevo (Sendinblue) HTTP API key for transactional emails
+BREVO_API_KEY = env("BREVO_API_KEY", default="")
 
 # En développement local, forcer l'utilisation du SMTP au lieu du backend console
 if DEBUG:
