@@ -8,6 +8,8 @@ from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
 
 class EmailService:
     """Service centralisé pour l'envoi d'emails professionnels"""
@@ -82,8 +84,9 @@ class EmailService:
         
         try:
             from django.template.loader import render_to_string
-            from django.core.mail import EmailMultiAlternatives, get_connection
-            
+            from django.conf import settings
+            import requests
+
             # Générer le contenu depuis les templates si fourni
             if template_name:
                 try:
@@ -99,57 +102,118 @@ class EmailService:
                 text_content = strip_tags(html_content)
             elif not text_content:
                 text_content = subject
-            
-            # Créer l'email
+
+            # --- Envoi via API HTTP Brevo (recommandé sur Render) ---
+            brevo_api_key = getattr(settings, "BREVO_API_KEY", None)
+            # Log pour debug : vérifier si la clé est présente
+            if brevo_api_key:
+                logger.info(f"🔑 BREVO_API_KEY trouvée (longueur: {len(brevo_api_key)})")
+            else:
+                logger.warning(f"⚠️ BREVO_API_KEY non trouvée ou vide dans settings. Fallback vers SMTP.")
+            if brevo_api_key and brevo_api_key.strip():
+                try:
+                    sender_email = cls.get_from_email_value()
+                    # Extraire adresse email seule si besoin
+                    if "<" in sender_email:
+                        import re
+                        m = re.search(r"<(.+?)>", sender_email)
+                        if m:
+                            sender_email = m.group(1)
+
+                    payload = {
+                        "sender": {
+                            "email": sender_email,
+                            "name": cls.FROM_NAME,
+                        },
+                        "to": [{"email": e} for e in to_emails],
+                        "subject": subject,
+                        "htmlContent": html_content or text_content or subject,
+                        "textContent": text_content or subject,
+                    }
+                    headers = {
+                        "accept": "application/json",
+                        "api-key": brevo_api_key,
+                        "content-type": "application/json",
+                    }
+
+                    logger.info(
+                        f"📧 Envoi via Brevo API à {', '.join(to_emails)} sujet='{subject}'"
+                    )
+                    resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(
+                            f"✅ Email envoyé avec succès via Brevo API à {', '.join(to_emails)}"
+                        )
+                        return True
+                    else:
+                        logger.error(
+                            f"❌ Erreur Brevo API ({resp.status_code}): {resp.text}"
+                        )
+                        if not fail_silently:
+                            resp.raise_for_status()
+                        return False
+                except Exception as api_error:
+                    logger.error(
+                        f"❌ Erreur lors de l'envoi via Brevo API à {', '.join(to_emails)}: {api_error}",
+                        exc_info=True,
+                    )
+                    if not fail_silently:
+                        raise
+                    return False
+
+            # --- Fallback SMTP classique (utile en local ou si SMTP dispo) ---
+            from django.core.mail import EmailMultiAlternatives
+
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=text_content,
                 from_email=cls.get_from_email(),
                 to=to_emails,
             )
-            
-            # Ajouter la version HTML si disponible
             if html_content:
                 email.attach_alternative(html_content, "text/html")
-            
-            # Ajouter les headers pour améliorer la délivrabilité
-            from django.conf import settings
-            email_headers = getattr(settings, 'EMAIL_HEADERS', {})
+
+            email_headers = getattr(settings, "EMAIL_HEADERS", {})
             for key, value in email_headers.items():
                 email.extra_headers[key] = value
-            
-            # Ajouter des headers supplémentaires pour éviter les spams
-            email.extra_headers['Reply-To'] = 'support@ci-habiko.com'
-            email.extra_headers['Return-Path'] = 'support@ci-habiko.com'
-            
-            # Envoyer l'email
+            email.extra_headers["Reply-To"] = "support@ci-habiko.com"
+            email.extra_headers["Return-Path"] = "support@ci-habiko.com"
+
             try:
-                # Logger la configuration avant l'envoi
-                from django.conf import settings
-                logger.info(f"📧 Tentative d'envoi email - Backend: {settings.EMAIL_BACKEND}, Host: {settings.EMAIL_HOST}, Port: {settings.EMAIL_PORT}")
-                logger.info(f"📧 Email de: {cls.get_from_email()}, Vers: {', '.join(to_emails)}, Sujet: {subject}")
-                
-                # Envoyer l'email
+                logger.info(
+                    f"📧 Tentative d'envoi email SMTP - Backend: {settings.EMAIL_BACKEND}, Host: {settings.EMAIL_HOST}, Port: {settings.EMAIL_PORT}"
+                )
+                logger.info(
+                    f"📧 Email de: {cls.get_from_email()}, Vers: {', '.join(to_emails)}, Sujet: {subject}"
+                )
                 result = email.send(fail_silently=fail_silently)
-                
-                logger.info(f"✅ Email envoyé avec succès à {', '.join(to_emails)}: {subject} (résultat: {result})")
+                logger.info(
+                    f"✅ Email envoyé avec succès via SMTP à {', '.join(to_emails)}: {subject} (résultat: {result})"
+                )
                 return True
             except Exception as send_error:
-                logger.error(f"❌ Erreur SMTP lors de l'envoi à {', '.join(to_emails)}: {send_error}", exc_info=True)
-                # Si c'est une erreur SMTP, essayer de logger plus de détails
-                if hasattr(send_error, 'smtp_code'):
-                    logger.error(f"Code SMTP: {send_error.smtp_code}, Message: {send_error.smtp_error}")
-                if hasattr(send_error, 'args'):
+                logger.error(
+                    f"❌ Erreur SMTP lors de l'envoi à {', '.join(to_emails)}: {send_error}",
+                    exc_info=True,
+                )
+                if hasattr(send_error, "smtp_code"):
+                    logger.error(
+                        f"Code SMTP: {send_error.smtp_code}, Message: {send_error.smtp_error}"
+                    )
+                if hasattr(send_error, "args"):
                     logger.error(f"Détails erreur: {send_error.args}")
-                # Logger la configuration actuelle
-                from django.conf import settings
-                logger.error(f"Configuration SMTP actuelle: BACKEND={settings.EMAIL_BACKEND}, HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, SSL={settings.EMAIL_USE_SSL}, TLS={settings.EMAIL_USE_TLS}")
+                logger.error(
+                    f"Configuration SMTP actuelle: BACKEND={settings.EMAIL_BACKEND}, HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, SSL={getattr(settings, 'EMAIL_USE_SSL', None)}, TLS={getattr(settings, 'EMAIL_USE_TLS', None)}"
+                )
                 if not fail_silently:
                     raise
                 return False
-            
+
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la préparation de l'email à {', '.join(to_emails)}: {e}", exc_info=True)
+            logger.error(
+                f"❌ Erreur lors de la préparation de l'email à {', '.join(to_emails)}: {e}",
+                exc_info=True,
+            )
             if not fail_silently:
                 raise
             return False
