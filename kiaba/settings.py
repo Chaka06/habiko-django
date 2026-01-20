@@ -422,9 +422,9 @@ USE_TLS = not DEBUG
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 """
-Email configuration
-- En dev : backend console par défaut
-- En prod : SMTP professionnel configuré via variables d'environnement
+Email configuration - SMTP
+- En dev : backend console par défaut (ou SMTP si configuré)
+- En prod : SMTP configuré via variables d'environnement (LWS, Brevo, SendGrid, etc.)
 """
 
 EMAIL_BACKEND = env(
@@ -442,32 +442,30 @@ SERVER_EMAIL = env(
     default="HABIKO Errors <no-replay@ci-habiko.com>",
 )
 
-# Paramètres SMTP (utilisés si EMAIL_BACKEND est un backend SMTP)
-EMAIL_HOST = env("EMAIL_HOST", default="mail.ci-habiko.com")
-EMAIL_PORT = env.int("EMAIL_PORT", default=465)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="no-replay@ci-habiko.com")
+# Paramètres SMTP (LWS, Brevo, SendGrid, etc.)
+# Configuration via variables d'environnement
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 
-# SSL/TLS : pour ton hébergeur, tu peux utiliser soit 465+SSL, soit 587+TLS
-EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="True").lower() in ("true", "1", "yes")
-EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="False").lower() in ("true", "1", "yes")
+# SSL/TLS : généralement 587+TLS ou 465+SSL
+# Par défaut, on utilise 587+TLS (plus standard)
+EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="False").lower() in ("true", "1", "yes")
+EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="True").lower() in ("true", "1", "yes")
 
-EMAIL_TIMEOUT = env.int(
-    "EMAIL_TIMEOUT", default=5
-)  # Timeout réduit pour éviter de bloquer l'inscription
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)  # Timeout pour SMTP
 EMAIL_USE_LOCALTIME = True
 EMAIL_SUBJECT_PREFIX = "[HABIKO] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
 
-# Resend HTTP API key for transactional emails (recommandé, plus simple et fiable)
-RESEND_API_KEY = env("RESEND_API_KEY", default="")
-
-# Brevo (Sendinblue) HTTP API key for transactional emails (fallback)
-BREVO_API_KEY = env("BREVO_API_KEY", default="")
-
-# En développement local, forcer l'utilisation du SMTP au lieu du backend console
-if DEBUG:
+# En développement local, utiliser console backend par défaut
+# Pour tester SMTP en local, configure les variables d'environnement
+if DEBUG and not EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+elif EMAIL_HOST:
+    # Si EMAIL_HOST est configuré, utiliser SMTP
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # Storage
