@@ -107,7 +107,9 @@ class EmailService:
             brevo_api_key = getattr(settings, "BREVO_API_KEY", None)
             # Log pour debug : vérifier si la clé est présente
             if brevo_api_key:
-                logger.info(f"🔑 BREVO_API_KEY trouvée (longueur: {len(brevo_api_key)})")
+                # Afficher les premiers caractères pour vérifier le format (sécurité : ne pas logger la clé complète)
+                key_preview = brevo_api_key[:20] + "..." if len(brevo_api_key) > 20 else brevo_api_key
+                logger.info(f"🔑 BREVO_API_KEY trouvée (longueur: {len(brevo_api_key)}, début: {key_preview})")
             else:
                 logger.warning(f"⚠️ BREVO_API_KEY non trouvée ou vide dans settings. Fallback vers SMTP.")
             if brevo_api_key and brevo_api_key.strip():
@@ -119,6 +121,8 @@ class EmailService:
                         m = re.search(r"<(.+?)>", sender_email)
                         if m:
                             sender_email = m.group(1)
+
+                    logger.info(f"📧 Email sender: {sender_email}")
 
                     payload = {
                         "sender": {
@@ -153,8 +157,13 @@ class EmailService:
                         # Si erreur 401 (clé invalide), donner un message plus clair
                         if resp.status_code == 401:
                             logger.error(
-                                "⚠️ La clé API Brevo (BREVO_API_KEY) est invalide ou n'existe pas. "
-                                "Vérifiez la clé dans le dashboard Brevo et mettez à jour la variable d'environnement sur Render."
+                                "⚠️ Erreur 401 Brevo API - Causes possibles :\n"
+                                "1. La clé API (BREVO_API_KEY) est invalide ou a été révoquée\n"
+                                "2. L'email sender ({}) n'est pas vérifié dans Brevo\n"
+                                "3. La clé API n'a pas les permissions nécessaires\n"
+                                "→ Vérifiez dans Brevo : Settings → SMTP & API → API Keys\n"
+                                "→ Vérifiez aussi : Settings → Senders & IP → Senders (l'email doit être vérifié)"
+                                .format(sender_email)
                             )
                         if not fail_silently:
                             resp.raise_for_status()
