@@ -71,7 +71,7 @@ class EmailService:
         if context is None:
             context = {}
 
-        # Ajouter des valeurs par défaut au contexte
+        # Ajouter des valeurs par défaut au contexte (logo, site_name, etc.)
         try:
             from django.conf import settings
 
@@ -81,10 +81,22 @@ class EmailService:
             site_url = "https://ci-habiko.com"
             static_url = "/static/"
 
-        context.setdefault("site_name", "HABIKO")
-        context.setdefault("site_url", site_url)
-        context.setdefault("support_email", "support@ci-habiko.com")
-        context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
+        # Toujours ajouter ces valeurs au contexte pour que le logo apparaisse
+        context["site_name"] = context.get("site_name", "HABIKO")
+        context["site_url"] = context.get("site_url", site_url)
+        context["support_email"] = context.get("support_email", "support@ci-habiko.com")
+        context["logo_url"] = context.get("logo_url", f"{site_url}{static_url}img/logo.png")
+        
+        # Pour les emails de confirmation, construire activate_url si key est présent
+        if "key" in context and "activate_url" not in context:
+            try:
+                from django.urls import reverse
+                key = context["key"]
+                activate_url = f"{site_url}{reverse('account_confirm_email', args=[key])}"
+                context["activate_url"] = activate_url
+                logger.info(f"📧 activate_url construit dans EmailService: {activate_url}")
+            except Exception as e:
+                logger.warning(f"Impossible de construire activate_url dans EmailService: {e}")
 
         try:
             from django.template.loader import render_to_string
@@ -113,55 +125,50 @@ class EmailService:
             if not sendgrid_api_key:
                 # Essayer de récupérer depuis EMAIL_HOST_PASSWORD si c'est une clé SendGrid
                 email_password = getattr(settings, "EMAIL_HOST_PASSWORD", "")
-                if email_password and email_password.startswith("SG.") and getattr(settings, "EMAIL_HOST", "") == "smtp.sendgrid.net":
+                if (
+                    email_password
+                    and email_password.startswith("SG.")
+                    and getattr(settings, "EMAIL_HOST", "") == "smtp.sendgrid.net"
+                ):
                     sendgrid_api_key = email_password
                     logger.info("📧 Clé API SendGrid détectée depuis EMAIL_HOST_PASSWORD")
-            
+
             if sendgrid_api_key and sendgrid_api_key.strip():
                 try:
                     import requests
-                    
+
                     sender_email = cls.get_from_email_value()
                     # Extraire adresse email seule si besoin
                     if "<" in sender_email:
                         import re
+
                         m = re.search(r"<(.+?)>", sender_email)
                         if m:
                             sender_email = m.group(1)
 
                     payload = {
-                        "personalizations": [{
-                            "to": [{"email": email} for email in to_emails],
-                            "subject": subject
-                        }],
-                        "from": {
-                            "email": sender_email,
-                            "name": cls.FROM_NAME
-                        },
-                        "content": [
-                            {
-                                "type": "text/plain",
-                                "value": text_content or subject
-                            }
-                        ]
+                        "personalizations": [
+                            {"to": [{"email": email} for email in to_emails], "subject": subject}
+                        ],
+                        "from": {"email": sender_email, "name": cls.FROM_NAME},
+                        "content": [{"type": "text/plain", "value": text_content or subject}],
                     }
-                    
+
                     # Ajouter HTML si disponible
                     if html_content:
-                        payload["content"].append({
-                            "type": "text/html",
-                            "value": html_content
-                        })
+                        payload["content"].append({"type": "text/html", "value": html_content})
 
                     headers = {
                         "Authorization": f"Bearer {sendgrid_api_key}",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
                     }
 
                     logger.info(
                         f"📧 Envoi via SendGrid API à {', '.join(to_emails)} sujet='{subject}'"
                     )
-                    resp = requests.post(SENDGRID_API_URL, json=payload, headers=headers, timeout=10)
+                    resp = requests.post(
+                        SENDGRID_API_URL, json=payload, headers=headers, timeout=10
+                    )
                     if resp.status_code in (200, 201, 202):
                         logger.info(
                             f"✅ Email envoyé avec succès via SendGrid API à {', '.join(to_emails)}"
@@ -169,13 +176,9 @@ class EmailService:
                         return True
                     else:
                         error_msg = resp.text
-                        logger.error(
-                            f"❌ Erreur SendGrid API ({resp.status_code}): {error_msg}"
-                        )
+                        logger.error(f"❌ Erreur SendGrid API ({resp.status_code}): {error_msg}")
                         if resp.status_code == 401:
-                            logger.error(
-                                "⚠️ Erreur 401 SendGrid API - La clé API est invalide"
-                            )
+                            logger.error("⚠️ Erreur 401 SendGrid API - La clé API est invalide")
                         # Continue vers SMTP en fallback
                 except Exception as api_error:
                     logger.error(
