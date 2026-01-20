@@ -343,10 +343,19 @@ _media_root = env("MEDIA_ROOT")
 
 # Sur Render, utiliser le disque persistant monté sur /app/media
 # Le disque persistant est configuré dans render.yaml avec mountPath: /app/media
-if os.path.exists("/app/media") and not DEBUG:
-    # Production sur Render : utiliser le disque persistant
+# IMPORTANT: Toujours utiliser /app/media en production sur Render pour éviter la perte d'images
+RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL")
+is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
+
+if is_render and not DEBUG:
+    # Production sur Render : FORCER l'utilisation du disque persistant
     MEDIA_ROOT = "/app/media"
     logger.info(f"📁 MEDIA_ROOT configuré pour Render (disque persistant): {MEDIA_ROOT}")
+    logger.info(f"📁 Vérification: /app/media existe = {os.path.exists('/app/media')}")
+    # Créer le dossier ads s'il n'existe pas
+    ads_dir = os.path.join(MEDIA_ROOT, "ads")
+    os.makedirs(ads_dir, exist_ok=True)
+    logger.info(f"📁 Dossier ads créé/vérifié: {ads_dir}")
 elif not os.path.isabs(_media_root):
     # Développement local : utiliser le chemin relatif
     MEDIA_ROOT = BASE_DIR / _media_root
@@ -358,6 +367,7 @@ else:
 
 # S'assurer que le dossier media existe
 os.makedirs(MEDIA_ROOT, exist_ok=True)
+logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT} (existe: {os.path.exists(MEDIA_ROOT)})")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

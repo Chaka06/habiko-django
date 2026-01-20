@@ -64,11 +64,25 @@ echo ""
 echo "Step 3: Checking media directory..."
 if [ -d "/app/media" ]; then
     echo "✓ Media directory exists: /app/media"
-    ls -la /app/media | head -5 || echo "⚠ Cannot list media directory"
+    echo "📁 Contents of /app/media:"
+    ls -la /app/media | head -10 || echo "⚠ Cannot list media directory"
+    # Créer le dossier ads s'il n'existe pas
+    if [ ! -d "/app/media/ads" ]; then
+        echo "📁 Creating /app/media/ads directory..."
+        mkdir -p /app/media/ads
+        chmod 755 /app/media/ads
+        echo "✓ /app/media/ads created"
+    else
+        echo "✓ /app/media/ads exists"
+        echo "📁 Number of images in /app/media/ads: $(find /app/media/ads -type f | wc -l)"
+    fi
 else
     echo "⚠ Media directory /app/media does not exist, creating..."
     mkdir -p /app/media
+    mkdir -p /app/media/ads
     chmod 755 /app/media
+    chmod 755 /app/media/ads
+    echo "✓ Created /app/media and /app/media/ads"
 fi
 
 # Vérifier la configuration
