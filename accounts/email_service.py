@@ -106,62 +106,7 @@ class EmailService:
             elif not text_content:
                 text_content = subject
 
-            # --- Envoi via Brevo HTTP API (recommandé pour Render) ---
-            brevo_api_key = getattr(settings, "BREVO_API_KEY", None)
-            if brevo_api_key and brevo_api_key.strip():
-                try:
-                    import requests
-
-                    sender_email = cls.get_from_email_value()
-                    # Extraire adresse email seule si besoin
-                    if "<" in sender_email:
-                        import re
-
-                        m = re.search(r"<(.+?)>", sender_email)
-                        if m:
-                            sender_email = m.group(1)
-
-                    payload = {
-                        "sender": {
-                            "email": sender_email,
-                            "name": cls.FROM_NAME,
-                        },
-                        "to": [{"email": e} for e in to_emails],
-                        "subject": subject,
-                        "htmlContent": html_content or text_content or subject,
-                        "textContent": text_content or subject,
-                    }
-                    headers = {
-                        "accept": "application/json",
-                        "api-key": brevo_api_key,
-                        "content-type": "application/json",
-                    }
-
-                    logger.info(
-                        f"📧 Envoi via Brevo API à {', '.join(to_emails)} sujet='{subject}'"
-                    )
-                    resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
-                    if resp.status_code in (200, 201, 202):
-                        logger.info(
-                            f"✅ Email envoyé avec succès via Brevo API à {', '.join(to_emails)}"
-                        )
-                        return True
-                    else:
-                        error_msg = resp.text
-                        logger.error(f"❌ Erreur Brevo API ({resp.status_code}): {error_msg}")
-                        if resp.status_code == 401:
-                            logger.error(
-                                "⚠️ Erreur 401 Brevo API - La clé API est invalide ou l'email sender n'est pas vérifié dans Brevo"
-                            )
-                        # Continue vers SMTP en fallback
-                except Exception as api_error:
-                    logger.error(
-                        f"❌ Erreur lors de l'envoi via Brevo API à {', '.join(to_emails)}: {api_error}",
-                        exc_info=True,
-                    )
-                    # Continue vers SMTP en fallback
-
-            # --- Fallback SMTP (pour local ou autres environnements) ---
+            # --- Envoi via SMTP (configuration dans settings.py) ---
             from django.core.mail import EmailMultiAlternatives
 
             email = EmailMultiAlternatives(
