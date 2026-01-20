@@ -460,9 +460,6 @@ EMAIL_SUBJECT_PREFIX = "[HABIKO] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
 
-# Brevo HTTP API key (recommandé pour Render, évite les blocages SMTP)
-BREVO_API_KEY = env("BREVO_API_KEY", default="")
-
 # En développement local, utiliser console backend par défaut
 # Pour tester SMTP en local, configure les variables d'environnement
 if DEBUG and not EMAIL_HOST:

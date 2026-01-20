@@ -1,6 +1,6 @@
 """
 Service d'envoi d'emails professionnel pour HABIKO
-Gère l'envoi d'emails avec templates HTML/text via Brevo HTTP API ou SMTP
+Gère l'envoi d'emails avec templates HTML/text via SMTP
 """
 
 import logging
@@ -8,8 +8,6 @@ from typing import List, Optional, Dict, Any
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
-
-BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 class EmailService:
@@ -113,11 +111,12 @@ class EmailService:
             if brevo_api_key and brevo_api_key.strip():
                 try:
                     import requests
-                    
+
                     sender_email = cls.get_from_email_value()
                     # Extraire adresse email seule si besoin
                     if "<" in sender_email:
                         import re
+
                         m = re.search(r"<(.+?)>", sender_email)
                         if m:
                             sender_email = m.group(1)
@@ -149,9 +148,7 @@ class EmailService:
                         return True
                     else:
                         error_msg = resp.text
-                        logger.error(
-                            f"❌ Erreur Brevo API ({resp.status_code}): {error_msg}"
-                        )
+                        logger.error(f"❌ Erreur Brevo API ({resp.status_code}): {error_msg}")
                         if resp.status_code == 401:
                             logger.error(
                                 "⚠️ Erreur 401 Brevo API - La clé API est invalide ou l'email sender n'est pas vérifié dans Brevo"
