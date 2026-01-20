@@ -146,9 +146,16 @@ class EmailService:
                         )
                         return True
                     else:
+                        error_msg = resp.text
                         logger.error(
-                            f"❌ Erreur Brevo API ({resp.status_code}): {resp.text}"
+                            f"❌ Erreur Brevo API ({resp.status_code}): {error_msg}"
                         )
+                        # Si erreur 401 (clé invalide), donner un message plus clair
+                        if resp.status_code == 401:
+                            logger.error(
+                                "⚠️ La clé API Brevo (BREVO_API_KEY) est invalide ou n'existe pas. "
+                                "Vérifiez la clé dans le dashboard Brevo et mettez à jour la variable d'environnement sur Render."
+                            )
                         if not fail_silently:
                             resp.raise_for_status()
                         return False
