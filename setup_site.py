@@ -29,6 +29,11 @@ try:
         call_command("seed_cities")
     except Exception as e:
         print(f"✗ Error seeding cities: {e}")
+    # Créer un superutilisateur par défaut si nécessaire
+    try:
+        call_command("create_initial_superuser")
+    except Exception as e:
+        print(f"✗ Error creating initial superuser: {e}")
 except Exception as e:
     print(f"✗ Error setting up site: {e}")
     import traceback
