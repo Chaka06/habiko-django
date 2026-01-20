@@ -337,10 +337,24 @@ WHITENOISE_MAX_AGE = 31536000
 # Media
 MEDIA_URL = env("MEDIA_URL")
 _media_root = env("MEDIA_ROOT")
-if not os.path.isabs(_media_root):
+
+# Sur Render, utiliser le disque persistant monté sur /app/media
+# Le disque persistant est configuré dans render.yaml avec mountPath: /app/media
+if os.path.exists("/app/media") and not DEBUG:
+    # Production sur Render : utiliser le disque persistant
+    MEDIA_ROOT = "/app/media"
+    logger.info(f"📁 MEDIA_ROOT configuré pour Render (disque persistant): {MEDIA_ROOT}")
+elif not os.path.isabs(_media_root):
+    # Développement local : utiliser le chemin relatif
     MEDIA_ROOT = BASE_DIR / _media_root
+    logger.info(f"📁 MEDIA_ROOT configuré pour développement local: {MEDIA_ROOT}")
 else:
+    # Chemin absolu personnalisé
     MEDIA_ROOT = _media_root
+    logger.info(f"📁 MEDIA_ROOT configuré (chemin absolu): {MEDIA_ROOT}")
+
+# S'assurer que le dossier media existe
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

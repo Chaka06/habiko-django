@@ -59,9 +59,21 @@ except Exception as e:
     traceback.print_exc()
 PYTHON_EOF
 
+# Vérifier que le dossier media existe et est accessible
+echo ""
+echo "Step 3: Checking media directory..."
+if [ -d "/app/media" ]; then
+    echo "✓ Media directory exists: /app/media"
+    ls -la /app/media | head -5 || echo "⚠ Cannot list media directory"
+else
+    echo "⚠ Media directory /app/media does not exist, creating..."
+    mkdir -p /app/media
+    chmod 755 /app/media
+fi
+
 # Vérifier la configuration
 echo ""
-echo "Step 3: Checking Django configuration..."
+echo "Step 4: Checking Django configuration..."
 python manage.py check --deploy || {
     echo "⚠ Django check found some issues, but continuing..."
 }
