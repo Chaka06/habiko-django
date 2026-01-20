@@ -26,12 +26,12 @@ def send_profile_validation_email(self, profile_id):
         # Créer le lien de validation (à implémenter selon tes besoins)
         validation_url = f"{settings.SITE_URL}/accounts/validate-profile/{profile.id}/"
 
-        subject = "Validation de votre profil KIABA"
+        subject = "Validation de votre profil HABIKO"
 
         message = f"""
 Bonjour {user.username},
 
-Votre profil a été créé avec succès sur KIABA !
+Votre profil a été créé avec succès sur HABIKO !
 
 Pour finaliser votre inscription et commencer à publier des annonces, veuillez cliquer sur le lien ci-dessous pour valider votre profil :
 
@@ -47,10 +47,10 @@ Une fois validé, vous pourrez :
 - Gérer vos préférences de contact
 - Suivre les statistiques de vos annonces
 
-Si vous n'avez pas créé de compte sur KIABA, veuillez ignorer cet email.
+Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
 
 Cordialement,
-L'équipe KIABA
+L'équipe HABIKO
 {settings.DEFAULT_FROM_EMAIL}
         """
 
@@ -103,12 +103,12 @@ def send_account_created_email(self, user_id):
         except Exception as e:
             logger.warning(f"Impossible de créer le lien de confirmation: {e}")
 
-        subject = "Compte créé avec succès sur KIABA"
+        subject = "Compte créé avec succès sur HABIKO"
 
         # Message texte
         message = f"""Bonjour {user.username},
 
-Bienvenue sur KIABA, la plateforme de rencontres et petites annonces pour adultes en Côte d'Ivoire !
+Bienvenue sur HABIKO, la plateforme de rencontres et petites annonces pour adultes en Côte d'Ivoire !
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVATION DE VOTRE COMPTE
@@ -128,10 +128,10 @@ Une fois votre compte activé, vous pourrez :
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️ Si vous n'avez pas créé de compte sur KIABA, veuillez ignorer cet email.
+⚠️ Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
 
 Cordialement,
-L'équipe KIABA
+L'équipe HABIKO
 {settings.SITE_URL}
         """
 
@@ -146,7 +146,7 @@ L'équipe KIABA
                 "site_url": settings.SITE_URL,
             },
             text_content=message if not confirmation_url else None,  # Utiliser le template si on a l'URL
-            fail_silently=False,
+            fail_silently=True,  # Ne pas bloquer l'inscription si l'email échoue
         )
 
         return f"Email de confirmation envoyé à {user.email}"
@@ -175,7 +175,7 @@ def send_ad_published_email(self, ad_id):
         context = {
             "user": user,
             "ad": ad,
-            "site_name": "KIABA",
+            "site_name": "HABIKO",
             "site_url": settings.SITE_URL,
             "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
         }
@@ -207,7 +207,7 @@ def send_login_notification_email(user_id):
 
         context = {
             "user": user,
-            "site_name": "KIABA",
+            "site_name": "HABIKO",
             "site_url": settings.SITE_URL,
         }
 
@@ -248,7 +248,7 @@ def send_password_change_email(self, user_id):
 
         context = {
             "user": user,
-            "site_name": "KIABA",
+            "site_name": "HABIKO",
             "site_url": settings.SITE_URL,
         }
 
@@ -287,7 +287,7 @@ def send_ad_expiration_email(self, ad_id):
         context = {
             "user": user,
             "ad": ad,
-            "site_name": "KIABA",
+            "site_name": "HABIKO",
             "site_url": settings.SITE_URL,
             "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
         }

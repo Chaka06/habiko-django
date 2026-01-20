@@ -40,20 +40,22 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
         # Enrichir le contexte avec les valeurs par défaut (logo, site_name, etc.)
         try:
             from django.conf import settings
+
             site_url = getattr(settings, "SITE_URL", "https://ci-habiko.com")
             static_url = getattr(settings, "STATIC_URL", "/static/")
-            
+
             # Ajouter les valeurs par défaut au contexte si elles n'existent pas
             context.setdefault("site_name", "HABIKO")
             context.setdefault("site_url", site_url)
             context.setdefault("support_email", "support@ci-habiko.com")
             context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
-            
+
             # Pour les emails de confirmation, construire activate_url si key est présent
             # Allauth peut passer 'key' ou 'activate_url' dans le contexte
             if "key" in context and "activate_url" not in context:
                 try:
                     from django.urls import reverse
+
                     key = context["key"]
                     # Construire l'URL complète avec le bon domaine
                     activate_url = f"{site_url}{reverse('account_confirm_email', args=[key])}"
@@ -70,16 +72,23 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                         # URL relative, la rendre absolue
                         context["activate_url"] = f"{site_url}{activate_url}"
                         logger.info(f"📧 activate_url rendu absolu: {context['activate_url']}")
-                    elif "localhost" in activate_url or "example.com" in activate_url or "127.0.0.1" in activate_url:
+                    elif (
+                        "localhost" in activate_url
+                        or "example.com" in activate_url
+                        or "127.0.0.1" in activate_url
+                    ):
                         # URL absolue avec mauvais domaine, extraire le chemin et reconstruire
                         from urllib.parse import urlparse
+
                         parsed = urlparse(activate_url)
                         path = parsed.path
                         context["activate_url"] = f"{site_url}{path}"
-                        logger.info(f"📧 activate_url corrigé (mauvais domaine): {context['activate_url']}")
+                        logger.info(
+                            f"📧 activate_url corrigé (mauvais domaine): {context['activate_url']}"
+                        )
         except Exception as e:
             logger.warning(f"Erreur lors de l'enrichissement du contexte: {e}")
-        
+
         # Logger le template_prefix pour debug
         try:
             logger.info(
@@ -126,7 +135,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     subject = " ".join(subject.split())
                 except Exception as e:
                     logger.warning(f"Erreur lors du rendu du sujet pour {template_prefix}: {e}")
-                    subject = context.get("subject", "Message de KIABA")
+                    subject = context.get("subject", "Message de HABIKO")
 
                 # Rendre le contenu HTML et texte
                 try:
@@ -145,6 +154,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 # Utiliser un thread pour ne pas bloquer la requête
                 try:
                     import threading
+
                     def send_email_async():
                         try:
                             EmailService.send_email(
@@ -157,7 +167,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                             )
                         except Exception as e:
                             logger.error(f"Erreur dans thread email: {e}")
-                    
+
                     # Lancer l'envoi en arrière-plan
                     thread = threading.Thread(target=send_email_async, daemon=True)
                     thread.start()
@@ -176,7 +186,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 try:
                     subject = render_to_string(f"{template_prefix}_subject.txt", context).strip()
                 except Exception:
-                    subject = context.get("subject", "Message de KIABA")
+                    subject = context.get("subject", "Message de HABIKO")
 
                 # Rendre le contenu texte
                 try:
@@ -199,6 +209,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 # Utiliser un thread pour ne pas bloquer la requête
                 try:
                     import threading
+
                     def send_email_async():
                         try:
                             EmailService.send_email(
@@ -211,7 +222,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                             )
                         except Exception as e:
                             logger.error(f"Erreur dans thread email: {e}")
-                    
+
                     # Lancer l'envoi en arrière-plan
                     thread = threading.Thread(target=send_email_async, daemon=True)
                     thread.start()

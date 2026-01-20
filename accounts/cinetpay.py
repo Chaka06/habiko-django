@@ -63,7 +63,7 @@ class CinetPayService:
     @staticmethod
     def generate_transaction_id(user_id, transaction_id):
         """Génère un ID de transaction unique pour CinetPay"""
-        return f"KIABA_{user_id}_{transaction_id}_{int(timezone.now().timestamp())}"
+        return f"HABIKO_{user_id}_{transaction_id}_{int(timezone.now().timestamp())}"
 
     @staticmethod
     def create_payment_link(transaction, amount, description):
@@ -108,7 +108,7 @@ class CinetPayService:
             'amount': amount_int,
             'currency': "XOF",  # FCFA
             'transaction_id': transaction_id,
-            'description': description[:255] if description else "Paiement KIABA",
+            'description': description[:255] if description else "Paiement HABIKO",
             'return_url': return_url,
             'notify_url': notify_url,
             'customer_name': customer_name[:50] if customer_name else "Client",

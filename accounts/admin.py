@@ -13,7 +13,7 @@ from .models import (
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
-        ("KIABA", {"fields": ("role", "phone_e164", "is_verified")}),
+        ("HABIKO", {"fields": ("role", "phone_e164", "is_verified")}),
     )
     list_display = ("username", "email", "role", "is_active", "is_staff", "is_verified")
     list_filter = ("role", "is_staff", "is_superuser", "is_active", "is_verified")
