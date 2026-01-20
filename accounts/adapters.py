@@ -95,18 +95,27 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     text_content = None
                 
                 # Envoyer via EmailService
-                success = EmailService.send_email(
-                    subject=subject,
-                    to_emails=[email],
-                    html_content=html_content,
-                    text_content=text_content,
-                    fail_silently=False,
-                )
-                if success:
-                    logger.info(f"✅ Email {template_prefix} envoyé via EmailService à {email}")
-                else:
-                    logger.error(f"❌ Échec de l'envoi de l'email {template_prefix} à {email}")
-                return
+                try:
+                    success = EmailService.send_email(
+                        subject=subject,
+                        to_emails=[email],
+                        html_content=html_content,
+                        text_content=text_content,
+                        fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
+                    )
+                    if success:
+                        logger.info(f"✅ Email {template_prefix} envoyé via EmailService à {email}")
+                        return
+                    else:
+                        logger.warning(f"⚠️ Échec de l'envoi de l'email {template_prefix} à {email} via EmailService")
+                        # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera
+                        # L'utilisateur pourra renvoyer l'email plus tard
+                        return
+                except Exception as email_error:
+                    logger.error(f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}")
+                    # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera
+                    # L'utilisateur pourra renvoyer l'email plus tard
+                    return
             else:
                 # Pour les autres types d'emails, utiliser la méthode par défaut mais avec EmailService
                 # Rendre le sujet
@@ -131,21 +140,30 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     pass
                 
                 # Envoyer via EmailService
-                EmailService.send_email(
-                    subject=subject,
-                    to_emails=[email],
-                    html_content=html_content,
-                    text_content=text_content,
-                    fail_silently=False,
-                )
-                logger.info(f"✅ Email {template_prefix} envoyé via EmailService à {email}")
-                return
+                try:
+                    success = EmailService.send_email(
+                        subject=subject,
+                        to_emails=[email],
+                        html_content=html_content,
+                        text_content=text_content,
+                        fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
+                    )
+                    if success:
+                        logger.info(f"✅ Email {template_prefix} envoyé via EmailService à {email}")
+                    else:
+                        logger.warning(f"⚠️ Échec de l'envoi de l'email {template_prefix} à {email} via EmailService")
+                    return
+                except Exception as email_error:
+                    logger.error(f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}")
+                    # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera
+                    return
                 
         except Exception as e:
             logger.error(f"❌ Erreur lors de l'envoi d'email {template_prefix} via EmailService: {e}", exc_info=True)
-            # Fallback vers la méthode par défaut d'allauth
-            logger.warning(f"⚠️ Utilisation de la méthode par défaut d'allauth pour {template_prefix}")
-            return super().send_mail(template_prefix, email, context)
+            # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera de la même manière
+            # L'utilisateur pourra renvoyer l'email de confirmation plus tard depuis l'interface
+            logger.warning(f"⚠️ Impossible d'envoyer l'email {template_prefix} à {email}. L'utilisateur pourra le renvoyer plus tard.")
+            return
 
     def get_login_redirect_url(self, request):
         """Redirection après connexion"""
