@@ -16,6 +16,9 @@ This settings module is configured for:
 from pathlib import Path
 import os
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     import environ  # type: ignore
