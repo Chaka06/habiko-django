@@ -184,21 +184,26 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     pass
 
                 # Envoyer via EmailService (avec contexte enrichi pour le logo)
+                # Utiliser un thread pour ne pas bloquer la requête
                 try:
-                    success = EmailService.send_email(
-                        subject=subject,
-                        to_emails=[email],
-                        html_content=html_content,
-                        text_content=text_content,
-                        context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
-                        fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
-                    )
-                    if success:
-                        logger.info(f"✅ Email {template_prefix} envoyé via EmailService à {email}")
-                    else:
-                        logger.warning(
-                            f"⚠️ Échec de l'envoi de l'email {template_prefix} à {email} via EmailService"
-                        )
+                    import threading
+                    def send_email_async():
+                        try:
+                            EmailService.send_email(
+                                subject=subject,
+                                to_emails=[email],
+                                html_content=html_content,
+                                text_content=text_content,
+                                context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
+                                fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
+                            )
+                        except Exception as e:
+                            logger.error(f"Erreur dans thread email: {e}")
+                    
+                    # Lancer l'envoi en arrière-plan
+                    thread = threading.Thread(target=send_email_async, daemon=True)
+                    thread.start()
+                    logger.info(f"📧 Email {template_prefix} envoyé en arrière-plan à {email}")
                     return
                 except Exception as email_error:
                     logger.error(
