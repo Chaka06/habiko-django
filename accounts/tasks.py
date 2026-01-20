@@ -108,7 +108,7 @@ def send_account_created_email(self, user_id):
         # Message texte
         message = f"""Bonjour {user.username},
 
-Bienvenue sur HABIKO, la plateforme de rencontres et petites annonces pour adultes en Côte d'Ivoire !
+Bienvenue sur HABIKO, la plateforme immobilière N°1 en Côte d'Ivoire !
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVATION DE VOTRE COMPTE
