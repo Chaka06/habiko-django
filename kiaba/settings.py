@@ -449,6 +449,10 @@ EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 
+# SendGrid HTTP API key (recommandé pour Render, évite les blocages SMTP)
+# Si EMAIL_HOST_PASSWORD contient une clé SendGrid (commence par SG.), elle sera utilisée automatiquement
+SENDGRID_API_KEY = env("SENDGRID_API_KEY", default="")
+
 # SSL/TLS : généralement 587+TLS ou 465+SSL
 # Par défaut, on utilise 587+TLS (plus standard)
 EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="False").lower() in ("true", "1", "yes")

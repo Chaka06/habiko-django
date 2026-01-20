@@ -1,6 +1,6 @@
 """
 Service d'envoi d'emails professionnel pour HABIKO
-Gère l'envoi d'emails avec templates HTML/text via SMTP
+Gère l'envoi d'emails avec templates HTML/text via SendGrid HTTP API ou SMTP
 """
 
 import logging
@@ -8,6 +8,8 @@ from typing import List, Optional, Dict, Any
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
+
+SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
 
 
 class EmailService:
