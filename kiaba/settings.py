@@ -460,7 +460,10 @@ EMAIL_SUBJECT_PREFIX = "[HABIKO] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
 
-# Brevo (Sendinblue) HTTP API key for transactional emails
+# Resend HTTP API key for transactional emails (recommandé, plus simple et fiable)
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+
+# Brevo (Sendinblue) HTTP API key for transactional emails (fallback)
 BREVO_API_KEY = env("BREVO_API_KEY", default="")
 
 # En développement local, forcer l'utilisation du SMTP au lieu du backend console

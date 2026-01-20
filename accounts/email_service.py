@@ -9,6 +9,7 @@ from django.utils.html import strip_tags
 logger = logging.getLogger(__name__)
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+RESEND_API_URL = "https://api.resend.com/emails"
 
 
 class EmailService:
@@ -103,7 +104,57 @@ class EmailService:
             elif not text_content:
                 text_content = subject
 
-            # --- Envoi via API HTTP Brevo (recommandé sur Render) ---
+            # --- Envoi via API HTTP Resend (recommandé, plus simple et fiable) ---
+            resend_api_key = getattr(settings, "RESEND_API_KEY", None)
+            if resend_api_key and resend_api_key.strip():
+                try:
+                    sender_email = cls.get_from_email_value()
+                    # Extraire adresse email seule si besoin
+                    if "<" in sender_email:
+                        import re
+                        m = re.search(r"<(.+?)>", sender_email)
+                        if m:
+                            sender_email = m.group(1)
+
+                    payload = {
+                        "from": f"{cls.FROM_NAME} <{sender_email}>",
+                        "to": to_emails,
+                        "subject": subject,
+                        "html": html_content or text_content or subject,
+                        "text": text_content or subject,
+                    }
+                    headers = {
+                        "Authorization": f"Bearer {resend_api_key}",
+                        "Content-Type": "application/json",
+                    }
+
+                    logger.info(
+                        f"📧 Envoi via Resend API à {', '.join(to_emails)} sujet='{subject}'"
+                    )
+                    resp = requests.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(
+                            f"✅ Email envoyé avec succès via Resend API à {', '.join(to_emails)}"
+                        )
+                        return True
+                    else:
+                        error_msg = resp.text
+                        logger.error(
+                            f"❌ Erreur Resend API ({resp.status_code}): {error_msg}"
+                        )
+                        if not fail_silently:
+                            resp.raise_for_status()
+                        # Continue vers Brevo en fallback
+                except Exception as api_error:
+                    logger.error(
+                        f"❌ Erreur lors de l'envoi via Resend API à {', '.join(to_emails)}: {api_error}",
+                        exc_info=True,
+                    )
+                    if not fail_silently and not isinstance(api_error, requests.exceptions.HTTPError):
+                        raise
+                    # Continue vers Brevo en fallback
+
+            # --- Envoi via API HTTP Brevo (fallback si Resend non configuré) ---
             brevo_api_key = getattr(settings, "BREVO_API_KEY", None)
             # Log pour debug : vérifier si la clé est présente
             if brevo_api_key:
