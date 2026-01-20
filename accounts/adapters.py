@@ -131,13 +131,14 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     logger.warning(f"Erreur lors du rendu texte pour {template_prefix}: {e}")
                     text_content = None
 
-                # Envoyer via EmailService
+                # Envoyer via EmailService (avec contexte enrichi pour le logo)
                 try:
                     success = EmailService.send_email(
                         subject=subject,
                         to_emails=[email],
                         html_content=html_content,
                         text_content=text_content,
+                        context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
                         fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
                     )
                     if success:
@@ -182,13 +183,14 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 except Exception:
                     pass
 
-                # Envoyer via EmailService
+                # Envoyer via EmailService (avec contexte enrichi pour le logo)
                 try:
                     success = EmailService.send_email(
                         subject=subject,
                         to_emails=[email],
                         html_content=html_content,
                         text_content=text_content,
+                        context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
                         fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
                     )
                     if success:
