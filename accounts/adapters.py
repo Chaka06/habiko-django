@@ -50,15 +50,23 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
             context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
             
             # Pour les emails de confirmation, construire activate_url si key est présent
+            # Allauth peut passer 'key' ou 'activate_url' dans le contexte
             if "key" in context and "activate_url" not in context:
                 try:
                     from django.urls import reverse
                     key = context["key"]
+                    # Construire l'URL complète avec le bon domaine
                     activate_url = f"{site_url}{reverse('account_confirm_email', args=[key])}"
                     context["activate_url"] = activate_url
-                    logger.info(f"📧 activate_url construit: {activate_url}")
+                    logger.info(f"📧 activate_url construit depuis key: {activate_url}")
                 except Exception as e:
-                    logger.warning(f"Impossible de construire activate_url: {e}")
+                    logger.warning(f"Impossible de construire activate_url depuis key: {e}")
+            elif "activate_url" in context:
+                # Si activate_url existe mais est relatif, le rendre absolu
+                activate_url = context["activate_url"]
+                if activate_url and not activate_url.startswith("http"):
+                    context["activate_url"] = f"{site_url}{activate_url}"
+                    logger.info(f"📧 activate_url rendu absolu: {context['activate_url']}")
         except Exception as e:
             logger.warning(f"Erreur lors de l'enrichissement du contexte: {e}")
         
