@@ -101,10 +101,20 @@ class EmailService:
                 logger.warning(f"Impossible de construire activate_url dans EmailService: {e}")
         elif "activate_url" in context:
             # Si activate_url existe mais est relatif, le rendre absolu
+            # Ou si c'est une URL absolue avec un mauvais domaine, la remplacer
             activate_url = context.get("activate_url", "")
-            if activate_url and not activate_url.startswith("http"):
-                context["activate_url"] = f"{site_url}{activate_url}"
-                logger.info(f"📧 activate_url rendu absolu dans EmailService: {context['activate_url']}")
+            if activate_url:
+                if not activate_url.startswith("http"):
+                    # URL relative, la rendre absolue
+                    context["activate_url"] = f"{site_url}{activate_url}"
+                    logger.info(f"📧 activate_url rendu absolu dans EmailService: {context['activate_url']}")
+                elif "localhost" in activate_url or "example.com" in activate_url or "127.0.0.1" in activate_url:
+                    # URL absolue avec mauvais domaine, extraire le chemin et reconstruire
+                    from urllib.parse import urlparse
+                    parsed = urlparse(activate_url)
+                    path = parsed.path
+                    context["activate_url"] = f"{site_url}{path}"
+                    logger.info(f"📧 activate_url corrigé dans EmailService (mauvais domaine): {context['activate_url']}")
 
         try:
             from django.template.loader import render_to_string
