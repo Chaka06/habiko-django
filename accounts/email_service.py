@@ -108,7 +108,83 @@ class EmailService:
             elif not text_content:
                 text_content = subject
 
-            # --- Envoi via SMTP (configuration dans settings.py) ---
+            # --- Envoi via SendGrid HTTP API (recommandé pour Render) ---
+            sendgrid_api_key = getattr(settings, "SENDGRID_API_KEY", None)
+            if not sendgrid_api_key:
+                # Essayer de récupérer depuis EMAIL_HOST_PASSWORD si c'est une clé SendGrid
+                email_password = getattr(settings, "EMAIL_HOST_PASSWORD", "")
+                if email_password and email_password.startswith("SG.") and getattr(settings, "EMAIL_HOST", "") == "smtp.sendgrid.net":
+                    sendgrid_api_key = email_password
+                    logger.info("📧 Clé API SendGrid détectée depuis EMAIL_HOST_PASSWORD")
+            
+            if sendgrid_api_key and sendgrid_api_key.strip():
+                try:
+                    import requests
+                    
+                    sender_email = cls.get_from_email_value()
+                    # Extraire adresse email seule si besoin
+                    if "<" in sender_email:
+                        import re
+                        m = re.search(r"<(.+?)>", sender_email)
+                        if m:
+                            sender_email = m.group(1)
+
+                    payload = {
+                        "personalizations": [{
+                            "to": [{"email": email} for email in to_emails],
+                            "subject": subject
+                        }],
+                        "from": {
+                            "email": sender_email,
+                            "name": cls.FROM_NAME
+                        },
+                        "content": [
+                            {
+                                "type": "text/plain",
+                                "value": text_content or subject
+                            }
+                        ]
+                    }
+                    
+                    # Ajouter HTML si disponible
+                    if html_content:
+                        payload["content"].append({
+                            "type": "text/html",
+                            "value": html_content
+                        })
+
+                    headers = {
+                        "Authorization": f"Bearer {sendgrid_api_key}",
+                        "Content-Type": "application/json"
+                    }
+
+                    logger.info(
+                        f"📧 Envoi via SendGrid API à {', '.join(to_emails)} sujet='{subject}'"
+                    )
+                    resp = requests.post(SENDGRID_API_URL, json=payload, headers=headers, timeout=10)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(
+                            f"✅ Email envoyé avec succès via SendGrid API à {', '.join(to_emails)}"
+                        )
+                        return True
+                    else:
+                        error_msg = resp.text
+                        logger.error(
+                            f"❌ Erreur SendGrid API ({resp.status_code}): {error_msg}"
+                        )
+                        if resp.status_code == 401:
+                            logger.error(
+                                "⚠️ Erreur 401 SendGrid API - La clé API est invalide"
+                            )
+                        # Continue vers SMTP en fallback
+                except Exception as api_error:
+                    logger.error(
+                        f"❌ Erreur lors de l'envoi via SendGrid API à {', '.join(to_emails)}: {api_error}",
+                        exc_info=True,
+                    )
+                    # Continue vers SMTP en fallback
+
+            # --- Fallback SMTP (pour local ou autres environnements) ---
             from django.core.mail import EmailMultiAlternatives
 
             email = EmailMultiAlternatives(
