@@ -344,6 +344,7 @@ _media_root = env("MEDIA_ROOT")
 # Sur Render, utiliser le disque persistant monté sur /app/media
 # Le disque persistant est configuré dans render.yaml avec mountPath: /app/media
 # IMPORTANT: Toujours utiliser /app/media en production sur Render pour éviter la perte d'images
+# Test de persistance - 2026-01-20
 RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL")
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
