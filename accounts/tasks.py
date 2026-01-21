@@ -23,42 +23,22 @@ def send_profile_validation_email(self, profile_id):
         profile = Profile.objects.get(id=profile_id)
         user = profile.user
 
-        # Créer le lien de validation (à implémenter selon tes besoins)
+        # Créer le lien de validation du profil
         validation_url = f"{settings.SITE_URL}/accounts/validate-profile/{profile.id}/"
 
-        subject = "Validation de votre profil HABIKO"
+        subject = "Validation / mise à jour de votre profil HABIKO"
 
-        message = f"""
-Bonjour {user.username},
-
-Votre profil a été créé avec succès sur HABIKO !
-
-Pour finaliser votre inscription et commencer à publier des annonces, veuillez cliquer sur le lien ci-dessous pour valider votre profil :
-
-{validation_url}
-
-Informations de votre profil :
-- Nom d'affichage : {profile.display_name}
-- Ville : {profile.city}
-- Méthodes de contact : {', '.join(profile.contact_prefs) if profile.contact_prefs else 'Non définies'}
-
-Une fois validé, vous pourrez :
-- Publier des annonces gratuitement
-- Gérer vos préférences de contact
-- Suivre les statistiques de vos annonces
-
-Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
-
-Cordialement,
-L'équipe HABIKO
-{settings.DEFAULT_FROM_EMAIL}
-        """
-
-        # Utiliser le nouveau service d'email
+        # Utiliser le service d'email avec template HTML + texte
         EmailService.send_email(
             subject=subject,
             to_emails=[user.email],
-            text_content=message,
+            template_name="account/email/profile_validation",
+            context={
+                "user": user,
+                "profile": profile,
+                "validation_url": validation_url,
+                "site_url": settings.SITE_URL,
+            },
             fail_silently=False,
         )
 
@@ -98,7 +78,7 @@ def send_account_created_email(self, user_id):
                 confirmation = EmailConfirmation.create(email_address)
                 confirmation_url = confirmation.get_confirm_url()
                 # Construire l'URL complète
-                if not confirmation_url.startswith('http'):
+                if not confirmation_url.startswith("http"):
                     confirmation_url = f"{settings.SITE_URL}{confirmation_url}"
         except Exception as e:
             logger.warning(f"Impossible de créer le lien de confirmation: {e}")
@@ -145,7 +125,9 @@ L'équipe HABIKO
                 "confirmation_url": confirmation_url,
                 "site_url": settings.SITE_URL,
             },
-            text_content=message if not confirmation_url else None,  # Utiliser le template si on a l'URL
+            text_content=(
+                message if not confirmation_url else None
+            ),  # Utiliser le template si on a l'URL
             fail_silently=True,  # Ne pas bloquer l'inscription si l'email échoue
         )
 
@@ -181,7 +163,7 @@ def send_ad_published_email(self, ad_id):
         }
 
         subject = f"Votre annonce '{ad.title}' est en ligne !"
-        
+
         # Utiliser le nouveau service d'email avec support HTML
         EmailService.send_email(
             subject=subject,
@@ -190,7 +172,7 @@ def send_ad_published_email(self, ad_id):
             context=context,
             fail_silently=False,
         )
-        
+
         return f"Email de publication envoyé à {user.email}"
     except Exception as e:
         raise e
@@ -212,7 +194,7 @@ def send_login_notification_email(user_id):
         }
 
         subject = "Connexion détectée sur votre compte"
-        
+
         # Utiliser le nouveau service d'email
         # Ne jamais bloquer la connexion à cause d'un email
         EmailService.send_email(
@@ -222,7 +204,7 @@ def send_login_notification_email(user_id):
             context=context,
             fail_silently=True,
         )
-        
+
         return f"Email de notification de connexion envoyé à {user.email}"
     except Exception as e:
         # Loguer mais ne jamais faire échouer la requête
@@ -253,7 +235,7 @@ def send_password_change_email(self, user_id):
         }
 
         subject = "Mot de passe modifié avec succès"
-        
+
         # Utiliser le nouveau service d'email avec support HTML
         EmailService.send_email(
             subject=subject,
@@ -262,7 +244,7 @@ def send_password_change_email(self, user_id):
             context=context,
             fail_silently=False,
         )
-        
+
         return f"Email de changement de mot de passe envoyé à {user.email}"
     except Exception as e:
         raise e
@@ -293,7 +275,7 @@ def send_ad_expiration_email(self, ad_id):
         }
 
         subject = f"Votre annonce '{ad.title}' a expiré"
-        
+
         # Utiliser le nouveau service d'email
         EmailService.send_email(
             subject=subject,
@@ -302,7 +284,7 @@ def send_ad_expiration_email(self, ad_id):
             context=context,
             fail_silently=False,
         )
-        
+
         return f"Email d'expiration envoyé à {user.email}"
     except Exception as e:
         raise e

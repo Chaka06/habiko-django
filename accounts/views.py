@@ -30,18 +30,22 @@ def profile_edit(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ProfileEditForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            # Sauvegarder le profil
+            # Sauvegarder le profil (sans commit pour enrichir avant)
             profile = form.save(commit=False)
             # Gérer contact_prefs manuellement
             profile.contact_prefs = form.cleaned_data.get("contact_prefs", [])
+            # Sauvegarder WhatsApp dans le profil
+            if form.cleaned_data.get("whatsapp_e164"):
+                profile.whatsapp_e164 = form.cleaned_data["whatsapp_e164"]
             profile.save()
+
             # Sauvegarder le numéro de téléphone dans l'utilisateur
             if form.cleaned_data.get("phone_e164"):
                 request.user.phone_e164 = form.cleaned_data["phone_e164"]
                 request.user.save()
 
-                # Envoyer un email de validation de profil
-                send_profile_validation_email.delay(profile.id)
+            # Envoyer un email de validation / mise à jour de profil
+            send_profile_validation_email.delay(profile.id)
 
             messages.success(request, "Profil mis à jour avec succès !")
             return redirect("/dashboard/")

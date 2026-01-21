@@ -204,18 +204,28 @@
         <span id="toggleContactMobileText">Cliquez pour afficher le téléphone</span>
       </button>
       <div id="contactContentMobile" class="hidden px-4 pb-4">
-        <!-- Header -->
-        <div class="flex items-center gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-700" fill="currentColor">
-            <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
-          </svg>
-          <h3 class="text-lg font-semibold text-gray-900">Contacts téléphoniques</h3>
+        <!-- Header + profil annonceur -->
+        <div class="flex items-center gap-3 mb-4">
+          <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
+              {% if ad.user.profile and ad.user.profile.avatar %}
+                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover">
+              {% else %}
+                <span class="text-gray-600 text-sm font-semibold">
+                  {{ ad.user.username|first|upper }}
+                </span>
+              {% endif %}
+            </div>
+          </a>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-gray-900">
+              {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
+            </h3>
+            <p class="text-xs text-gray-500">
+              Contacts téléphoniques · {% if ad.user.profile and ad.user.profile.city %}{{ ad.user.profile.city.name }}, {% endif %}Côte d'Ivoire
+            </p>
+          </div>
         </div>
-
-        <!-- Nom -->
-        <h4 class="text-2xl font-bold text-gray-900 mb-3">
-          {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
-        </h4>
 
         <!-- Message -->
         <p class="text-sm text-gray-600 mb-4">
@@ -448,18 +458,28 @@
           <span id="toggleContactDesktopText">Cliquez pour afficher le téléphone</span>
         </button>
         <div id="contactContentDesktop" class="hidden px-4 pb-4">
-          <!-- Header -->
-          <div class="flex items-center gap-2 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 text-gray-700" fill="currentColor">
-              <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
-            </svg>
-            <h3 class="text-lg font-semibold text-gray-900">Contacts téléphoniques</h3>
+        <!-- Header + profil annonceur -->
+        <div class="flex items-center gap-3 mb-4">
+          <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
+              {% if ad.user.profile and ad.user.profile.avatar %}
+                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover">
+              {% else %}
+                <span class="text-gray-600 text-sm font-semibold">
+                  {{ ad.user.username|first|upper }}
+                </span>
+              {% endif %}
+            </div>
+          </a>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-gray-900">
+              {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
+            </h3>
+            <p class="text-xs text-gray-500">
+              Contacts téléphoniques · {% if ad.user.profile and ad.user.profile.city %}{{ ad.user.profile.city.name }}, {% endif %}Côte d'Ivoire
+            </p>
           </div>
-
-          <!-- Nom -->
-          <h4 class="text-2xl font-bold text-gray-900 mb-3">
-            {% if ad.user.profile and ad.user.profile.display_name %}{{ ad.user.profile.display_name }}{% else %}{{ ad.user.username }}{% endif %}
-          </h4>
+        </div>
 
           <!-- Message -->
           <p class="text-sm text-gray-600 mb-4">

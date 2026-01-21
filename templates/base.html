@@ -709,13 +709,13 @@
 
       // Gérer la soumission des formulaires
       document.addEventListener('DOMContentLoaded', function() {
-        // Détecter le formulaire de création d'annonce (formulaire avec enctype="multipart/form-data")
-        const postForm = document.querySelector('form[enctype="multipart/form-data"]');
+        // Détecter le formulaire de création d'annonce (formulaire spécifique avec id="postAdForm")
+        const postForm = document.getElementById('postAdForm');
         if (postForm) {
           postForm.addEventListener('submit', function(e) {
             // Vérifier que le formulaire est valide avant d'afficher le loader
             if (this.checkValidity()) {
-              showLoadingModal('Création de l\'annonce', 'Votre annonce est en cours de création, veuillez patienter...');
+              showLoadingModal("Création de l'annonce", "Votre annonce est en cours de création, veuillez patienter...");
             }
           });
         }

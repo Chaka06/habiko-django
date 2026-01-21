@@ -14,7 +14,7 @@
     {% endfor %}
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="space-y-6">
+  <form id="postAdForm" method="post" enctype="multipart/form-data" class="space-y-6">
     {% csrf_token %}
     
     <!-- Titre -->

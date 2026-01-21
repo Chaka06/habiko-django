@@ -1,0 +1,51 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Validation de votre profil · {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title"><i class="bx bx-badge-check"></i> Validation de votre profil</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Votre profil <strong>{{ site_name }}</strong> a été mis à jour (ou créé) avec succès.</p>
+
+<div class="info-box">
+    <h3><i class="bx bx-user"></i> Détails de votre profil :</h3>
+    <dl>
+        <dt>Nom d'affichage :</dt>
+        <dd>{{ profile.display_name }}</dd>
+
+        <dt>Ville :</dt>
+        <dd>{% if profile.city %}{{ profile.city.name }}{% else %}Non renseignée{% endif %}</dd>
+
+        <dt>Méthodes de contact :</dt>
+        <dd>
+            {% if profile.contact_prefs %}
+                {{ profile.contact_prefs|join:", " }}
+            {% else %}
+                Non définies
+            {% endif %}
+        </dd>
+    </dl>
+</div>
+
+<div class="button-container">
+    <a href="{{ validation_url }}" class="button">
+        <i class="bx bx-check-circle"></i> Valider mon profil
+    </a>
+</div>
+
+<div class="security-note">
+    <p style="margin: 0;">
+        <strong><i class="bx bx-info-circle"></i> Pourquoi valider votre profil ?</strong><br><br>
+        - Vos annonces seront plus visibles et inspireront plus confiance aux visiteurs.<br>
+        - Les acheteurs sauront que vos coordonnées ont été vérifiées.<br>
+        - Vous pourrez gérer plus facilement vos annonces depuis votre tableau de bord.
+    </p>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center; margin-top: 30px;">
+    Si vous n'êtes pas à l'origine de cette modification ou si vous n'avez pas créé de compte sur {{ site_name }}, ignorez simplement cet email.
+</p>
+{% endblock %}
+

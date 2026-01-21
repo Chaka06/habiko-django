@@ -52,8 +52,8 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
         <p class="text-gray-900">
-          {% if user.profile and user.profile.phone_e164 %}
-            {{ user.profile.phone_e164 }}
+          {% if user.phone_e164 %}
+            {{ user.phone_e164 }}
           {% else %}
             Non renseigné
           {% endif %}
@@ -70,15 +70,18 @@
         </p>
       </div>
     </div>
-    <div class="mt-4 flex flex-wrap gap-2 md:gap-3">
-      <a href="/accounts/password/change/" class="bg-green-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-green-700 transition text-xs md:text-sm font-medium">
-        Modifier le mot de passe
+    <div class="mt-5 flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
+      <a href="/accounts/password/change/" class="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm md:text-base font-medium shadow-sm hover:shadow-md w-full sm:w-auto">
+        <i class="bx bx-lock-alt text-lg"></i>
+        <span>Modifier le mot de passe</span>
       </a>
-      <a href="/accounts/profile/" class="bg-gray-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-gray-700 transition text-xs md:text-sm font-medium">
-        Modifier le profil
+      <a href="/accounts/profile/" class="inline-flex items-center justify-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition text-sm md:text-base font-medium shadow-sm hover:shadow-md w-full sm:w-auto">
+        <i class="bx bx-user-circle text-lg"></i>
+        <span>Modifier le profil</span>
       </a>
-      <a href="/auth/logout/?next=/" class="bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-red-700 transition text-xs md:text-sm font-medium">
-        Se déconnecter
+      <a href="/auth/logout/?next=/" class="inline-flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm md:text-base font-medium shadow-sm hover:shadow-md w-full sm:w-auto">
+        <i class="bx bx-log-out text-lg"></i>
+        <span>Se déconnecter</span>
       </a>
     </div>
   </section>

@@ -86,17 +86,20 @@ class EmailService:
         context["site_url"] = context.get("site_url", site_url)
         context["support_email"] = context.get("support_email", "support@ci-habiko.com")
         context["logo_url"] = context.get("logo_url", f"{site_url}{static_url}img/logo.png")
-        
+
         # Pour les emails de confirmation, construire activate_url si key est présent
         # Allauth peut passer 'key' ou 'activate_url' dans le contexte
         if "key" in context and "activate_url" not in context:
             try:
                 from django.urls import reverse
+
                 key = context["key"]
                 # Construire l'URL complète avec le bon domaine
                 activate_url = f"{site_url}{reverse('account_confirm_email', args=[key])}"
                 context["activate_url"] = activate_url
-                logger.info(f"📧 activate_url construit dans EmailService depuis key: {activate_url}")
+                logger.info(
+                    f"📧 activate_url construit dans EmailService depuis key: {activate_url}"
+                )
             except Exception as e:
                 logger.warning(f"Impossible de construire activate_url dans EmailService: {e}")
         elif "activate_url" in context:
@@ -107,14 +110,23 @@ class EmailService:
                 if not activate_url.startswith("http"):
                     # URL relative, la rendre absolue
                     context["activate_url"] = f"{site_url}{activate_url}"
-                    logger.info(f"📧 activate_url rendu absolu dans EmailService: {context['activate_url']}")
-                elif "localhost" in activate_url or "example.com" in activate_url or "127.0.0.1" in activate_url:
+                    logger.info(
+                        f"📧 activate_url rendu absolu dans EmailService: {context['activate_url']}"
+                    )
+                elif (
+                    "localhost" in activate_url
+                    or "example.com" in activate_url
+                    or "127.0.0.1" in activate_url
+                ):
                     # URL absolue avec mauvais domaine, extraire le chemin et reconstruire
                     from urllib.parse import urlparse
+
                     parsed = urlparse(activate_url)
                     path = parsed.path
                     context["activate_url"] = f"{site_url}{path}"
-                    logger.info(f"📧 activate_url corrigé dans EmailService (mauvais domaine): {context['activate_url']}")
+                    logger.info(
+                        f"📧 activate_url corrigé dans EmailService (mauvais domaine): {context['activate_url']}"
+                    )
 
         try:
             from django.template.loader import render_to_string
@@ -185,9 +197,7 @@ class EmailService:
                         f"📧 Envoi via SendGrid API à {', '.join(to_emails)} sujet='{subject}'"
                     )
                     # Timeout réduit pour ne pas bloquer l'application
-                    resp = requests.post(
-                        SENDGRID_API_URL, json=payload, headers=headers, timeout=5
-                    )
+                    resp = requests.post(SENDGRID_API_URL, json=payload, headers=headers, timeout=5)
                     if resp.status_code in (200, 201, 202):
                         logger.info(
                             f"✅ Email envoyé avec succès via SendGrid API à {', '.join(to_emails)}"
