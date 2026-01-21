@@ -10,9 +10,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User = get_user_model()
+        from django.conf import settings
 
         username = "kaliadmin2"
-        password = "Ch@coul@melo72"
+        # Utiliser une variable d'environnement pour le mot de passe (plus sécurisé)
+        password = getattr(settings, "INITIAL_SUPERUSER_PASSWORD", "Ch@coul@melo72")
         email = "admin@ci-habiko.com"
 
         if User.objects.filter(username=username).exists():
