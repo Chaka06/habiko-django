@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from .models import Profile, Account, RechargePackage, BoostOption, Transaction
+from .models import Profile, Account, RechargePackage, BoostOption, Transaction, CustomUser
 from .forms import (
     ProfileEditForm,
     CustomPasswordChangeForm,
@@ -28,7 +28,7 @@ def profile_edit(request: HttpRequest) -> HttpResponse:
         profile = Profile.objects.create(user=request.user)
 
     if request.method == "POST":
-        form = ProfileEditForm(request.POST, instance=profile)
+        form = ProfileEditForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             # Sauvegarder le profil
             profile = form.save(commit=False)
@@ -183,6 +183,34 @@ def account_balance(request: HttpRequest) -> HttpResponse:
         "account": account,
         "packages": packages,
     })
+
+
+def public_profile(request: HttpRequest, username: str) -> HttpResponse:
+    """
+    Page de profil public d'un utilisateur (accessible depuis une annonce).
+    Affiche la photo de profil, le pseudo, la ville et la liste des annonces.
+    """
+    user = get_object_or_404(CustomUser, username=username)
+    try:
+        profile = user.profile
+    except Profile.DoesNotExist:
+        profile = None
+
+    ads = (
+        Ad.objects.filter(user=user, status=Ad.Status.APPROVED)
+        .order_by("-created_at")
+        .prefetch_related("media", "city")
+    )
+
+    return render(
+        request,
+        "accounts/public_profile.html",
+        {
+            "profile_user": user,
+            "profile": profile,
+            "ads": ads,
+        },
+    )
 
 
 @login_required

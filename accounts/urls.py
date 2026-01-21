@@ -5,6 +5,7 @@ app_name = "accounts"
 
 urlpatterns = [
     path("profile/", views.profile_edit, name="profile_edit"),
+    path("u/<str:username>/", views.public_profile, name="public_profile"),
     path("password/change/", views.password_change, name="password_change"),
     path("password/change/confirm/", views.password_change_confirm, name="password_change_confirm"),
     path(

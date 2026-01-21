@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Profil de {{ profile.display_name|default:profile_user.username }} · HABIKO{% endblock %}
+{% block description %}Découvrez le profil de {{ profile.display_name|default:profile_user.username }} et toutes ses annonces immobilières sur HABIKO CI.{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
+  <!-- Colonne profil -->
+  <aside class="w-full lg:w-72 flex-shrink-0">
+    <section class="bg-white rounded-2xl p-6 border shadow-sm">
+      <div class="flex flex-col items-center text-center">
+        <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mb-3 ring-2 ring-orange-500/80">
+          {% if profile and profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name|default:profile_user.username }}" class="w-full h-full object-cover">
+          {% else %}
+            <span class="text-gray-500 text-3xl font-semibold">
+              {{ profile.display_name|default:profile_user.username|first|upper }}
+            </span>
+          {% endif %}
+        </div>
+        <h1 class="text-xl font-semibold text-gray-900">
+          {{ profile.display_name|default:profile_user.username }}
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">
+          {% if profile and profile.city %}{{ profile.city.name }}, {% endif %}Côte d'Ivoire
+        </p>
+
+        {% if profile and profile.bio_sanitized %}
+        <p class="mt-3 text-sm text-gray-700 line-clamp-4">
+          {{ profile.bio_sanitized }}
+        </p>
+        {% endif %}
+      </div>
+
+      <div class="mt-6 space-y-3">
+        <div>
+          <h2 class="text-sm font-semibold text-gray-800 mb-1">Contact</h2>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>
+              <span class="font-medium">Téléphone : </span>
+              {% if profile_user.phone_e164 %}
+                {{ profile_user.phone_e164 }}
+              {% else %}
+                Non renseigné
+              {% endif %}
+            </li>
+            <li>
+              <span class="font-medium">WhatsApp : </span>
+              {% if profile and profile.whatsapp_e164 %}
+                {{ profile.whatsapp_e164 }}
+              {% else %}
+                Non renseigné
+              {% endif %}
+            </li>
+          </ul>
+        </div>
+
+        {% if profile %}
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800 mb-2">Moyens de contact préférés</h3>
+          <div class="flex flex-wrap gap-2">
+            {% with prefs=profile.contact_prefs %}
+              {% if prefs %}
+                {% if 'whatsapp' in prefs and profile.whatsapp_e164 %}
+                  <a class="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de HABIKO.'|urlencode }}"
+                     target="_blank" rel="nofollow noopener">
+                    <span>WhatsApp</span>
+                  </a>
+                {% endif %}
+                {% if 'sms' in prefs and profile_user.phone_e164 %}
+                  <a class="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="sms:{{ profile_user.phone_e164 }}" rel="nofollow">
+                    <span>SMS</span>
+                  </a>
+                {% endif %}
+                {% if 'call' in prefs and profile_user.phone_e164 %}
+                  <a class="inline-flex items-center gap-1.5 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="tel:{{ profile_user.phone_e164 }}" rel="nofollow">
+                    <span>Appel direct</span>
+                  </a>
+                {% endif %}
+              {% else %}
+                {% if profile.whatsapp_e164 %}
+                  <a class="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de HABIKO.'|urlencode }}"
+                     target="_blank" rel="nofollow noopener">
+                    <span>WhatsApp</span>
+                  </a>
+                {% endif %}
+                {% if profile_user.phone_e164 %}
+                  <a class="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="sms:{{ profile_user.phone_e164 }}" rel="nofollow">
+                    <span>SMS</span>
+                  </a>
+                  <a class="inline-flex items-center gap-1.5 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                     href="tel:{{ profile_user.phone_e164 }}" rel="nofollow">
+                    <span>Appel direct</span>
+                  </a>
+                {% endif %}
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </aside>
+
+  <!-- Colonne annonces -->
+  <main class="flex-1">
+    <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">
+          Annonces de {{ profile.display_name|default:profile_user.username }}
+        </h2>
+      </div>
+
+      {% if ads %}
+        <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+          {% for ad in ads %}
+            <a href="/ads/{{ ad.slug }}/" class="group block bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition h-40">
+              <div class="flex h-full">
+                <div class="w-32 flex-shrink-0 bg-slate-100">
+                  {% if ad.media.count %}
+                    <img src="{{ ad.media.first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy">
+                  {% else %}
+                    <div class="w-full h-full bg-slate-200 flex items-center justify-center">
+                      <span class="text-slate-400 text-xs">Photo</span>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
+                  <div class="min-w-0 flex-1">
+                    <div class="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors mb-1">
+                      {{ ad.title }}
+                    </div>
+                    <div class="text-xs text-gray-600 mb-1 font-medium">
+                      {{ ad.get_category_display }}
+                    </div>
+                    <div class="text-xs text-gray-500 mb-1">
+                      {{ ad.city.name }}
+                    </div>
+                  </div>
+                  <div class="flex justify-between items-end mt-1">
+                    <div class="text-xs text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded">
+                      {{ ad.created_at|date:"d/m/Y" }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-500 text-sm">
+          Cet utilisateur n'a pas encore publié d'annonces.
+        </p>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}
+

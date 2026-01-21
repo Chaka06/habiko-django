@@ -8,6 +8,16 @@ from ads.models import City
 
 class ProfileEditForm(forms.ModelForm):
     """Formulaire pour modifier le profil"""
+    avatar = forms.ImageField(
+        required=False,
+        label="Photo de profil",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none",
+            }
+        ),
+        help_text="Photo carrée (recommandé 400x400). Formats acceptés: JPG, PNG, WEBP.",
+    )
     phone_e164 = forms.CharField(
         max_length=20,
         required=False,
@@ -43,7 +53,7 @@ class ProfileEditForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ["display_name", "city", "bio_sanitized"]
+        fields = ["display_name", "city", "bio_sanitized", "avatar"]
         widgets = {
             "display_name": forms.TextInput(attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg"

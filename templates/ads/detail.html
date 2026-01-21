@@ -346,6 +346,48 @@
   </section>
   {% endif %}
 
+  <!-- Profil de l'annonceur -->
+  <section class="mt-12 pt-8 border-t border-gray-200">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Profil de l'annonceur</h2>
+    <div class="flex items-center justify-between bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center gap-3">
+        <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
+          <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
+            {% if ad.user.profile and ad.user.profile.avatar %}
+              <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover">
+            {% else %}
+              <span class="text-gray-600 text-lg font-semibold">
+                {{ ad.user.username|first|upper }}
+              </span>
+            {% endif %}
+          </div>
+        </a>
+        <div>
+          <a href="{% url 'accounts:public_profile' ad.user.username %}" class="text-sm font-semibold text-gray-900 hover:text-orange-600 transition">
+            {% if ad.user.profile and ad.user.profile.display_name %}
+              {{ ad.user.profile.display_name }}
+            {% else %}
+              {{ ad.user.username }}
+            {% endif %}
+          </a>
+          <p class="text-xs text-gray-500 mt-0.5">
+            {% if ad.user.profile and ad.user.profile.city %}
+              {{ ad.user.profile.city.name }}, Côte d'Ivoire
+            {% else %}
+              Côte d'Ivoire
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="hidden sm:flex flex-col items-end text-xs text-gray-500">
+        <span>Voir toutes ses annonces</span>
+        <a href="{% url 'accounts:public_profile' ad.user.username %}" class="text-orange-600 hover:text-orange-700 font-medium">
+          Consulter le profil →
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- Annonces similaires -->
   {% if similar_ads %}
     <section class="mt-16 pt-8 border-t border-gray-200">
