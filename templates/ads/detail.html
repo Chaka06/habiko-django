@@ -212,7 +212,7 @@
           <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
             <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
               {% if ad.user.profile and ad.user.profile.avatar %}
-                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover">
+                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover" loading="lazy" decoding="async">
               {% else %}
                 <span class="text-gray-600 text-sm font-semibold">
                   {{ ad.user.username|first|upper }}
@@ -469,7 +469,7 @@
           <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
             <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
               {% if ad.user.profile and ad.user.profile.avatar %}
-                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover">
+                <img src="{{ ad.user.profile.avatar.url }}" alt="{{ ad.user.profile.display_name|default:ad.user.username }}" class="w-full h-full object-cover" loading="lazy" decoding="async">
               {% else %}
                 <span class="text-gray-600 text-sm font-semibold">
                   {{ ad.user.username|first|upper }}

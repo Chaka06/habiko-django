@@ -131,6 +131,13 @@ class Ad(models.Model):
 
     class Meta:
         ordering = ["-is_premium", "-is_urgent", "-created_at"]
+        indexes = [
+            models.Index(fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"),
+            models.Index(fields=["status", "category"], name="ad_category_idx"),
+            models.Index(fields=["status", "city"], name="ad_city_idx"),
+            models.Index(fields=["slug"], name="ad_slug_idx"),
+            models.Index(fields=["user", "status"], name="ad_user_status_idx"),
+        ]
 
     def clean(self):
         invalid = [s for s in self.subcategories if s not in self.SUBCATEGORY_CHOICES]

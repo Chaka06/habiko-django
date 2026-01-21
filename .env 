@@ -1,0 +1,35 @@
+# --- Mode développement ---
+DEBUG=True
+
+# URL du site (pour les liens dans les mails, etc.)
+SITE_URL=http://localhost:8001
+
+# --- Base de données : Supabase PostgreSQL ---
+DB_ENGINE=postgres
+
+# ATTENTION : il faut échapper les caractères spéciaux du mot de passe dans l'URL.
+# Ton mot de passe est : Ch@coul@melo72
+# Dans une URL, le caractère @ doit être encodé en %40.
+# Donc le mot de passe devient : Ch%40coul%40melo72
+
+DATABASE_URL=postgresql://postgres:Ch%40coul%40melo72@db.tjitkndmhhrsxguntdvi.supabase.co:5432/postgres
+
+# (facultatif, mais propre si tu veux les utiliser séparément)
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=Ch@coul@melo72
+POSTGRES_HOST=db.tjitkndmhhrsxguntdvi.supabase.co
+POSTGRES_PORT=5432
+
+# --- SMTP HABIKO (no-replay@ci-habiko.com) ---
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
+DEFAULT_FROM_EMAIL=HABIKO <no-replay@ci-habiko.com>
+SERVER_EMAIL=HABIKO Errors <no-replay@ci-habiko.com>
+
+EMAIL_HOST=mail.ci-habiko.com
+EMAIL_PORT=465
+EMAIL_HOST_USER=no-replay@ci-habiko.com
+EMAIL_HOST_PASSWORD=Ch@coul@melo72
+EMAIL_USE_SSL=True
+EMAIL_USE_TLS=False

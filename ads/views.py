@@ -8,7 +8,8 @@ from .models import Ad, City
 def ad_list(request: HttpRequest) -> HttpResponse:
     qs = (
         Ad.objects.filter(status=Ad.Status.APPROVED)
-        .select_related("city", "user")
+        .select_related("city", "user", "user__profile")
+        .prefetch_related("media")
         .order_by("-is_premium", "-is_urgent", "-created_at")
     )
     city = request.GET.get("city")
@@ -40,7 +41,12 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    cities = City.objects.all()
+    # Cache des villes (elles changent rarement)
+    from django.core.cache import cache
+    cities = cache.get("all_cities")
+    if cities is None:
+        cities = City.objects.all()
+        cache.set("all_cities", cities, 3600)  # Cache 1 heure
     return render(
         request,
         "ads/list.html",
@@ -57,25 +63,30 @@ def ad_list(request: HttpRequest) -> HttpResponse:
 
 def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
     ad = get_object_or_404(
-        Ad.objects.select_related("city", "user"), slug=slug, status=Ad.Status.APPROVED
+        Ad.objects.select_related("city", "user", "user__profile")
+        .prefetch_related("media"),
+        slug=slug,
+        status=Ad.Status.APPROVED
     )
 
     # Annonces similaires : même catégorie et même ville, exclure l'annonce actuelle
     similar_ads = (
         Ad.objects.filter(status=Ad.Status.APPROVED, category=ad.category, city=ad.city)
         .exclude(id=ad.id)
-        .select_related("city", "user")
+        .select_related("city", "user", "user__profile")
+        .prefetch_related("media")
         .order_by("-created_at")[:5]
     )
 
     # Si pas assez d'annonces similaires, ajouter d'autres annonces de la même catégorie
-    if similar_ads.count() < 5:
+    if len(similar_ads) < 5:
         additional_ads = (
             Ad.objects.filter(status=Ad.Status.APPROVED, category=ad.category)
             .exclude(id=ad.id)
             .exclude(id__in=[a.id for a in similar_ads])
-            .select_related("city", "user")
-            .order_by("-created_at")[: 5 - similar_ads.count()]
+            .select_related("city", "user", "user__profile")
+            .prefetch_related("media")
+            .order_by("-created_at")[: 5 - len(similar_ads)]
         )
         similar_ads = list(similar_ads) + list(additional_ads)
 

@@ -174,6 +174,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Compression gzip pour améliorer les performances
+    "core.middleware.GZipCompressionMiddleware",
     # En dev on désactive les redirections HTTP->HTTPS pour pouvoir utiliser http://127.0.0.1
     "core.middleware.RedirectMiddleware",  # Redirections HTTP->HTTPS et www->non-www (désactivé si DEBUG=True, voir plus bas)
     "corsheaders.middleware.CorsMiddleware",
@@ -205,6 +207,19 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_metrics",
+            ],
+            # Activer le cache de template pour améliorer les performances
+            "loaders": [
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                )
+            ] if not DEBUG else [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
             ],
         },
     },

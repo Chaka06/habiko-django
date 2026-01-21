@@ -1,6 +1,8 @@
-from django.http import HttpRequest, HttpResponsePermanentRedirect
+from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
+import gzip
+from io import BytesIO
 
 
 class RedirectMiddleware:
@@ -107,3 +109,66 @@ class AgeGateMiddleware:
             if not allowed:
                 return redirect("/age-gate/")
         return self.get_response(request)
+
+
+class GZipCompressionMiddleware:
+    """
+    Middleware pour compresser les réponses avec gzip
+    Améliore les performances en réduisant la taille des réponses HTTP
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        response = self.get_response(request)
+        
+        # Ne compresser que les réponses HTML, CSS, JS, JSON, XML
+        content_type = response.get('Content-Type', '')
+        compressible_types = [
+            'text/html',
+            'text/css',
+            'text/javascript',
+            'application/javascript',
+            'application/json',
+            'application/xml',
+            'text/xml',
+        ]
+        
+        # Vérifier si le type de contenu est compressible
+        should_compress = any(ct in content_type for ct in compressible_types)
+        
+        # Vérifier si le client accepte gzip
+        accept_encoding = request.META.get('HTTP_ACCEPT_ENCODING', '')
+        accepts_gzip = 'gzip' in accept_encoding
+        
+        # Ne pas compresser si déjà compressé ou si trop petit (< 200 bytes)
+        if (should_compress and accepts_gzip and 
+            'Content-Encoding' not in response and 
+            len(response.content) > 200):
+            
+            # Compresser le contenu
+            compressed_content = BytesIO()
+            with gzip.GzipFile(fileobj=compressed_content, mode='wb') as gz_file:
+                gz_file.write(response.content)
+            compressed_content.seek(0)
+            
+            # Créer une nouvelle réponse avec le contenu compressé
+            compressed_response = HttpResponse(
+                compressed_content.read(),
+                content_type=response.get('Content-Type'),
+                status=response.status_code
+            )
+            
+            # Copier les headers de la réponse originale
+            for header, value in response.items():
+                if header.lower() != 'content-length':
+                    compressed_response[header] = value
+            
+            # Ajouter le header Content-Encoding
+            compressed_response['Content-Encoding'] = 'gzip'
+            compressed_response['Content-Length'] = str(len(compressed_response.content))
+            compressed_response['Vary'] = 'Accept-Encoding'
+            
+            return compressed_response
+        
+        return response
