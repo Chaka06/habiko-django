@@ -201,7 +201,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
           <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
         </svg>
-        <span id="toggleContactMobileText">Cliquez pour afficher le téléphone</span>
+        <span id="toggleContactMobileText">Nous contacter</span>
+        <svg id="toggleContactMobileArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 transition-transform duration-200" fill="currentColor">
+          <path d="M12 15.5a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L12 13.086l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4A1 1 0 0 1 12 15.5z"/>
+        </svg>
       </button>
       <div id="contactContentMobile" class="hidden px-4 pb-4">
         <!-- Header + profil annonceur -->
@@ -455,7 +458,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
             <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
           </svg>
-          <span id="toggleContactDesktopText">Cliquez pour afficher le téléphone</span>
+          <span id="toggleContactDesktopText">Nous contacter</span>
+          <svg id="toggleContactDesktopArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 transition-transform duration-200" fill="currentColor">
+            <path d="M12 15.5a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L12 13.086l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4A1 1 0 0 1 12 15.5z"/>
+          </svg>
         </button>
         <div id="contactContentDesktop" class="hidden px-4 pb-4">
         <!-- Header + profil annonceur -->
@@ -652,29 +658,37 @@
   const contentDesktop = document.getElementById("contactContentDesktop");
   const textMobile = document.getElementById("toggleContactMobileText");
   const textDesktop = document.getElementById("toggleContactDesktopText");
+  const arrowMobile = document.getElementById("toggleContactMobileArrow");
+  const arrowDesktop = document.getElementById("toggleContactDesktopArrow");
 
-  function toggleContent(content, textElement) {
+  function toggleContent(content, textElement, arrowElement) {
     if (content && textElement) {
       const isHidden = content.classList.contains("hidden");
       if (isHidden) {
         content.classList.remove("hidden");
-        textElement.textContent = "Masquer le téléphone";
+        textElement.textContent = "Masquer les contacts";
+        if (arrowElement) {
+          arrowElement.style.transform = "rotate(180deg)";
+        }
       } else {
         content.classList.add("hidden");
-        textElement.textContent = "Cliquez pour afficher le téléphone";
+        textElement.textContent = "Nous contacter";
+        if (arrowElement) {
+          arrowElement.style.transform = "rotate(0deg)";
+        }
       }
     }
   }
 
   if (toggleBtnMobile && contentMobile && textMobile) {
     toggleBtnMobile.addEventListener("click", function() {
-      toggleContent(contentMobile, textMobile);
+      toggleContent(contentMobile, textMobile, arrowMobile);
     });
   }
 
   if (toggleBtnDesktop && contentDesktop && textDesktop) {
     toggleBtnDesktop.addEventListener("click", function() {
-      toggleContent(contentDesktop, textDesktop);
+      toggleContent(contentDesktop, textDesktop, arrowDesktop);
     });
   }
 })();
