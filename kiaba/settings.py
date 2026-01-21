@@ -195,33 +195,40 @@ if DEBUG and "core.middleware.RedirectMiddleware" in MIDDLEWARE:
 
 ROOT_URLCONF = "kiaba.urls"
 
+# Configuration des templates avec cache en production
+_template_options = {
+    "context_processors": [
+        "django.template.context_processors.debug",
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+        "core.context_processors.site_metrics",
+    ],
+}
+
+# En production, activer le cache de template pour améliorer les performances
+if not DEBUG:
+    _template_options["loaders"] = [
+        (
+            "django.template.loaders.cached.Loader",
+            [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
+        )
+    ]
+    # APP_DIRS doit être False quand loaders est défini
+    _template_app_dirs = False
+else:
+    # En DEBUG, utiliser APP_DIRS (plus simple pour le développement)
+    _template_app_dirs = True
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-                "core.context_processors.site_metrics",
-            ],
-            # Activer le cache de template pour améliorer les performances
-            "loaders": [
-                (
-                    "django.template.loaders.cached.Loader",
-                    [
-                        "django.template.loaders.filesystem.Loader",
-                        "django.template.loaders.app_directories.Loader",
-                    ],
-                )
-            ] if not DEBUG else [
-                "django.template.loaders.filesystem.Loader",
-                "django.template.loaders.app_directories.Loader",
-            ],
-        },
+        "APP_DIRS": _template_app_dirs,
+        "OPTIONS": _template_options,
     },
 ]
 
