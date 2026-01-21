@@ -4,7 +4,7 @@ services:
     env: python
     region: frankfurt
     plan: free
-    repo: https://github.com/kiaba666/KIABA-RENCONTRE.git
+    repo: https://github.com/Chaka06/habiko-django.git
     branch: master
     autoDeploy: true
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
@@ -16,50 +16,53 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "ci-kiaba.com,www.ci-kiaba.com"
+        value: "ci-habiko.com,www.ci-habiko.com"
       - key: SITE_URL
-        value: "https://ci-kiaba.com"
-      # Database (fill with your Render PostgreSQL connection info)
+        value: "https://ci-habiko.com"
+      # Database (configure these in Render dashboard, not here)
       - key: DB_ENGINE
         value: "postgres"
-      - key: POSTGRES_DB
-        value: "kiaba_db_wzbz_8ruc"
-      - key: POSTGRES_USER
-        value: "kiaba_db_wzbz_user"
-      - key: POSTGRES_PASSWORD
-        value: "GIC0OwgP0ACv90JSg1EH19Hre1Ndg1ir"
-      - key: POSTGRES_HOST
-        value: "dpg-d53940khg0os738mrqq0-a.oregon-postgres.render.com"
-      - key: POSTGRES_PORT
-        value: "5432"
-      # Email configuration (remove EMAIL_BACKEND - handled by settings.py)
-      - key: EMAIL_HOST
-        value: "mail55.lwspanel.com"
-      - key: EMAIL_PORT
-        value: "465"
-      - key: EMAIL_USE_SSL
-        value: "True"
-      - key: EMAIL_HOST_USER
-        value: "support@ci-kiaba.com"
-      - key: EMAIL_HOST_PASSWORD
-        value: "your_password_here"
-      - key: DEFAULT_FROM_EMAIL
-        value: "KIABA <support@ci-kiaba.com>"
-      - key: SERVER_EMAIL
-        value: "KIABA Errors <errors@ci-kiaba.com>"
-      # CinetPay configuration
-      - key: CINETPAY_SITE_ID
-        value: "105907241"
-      - key: CINETPAY_API_KEY
-        value: "1317052651681a6fdef33a80.27918103"
-      - key: CINETPAY_SITE_KEY
-        value: "9694017766946fdd7c66b09.59234458"
-      - key: CINETPAY_MODE
-        value: "PRODUCTION"
-      - key: CINETPAY_NOTIFY_URL
-        value: "https://ci-kiaba.com/accounts/payment/cinetpay/notify/"
-      - key: CINETPAY_RETURN_URL
-        value: "https://ci-kiaba.com/accounts/payment/cinetpay/return/"
+      # IMPORTANT: Set these values in Render dashboard environment variables, NOT here
+      # - key: POSTGRES_DB
+      #   value: "your_database_name"
+      # - key: POSTGRES_USER
+      #   value: "your_database_user"
+      # - key: POSTGRES_PASSWORD
+      #   value: "your_database_password"
+      # - key: POSTGRES_HOST
+      #   value: "your_database_host"
+      # - key: POSTGRES_PORT
+      #   value: "5432"
+      # Email configuration (configure these in Render dashboard, not here)
+      # - key: EMAIL_HOST
+      #   value: "smtp.sendgrid.net"
+      # - key: EMAIL_PORT
+      #   value: "587"
+      # - key: EMAIL_USE_TLS
+      #   value: "True"
+      # - key: EMAIL_HOST_USER
+      #   value: "apikey"
+      # - key: EMAIL_HOST_PASSWORD
+      #   value: "your_sendgrid_api_key"
+      # - key: SENDGRID_API_KEY
+      #   value: "your_sendgrid_api_key"
+      # - key: DEFAULT_FROM_EMAIL
+      #   value: "HABIKO <no-reply@ci-habiko.com>"
+      # - key: SERVER_EMAIL
+      #   value: "HABIKO Errors <errors@ci-habiko.com>"
+      # CinetPay configuration (configure these in Render dashboard, not here)
+      # - key: CINETPAY_SITE_ID
+      #   value: "your_site_id"
+      # - key: CINETPAY_API_KEY
+      #   value: "your_api_key"
+      # - key: CINETPAY_SITE_KEY
+      #   value: "your_site_key"
+      # - key: CINETPAY_MODE
+      #   value: "PRODUCTION"
+      # - key: CINETPAY_NOTIFY_URL
+      #   value: "https://ci-habiko.com/accounts/payment/cinetpay/notify/"
+      # - key: CINETPAY_RETURN_URL
+      #   value: "https://ci-habiko.com/accounts/payment/cinetpay/return/"
     disks:
       - name: media
         mountPath: /app/media
