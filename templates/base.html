@@ -583,12 +583,20 @@
       class="{% block main_class %}max-w-7xl mx-auto p-3 md:p-4{% endblock %}"
     >
       {% if messages %}
-      <div class="max-w-3xl mx-auto mb-4 space-y-2">
+      <div class="max-w-3xl mx-auto mb-4 space-y-2" id="messagesContainer">
         {% for message in messages %}
         <div
-          class="rounded-lg border px-4 py-3 text-sm {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800 {% endif %} {% if message.tags == 'info' %} bg-orange-50 border-orange-200 text-orange-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
+          class="message-toast rounded-lg border px-4 py-3 text-sm opacity-0 transform translate-y-2 transition-all duration-300 {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800 {% endif %} {% if message.tags == 'info' %} bg-orange-50 border-orange-200 text-orange-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
+          data-message-id="{{ forloop.counter }}"
         >
-          {{ message }}
+          <div class="flex items-center justify-between gap-3">
+            <span>{{ message }}</span>
+            <button class="message-close text-gray-400 hover:text-gray-600 transition" aria-label="Fermer">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
         {% endfor %}
       </div>
@@ -711,6 +719,39 @@
         const modal = document.getElementById('loadingModal');
         modal.classList.remove('active');
       }
+
+      // Gérer les messages toast (apparition/disparition automatique)
+      document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.message-toast');
+        
+        messages.forEach(function(message, index) {
+          // Animation d'apparition
+          setTimeout(function() {
+            message.classList.remove('opacity-0', 'translate-y-2');
+            message.classList.add('opacity-100', 'translate-y-0');
+          }, 100 * (index + 1)); // Délai progressif pour chaque message
+          
+          // Disparition automatique après 5 secondes
+          const autoHideTimeout = setTimeout(function() {
+            message.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(function() {
+              message.remove();
+            }, 300); // Attendre la fin de l'animation
+          }, 5000); // 5 secondes
+          
+          // Bouton de fermeture manuelle
+          const closeBtn = message.querySelector('.message-close');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+              clearTimeout(autoHideTimeout);
+              message.classList.add('opacity-0', 'translate-y-2');
+              setTimeout(function() {
+                message.remove();
+              }, 300);
+            });
+          }
+        });
+      });
 
       // Gérer la soumission des formulaires
       document.addEventListener('DOMContentLoaded', function() {
