@@ -178,6 +178,7 @@ MIDDLEWARE = [
     "core.middleware.GZipCompressionMiddleware",
     # En dev on désactive les redirections HTTP->HTTPS pour pouvoir utiliser http://127.0.0.1
     "core.middleware.RedirectMiddleware",  # Redirections HTTP->HTTPS et www->non-www (désactivé si DEBUG=True, voir plus bas)
+    "core.middleware.CloudflareMiddleware",  # Récupère l'IP réelle depuis Cloudflare (CF-Connecting-IP)
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -461,6 +462,10 @@ CSRF_COOKIE_SECURE = False
 # Renforcer la protection des cookies en toutes circonstances
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+# Durée des sessions (14 jours)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Politique de referrer plus stricte
 SECURE_REFERRER_POLICY = "same-origin"
 # Désactiver complètement HSTS en développement pour éviter les redirections HTTPS forcées

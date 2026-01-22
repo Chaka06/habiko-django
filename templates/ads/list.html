@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces{% if selected_category %} {{ selected_category|title }}{% endif %} · HABIKO{% endblock %}
-{% block description %}{% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire. Maisons, villas, appartements, terrains.{% else %}HABIKO - Site immobilier en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements, terrains à Abidjan et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
+{% block description %}{% if selected_city %}Découvrez les meilleures annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire sur HABIKO. Maisons à vendre, villas à louer, appartements et terrains vérifiés. Contactez directement les propriétaires.{% else %}HABIKO - Le site immobilier #1 en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces vérifiées : maisons à vendre, villas à louer, appartements et terrains à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
 {% block keywords %}{% if selected_city %}immobilier {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire{% endblock %}
 {% block canonical_url %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 {% block hreflang_fr_ci %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
@@ -22,10 +22,12 @@
       "@type": "ListItem",
       "position": {{ forloop.counter }},
       "item": {
-        "@type": "Person",
+        "@type": "Product",
         "name": "{{ ad.title|escapejs }}",
         "description": "{{ ad.description_sanitized|truncatewords:20|escapejs }}",
         "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+        "image": {% if ad.media.count %}"https://ci-habiko.com{{ ad.media.first.image.url }}"{% else %}"https://ci-habiko.com/static/img/logo.png"{% endif %},
+        "category": "{{ ad.get_category_display|escapejs }}",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "{{ ad.city.name }}",
@@ -146,7 +148,7 @@
               src="{{ ad.media.first.image.url }}"
               data-placeholder="{% cycle ph1 ph2 ph3 ph4 %}"
               onerror="this.onerror=null; this.src=this.dataset.placeholder;"
-              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO"
+              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce immobilière sur HABIKO."
               loading="lazy"
               decoding="async"
               class="w-full h-full object-cover"
@@ -157,7 +159,7 @@
           {% else %}
             <img
               src="{% cycle ph1 ph2 ph3 ph4 %}"
-              alt="Illustration d'annonce immobilière HABIKO"
+              alt="Annonce immobilière {{ ad.get_category_display|default:'immobilier' }} à {{ ad.city.name }}, Côte d'Ivoire - HABIKO"
               class="w-full h-full object-cover"
               loading="lazy"
               width="160"

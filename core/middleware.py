@@ -48,6 +48,27 @@ class RedirectMiddleware:
         return self.get_response(request)
 
 
+class CloudflareMiddleware:
+    """
+    Middleware pour récupérer l'IP réelle du client depuis Cloudflare
+    Cloudflare envoie l'IP réelle dans le header CF-Connecting-IP
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Cloudflare envoie l'IP réelle dans ce header
+        cf_connecting_ip = request.META.get('HTTP_CF_CONNECTING_IP')
+        if cf_connecting_ip:
+            # Remplacer REMOTE_ADDR par l'IP réelle du client
+            request.META['REMOTE_ADDR'] = cf_connecting_ip
+            # Garder aussi l'IP originale dans un header personnalisé
+            request.META['HTTP_X_FORWARDED_FOR_ORIGINAL'] = request.META.get('HTTP_X_FORWARDED_FOR', '')
+        
+        response = self.get_response(request)
+        return response
+
+
 class AgeGateMiddleware:
     """
     Middleware pour l'age-gate (désactivé pour HABIKO - site immobilier)

@@ -219,6 +219,19 @@ class AdMedia(models.Model):
                 logger.warning(f"Impossible d'ouvrir l'image: {self.image.name if self.image else 'None'}")
                 return False
             
+            # OPTIMISATION : Redimensionner l'image si trop grande (max 1920px de largeur)
+            MAX_WIDTH = 1920
+            MAX_HEIGHT = 1920
+            img_width, img_height = img.size
+            
+            if img_width > MAX_WIDTH or img_height > MAX_HEIGHT:
+                # Calculer les nouvelles dimensions en gardant les proportions
+                ratio = min(MAX_WIDTH / img_width, MAX_HEIGHT / img_height)
+                new_width = int(img_width * ratio)
+                new_height = int(img_height * ratio)
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                logger.info(f"Image redimensionnée de {img_width}x{img_height} à {new_width}x{new_height}")
+            
             # Convertir en RGBA si nécessaire
             if img.mode != 'RGBA':
                 img = img.convert('RGBA')
@@ -247,6 +260,7 @@ class AdMedia(models.Model):
                 logo = logo.convert('RGBA')
             
             # Calculer la taille du logo (50% de la plus petite dimension de l'image)
+            # (img_width et img_height ont été mis à jour après redimensionnement)
             img_width, img_height = img.size
             min_dimension = min(img_width, img_height)
             logo_size = int(min_dimension * 0.5)
@@ -269,7 +283,7 @@ class AdMedia(models.Model):
             # Coller le logo sur l'image (100% opaque, pas de transparence)
             img.paste(logo, (x, y), logo)
             
-            # Sauvegarder l'image modifiée
+            # Sauvegarder l'image modifiée avec compression optimisée
             output = BytesIO()
             # Conserver le format original
             format_map = {
@@ -280,15 +294,34 @@ class AdMedia(models.Model):
             # Utiliser le format original détecté ou celui de l'image
             img_format = format_map.get(original_format or img.format, 'JPEG')
             
-            if img_format == 'PNG':
-                img.save(output, format='PNG', quality=95)
-            else:
-                # Convertir en RGB pour JPEG
+            # OPTIMISATION : Essayer WebP en premier (meilleure compression)
+            # Si WebP n'est pas supporté, utiliser le format original
+            try:
+                # Convertir en RGB pour WebP/JPEG
                 if img.mode == 'RGBA':
                     rgb_img = Image.new('RGB', img.size, (255, 255, 255))
                     rgb_img.paste(img, mask=img.split()[3])
                     img = rgb_img
-                img.save(output, format=img_format, quality=85, optimize=True)
+                
+                # Essayer WebP (meilleure compression, ~30% plus petit que JPEG)
+                img.save(output, format='WEBP', quality=80, method=6, optimize=True)
+                img_format = 'WEBP'
+                logger.info("Image sauvegardée en WebP (compression optimale)")
+            except Exception as e:
+                # Fallback sur le format original si WebP échoue
+                logger.warning(f"WebP non disponible, utilisation du format {img_format}: {str(e)}")
+                if img_format == 'PNG':
+                    # PNG avec compression optimisée (qualité réduite pour économiser l'espace)
+                    if img.mode != 'RGBA':
+                        img = img.convert('RGBA')
+                    img.save(output, format='PNG', optimize=True, compress_level=9)
+                else:
+                    # JPEG avec qualité optimisée (80% = bon compromis taille/qualité)
+                    if img.mode == 'RGBA':
+                        rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                        rgb_img.paste(img, mask=img.split()[3])
+                        img = rgb_img
+                    img.save(output, format='JPEG', quality=80, optimize=True, progressive=True)
             
             output.seek(0)
             

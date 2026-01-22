@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{{ ad.title }} · {{ ad.city.name }} · HABIKO{% endblock %}
-{% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:25|striptags }}. Contactez directement sur HABIKO, alternative à Bizi, Jedolo et Locanto.{% endblock %}
+{% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:20|striptags }}. Annonce vérifiée sur HABIKO, le site immobilier de référence en Côte d'Ivoire. Contactez directement le propriétaire par WhatsApp, SMS ou appel direct.{% endblock %}
 {% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, habiko, habiko ci, habiko {{ ad.city.name|lower }}, habiko ci, habiko ci, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
 {% block hreflang_fr_ci %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
 {% block hreflang_default %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
@@ -10,13 +10,26 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
+  "@type": "Product",
   "name": "{{ ad.title|escapejs }}",
   "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
   "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-habiko.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-habiko.com/static/img/logo.png"]{% endif %},
+  "category": "{{ ad.get_category_display|escapejs }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "HABIKO"
+  },
+  "offers": {
+    "@type": "Offer",
+    "availability": "https://schema.org/InStock",
+    "priceCurrency": "XOF",
+    "url": "https://ci-habiko.com/ads/{{ ad.slug }}"
+  },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "{{ ad.city.name }}",
+    "addressRegion": "{{ ad.city.region|default:'' }}",
     "addressCountry": "CI"
   }
 }
@@ -135,7 +148,7 @@
             id="mainImage"
             src="{{ first.image.url }}"
             onerror="this.onerror=null; this.src='{% static 'page-detail-annonce.PNG' %}';"
-            alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO"
+            alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Découvrez cette annonce immobilière sur HABIKO, le site immobilier de référence en Côte d'Ivoire."
             class="max-w-full max-h-96 md:max-h-[500px] object-contain"
             loading="eager"
             width="800"
@@ -146,7 +159,7 @@
         <img
           id="mainImage"
           src="{% static 'page-detail-annonce.PNG' %}"
-          alt="Illustration d'annonce immobilière HABIKO"
+          alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - HABIKO Immobilier"
           class="max-w-full max-h-96 md:max-h-[500px] object-contain"
           loading="eager"
           width="800"
@@ -183,7 +196,7 @@
 
   <!-- Description -->
   <section class="prose max-w-none mt-6 text-gray-800">
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-3">Description du Bien Immobilier</h2>
     <div class="text-gray-700 leading-relaxed">
       {{ ad.description_sanitized|linebreaksbr }}
     </div>
@@ -361,7 +374,7 @@
 
   <!-- Profil de l'annonceur -->
   <section class="mt-12 pt-8 border-t border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Profil de l'annonceur</h2>
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Profil de l'Annonceur</h2>
     <div class="flex items-center justify-between bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
       <div class="flex items-center gap-3">
         <a href="{% url 'accounts:public_profile' ad.user.username %}" class="block">
@@ -404,14 +417,14 @@
   <!-- Annonces similaires -->
   {% if similar_ads %}
     <section class="mt-16 pt-8 border-t border-gray-200">
-      <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces similaires</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces Immobilières Similaires à {{ ad.city.name }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for similar_ad in similar_ads %}
           <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 h-40">
             <div class="flex h-full">
               <div class="w-40 flex-shrink-0 bg-slate-100">
                 {% if similar_ad.media.count %}
-                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire | HABIKO" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
+                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur HABIKO." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
                 {% else %}
                   <div class="w-full h-full bg-slate-200 flex items-center justify-center">
                     <span class="text-slate-400 text-xs">Photo</span>

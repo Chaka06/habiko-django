@@ -32,8 +32,5 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Superutilisateur créé avec succès : {username} / {password}"
-            )
+            self.style.SUCCESS(f"Superutilisateur créé avec succès : {username} / {password}")
         )
-

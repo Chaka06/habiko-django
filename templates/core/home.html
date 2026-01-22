@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}HABIKO - Site Immobilier en Côte d'Ivoire | Maisons, Villas, Appartements, Terrains{% endblock %}
-{% block description %}HABIKO est le site immobilier #1 en Côte d'Ivoire. Maisons à vendre, villas à louer, appartements et terrains à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire. Plus de {{ total_approved_ads }} biens disponibles.{% endblock %}
+{% block description %}HABIKO est le site immobilier #1 en Côte d'Ivoire. Découvrez plus de {{ total_approved_ads }} annonces vérifiées : maisons à vendre, villas à louer, appartements et terrains à Abidjan, Bouaké, Daloa, Yamoussoukro et dans toute la Côte d'Ivoire. Publication gratuite, contact direct avec les propriétaires.{% endblock %}
 {% block keywords %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire, abidjan, bouaké, daloa, yamoussoukro, san-pédro, korhogo, man, gagnoa{% endblock %}
 
 {% block structured_data %}
@@ -41,9 +41,9 @@
 <section class="bg-gradient-to-br from-orange-500 to-green-500 text-white py-16 md:py-24">
   <div class="max-w-7xl mx-auto px-4 text-center">
     <h1 class="text-4xl md:text-6xl font-bold mb-6">
-      HABIKO
+      HABIKO - Site Immobilier en Côte d'Ivoire
       <span class="block text-2xl md:text-3xl font-normal text-white">
-        Site Immobilier en Côte d'Ivoire
+        Maisons, Villas, Appartements et Terrains à Vendre et à Louer
       </span>
     </h1>
     <p class="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto">
@@ -85,7 +85,7 @@
 <section class="bg-gray-50 py-16">
   <div class="max-w-7xl mx-auto px-4">
     <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
-      Annonces par ville
+      Annonces Immobilières par Ville en Côte d'Ivoire
     </h2>
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
       {% for city in popular_cities %}
@@ -107,27 +107,27 @@
 <section class="bg-white py-16">
   <div class="max-w-7xl mx-auto px-4">
     <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
-      Catégories populaires
+      Catégories d'Annonces Immobilières
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       <a href="/ads?category=maisons_appartements" class="bg-orange-50 rounded-xl p-6 hover:shadow-md transition">
         <div class="text-2xl mb-3">🏠</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Maisons & Appartements</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Maisons et Appartements à Vendre</h3>
         <p class="text-gray-600">Maisons et appartements à vendre à Abidjan et dans toute la Côte d'Ivoire</p>
       </a>
       <a href="/ads?category=villas_residences" class="bg-green-50 rounded-xl p-6 hover:shadow-md transition">
         <div class="text-2xl mb-3">🏡</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Villas & Résidences</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Villas et Résidences de Standing</h3>
         <p class="text-gray-600">Villas de luxe et résidences meublées de standing</p>
       </a>
       <a href="/ads?category=terrains" class="bg-orange-50 rounded-xl p-6 hover:shadow-md transition">
         <div class="text-2xl mb-3">📐</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Terrains</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Terrains à Vendre</h3>
         <p class="text-gray-600">Terrains à vendre, constructibles et viabilisés</p>
       </a>
       <a href="/ads?category=locations" class="bg-green-50 rounded-xl p-6 hover:shadow-md transition">
         <div class="text-2xl mb-3">🔑</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Locations</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Biens Immobiliers à Louer</h3>
         <p class="text-gray-600">Maisons, appartements et villas à louer</p>
       </a>
     </div>
@@ -138,7 +138,7 @@
 <section class="bg-gray-50 py-16">
   <div class="max-w-7xl mx-auto px-4">
     <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
-      Dernières annonces
+      Dernières Annonces Immobilières Publiées
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for ad in recent_ads %}
@@ -147,7 +147,7 @@
           {% if ad.media.count %}
             <img 
               src="{{ ad.media.first.image.url }}" 
-              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire | HABIKO" 
+              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Achetez ou louez sur HABIKO, le site immobilier de référence en Côte d'Ivoire." 
               class="w-full h-full object-cover" 
               loading="lazy" 
               width="400" 
@@ -183,8 +183,8 @@
     <div class="prose max-w-none">
       <p class="text-lg text-gray-600 mb-6">
         <strong>HABIKO</strong> est la plateforme immobilière de référence en Côte d'Ivoire. 
-        Que vous recherchiez une <strong>maison à vendre à Abidjan</strong>, une <strong>villa à louer à Bouaké</strong>, 
-        ou un <strong>terrain à Daloa</strong>, notre site vous connecte avec des milliers de biens immobiliers vérifiés.
+        Que vous recherchiez une <a href="/ads?category=maisons_appartements&city=abidjan" class="text-orange-600 hover:text-orange-800 font-semibold underline">maison à vendre à Abidjan</a>, une <a href="/ads?category=villas_residences&city=bouake" class="text-orange-600 hover:text-orange-800 font-semibold underline">villa à louer à Bouaké</a>, 
+        ou un <a href="/ads?category=terrains&city=daloa" class="text-orange-600 hover:text-orange-800 font-semibold underline">terrain à Daloa</a>, notre site vous connecte avec des milliers de biens immobiliers vérifiés.
       </p>
       
       <h3 class="text-xl font-bold text-gray-900 mb-4">HABIKO : Votre partenaire immobilier en Côte d'Ivoire</h3>
@@ -206,22 +206,22 @@
       
       <p class="text-lg text-gray-600 mb-4">
         Rejoignez les milliers d'utilisateurs qui font confiance à <strong>HABIKO</strong> 
-        pour leurs transactions immobilières en Côte d'Ivoire. Que vous cherchiez une <strong>maison à vendre</strong> à Abidjan, 
-        une <strong>villa à louer</strong> à Bouaké, ou un <strong>terrain</strong> dans votre ville, 
-        <strong>HABIKO</strong> est votre plateforme de référence.
+        pour leurs transactions immobilières en Côte d'Ivoire. Que vous cherchiez une <a href="/ads?category=maisons_appartements" class="text-orange-600 hover:text-orange-800 font-semibold underline">maison à vendre</a> à Abidjan, 
+        une <a href="/ads?category=villas_residences" class="text-orange-600 hover:text-orange-800 font-semibold underline">villa à louer</a> à Bouaké, ou un <a href="/ads?category=terrains" class="text-orange-600 hover:text-orange-800 font-semibold underline">terrain</a> dans votre ville, 
+        <strong>HABIKO</strong> est votre plateforme de référence. <a href="/ads" class="text-orange-600 hover:text-orange-800 font-semibold underline">Consultez toutes nos annonces immobilières</a>.
       </p>
       
       <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Recherches populaires sur HABIKO :</h3>
       <p class="text-lg text-gray-600 mb-4">
-        Les utilisateurs recherchent souvent : <strong>maison à vendre Abidjan</strong>, <strong>villa à louer</strong>, 
-        <strong>appartement Abidjan</strong>, <strong>terrain à vendre</strong>, <strong>résidence meublée</strong>, 
-        <strong>immobilier Côte d'Ivoire</strong>, et bien d'autres termes liés à l'immobilier en Côte d'Ivoire.
+        Les utilisateurs recherchent souvent : <a href="/ads?category=maisons_appartements&city=abidjan" class="text-orange-600 hover:text-orange-800 font-semibold underline">maison à vendre Abidjan</a>, <a href="/ads?category=villas_residences" class="text-orange-600 hover:text-orange-800 font-semibold underline">villa à louer</a>, 
+        <a href="/ads?category=maisons_appartements&city=abidjan" class="text-orange-600 hover:text-orange-800 font-semibold underline">appartement Abidjan</a>, <a href="/ads?category=terrains" class="text-orange-600 hover:text-orange-800 font-semibold underline">terrain à vendre</a>, <a href="/ads?category=villas_residences" class="text-orange-600 hover:text-orange-800 font-semibold underline">résidence meublée</a>, 
+        <a href="/ads" class="text-orange-600 hover:text-orange-800 font-semibold underline">immobilier Côte d'Ivoire</a>, et bien d'autres termes liés à l'immobilier en Côte d'Ivoire.
       </p>
       
       <p class="text-lg text-gray-600">
         <strong>HABIKO</strong> répond à toutes ces recherches en offrant une plateforme complète, sécurisée et adaptée 
-        au marché immobilier ivoirien. Que vous soyez à Abidjan, Bouaké, Daloa, Yamoussoukro ou dans toute autre ville de Côte d'Ivoire, 
-        <strong>HABIKO</strong> est votre destination pour l'immobilier.
+        au marché immobilier ivoirien. Que vous soyez à <a href="/ads?city=abidjan" class="text-orange-600 hover:text-orange-800 font-semibold underline">Abidjan</a>, <a href="/ads?city=bouake" class="text-orange-600 hover:text-orange-800 font-semibold underline">Bouaké</a>, <a href="/ads?city=daloa" class="text-orange-600 hover:text-orange-800 font-semibold underline">Daloa</a>, <a href="/ads?city=yamoussoukro" class="text-orange-600 hover:text-orange-800 font-semibold underline">Yamoussoukro</a> ou dans toute autre ville de Côte d'Ivoire, 
+        <strong>HABIKO</strong> est votre destination pour l'immobilier. <a href="/post" class="text-orange-600 hover:text-orange-800 font-semibold underline">Publiez votre annonce gratuitement</a> dès aujourd'hui.
       </p>
     </div>
   </div>

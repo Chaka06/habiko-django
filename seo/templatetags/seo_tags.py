@@ -33,12 +33,12 @@ def breadcrumbs(context, items=None):
         
         # Si l'URL est relative, la rendre absolue
         if url and not url.startswith('http'):
-            url = f"https://ci-kiaba.com{url}"
+            url = f"https://ci-habiko.com{url}"
         
         breadcrumb_list.append({
             'position': i,
             'name': name,
-            'url': url or f"https://ci-kiaba.com",
+            'url': url or f"https://ci-habiko.com",
         })
     
     return {
@@ -66,13 +66,13 @@ def breadcrumb_json_ld(items):
             url = ''
         
         if url and not url.startswith('http'):
-            url = f"https://ci-kiaba.com{url}"
+            url = f"https://ci-habiko.com{url}"
         
         item_list.append({
             "@type": "ListItem",
             "position": i,
             "name": name,
-            "item": url or "https://ci-kiaba.com"
+            "item": url or "https://ci-habiko.com"
         })
     
     schema = {

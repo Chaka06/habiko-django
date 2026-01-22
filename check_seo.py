@@ -27,7 +27,7 @@ def check_robots_txt():
     
     if response.status_code == 200:
         content = response.content.decode()
-        if 'Sitemap:' in content and 'ci-kiaba.com' in content:
+        if 'Sitemap:' in content and 'ci-habiko.com' in content:
             print("✅ robots.txt : OK")
             return True
         else:
@@ -168,8 +168,8 @@ def main():
         print()
         print("📋 Prochaines étapes :")
         print("1. Aller sur https://search.google.com/search-console")
-        print("2. Ajouter la propriété : https://ci-kiaba.com")
-        print("3. Soumettre le sitemap : https://ci-kiaba.com/sitemap.xml")
+        print("2. Ajouter la propriété : https://ci-habiko.com")
+        print("3. Soumettre le sitemap : https://ci-habiko.com/sitemap.xml")
         print("4. Demander l'indexation de la page d'accueil")
     else:
         print()

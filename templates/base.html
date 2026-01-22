@@ -786,26 +786,193 @@
 
     {% block extra_js %}{% endblock %}
 
-    <!-- Google Analytics - Deferred loading -->
+    <!-- Bannière de consentement aux cookies -->
+    <div id="cookieBanner" class="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50 hidden">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex-1">
+          <p class="text-sm">
+            🍪 Nous utilisons des cookies pour améliorer votre expérience sur HABIKO. 
+            En continuant, vous acceptez notre utilisation des cookies. 
+            <a href="/legal/privacy" class="underline hover:text-orange-400">En savoir plus</a>
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button id="cookieAcceptAll" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Tout accepter
+          </button>
+          <button id="cookieRejectAll" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Refuser
+          </button>
+          <button id="cookieCustomize" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Personnaliser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de personnalisation des cookies -->
+    <div id="cookieModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Gestion des cookies</h2>
+        <p class="text-gray-600 mb-6">
+          Choisissez les cookies que vous souhaitez accepter. Les cookies essentiels sont nécessaires au fonctionnement du site.
+        </p>
+        
+        <div class="space-y-4 mb-6">
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies essentiels</h3>
+                <p class="text-sm text-gray-600">Nécessaires au fonctionnement du site (sessions, sécurité)</p>
+              </div>
+              <span class="text-green-600 font-semibold">Toujours actifs</span>
+            </div>
+          </div>
+          
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies analytiques</h3>
+                <p class="text-sm text-gray-600">Nous aident à comprendre comment vous utilisez le site (Google Analytics)</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cookieAnalytics" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+              </label>
+            </div>
+          </div>
+          
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies marketing</h3>
+                <p class="text-sm text-gray-600">Pour personnaliser les publicités (actuellement non utilisés)</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cookieMarketing" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 justify-end">
+          <button id="cookieSave" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition">
+            Enregistrer les préférences
+          </button>
+          <button id="cookieCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium transition">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script de gestion des cookies -->
+    <script>
+      (function() {
+        // Vérifier si le consentement existe déjà
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return null;
+        }
+
+        const cookieConsent = getCookie('cookie_consent');
+        const banner = document.getElementById('cookieBanner');
+        const modal = document.getElementById('cookieModal');
+
+        // Afficher la bannière si pas de consentement
+        if (!cookieConsent) {
+          banner.classList.remove('hidden');
+        }
+
+        // Gestion des boutons
+        document.getElementById('cookieAcceptAll')?.addEventListener('click', function() {
+          saveCookieConsent({ analytics: true, marketing: true });
+        });
+
+        document.getElementById('cookieRejectAll')?.addEventListener('click', function() {
+          saveCookieConsent({ analytics: false, marketing: false });
+        });
+
+        document.getElementById('cookieCustomize')?.addEventListener('click', function() {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+
+        document.getElementById('cookieCancel')?.addEventListener('click', function() {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+
+        document.getElementById('cookieSave')?.addEventListener('click', function() {
+          const analytics = document.getElementById('cookieAnalytics').checked;
+          const marketing = document.getElementById('cookieMarketing').checked;
+          saveCookieConsent({ analytics, marketing });
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+
+        function saveCookieConsent(consent) {
+          fetch('/api/cookie-consent/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken') || ''
+            },
+            body: JSON.stringify({ consent })
+          })
+          .then(() => {
+            banner.classList.add('hidden');
+            // Recharger Google Analytics si accepté
+            if (consent.analytics && typeof gtag !== 'undefined') {
+              gtag('consent', 'update', {
+                'analytics_storage': 'granted'
+              });
+            }
+            location.reload();
+          })
+          .catch(err => console.error('Erreur lors de la sauvegarde des préférences:', err));
+        }
+      })();
+    </script>
+
+    <!-- Google Analytics - Respect du consentement -->
     {% if GA_MEASUREMENT_ID %}
     <script>
-      // Defer GA loading until after page load
-      window.addEventListener("load", function () {
-        var script = document.createElement("script");
-        script.async = true;
-        script.src =
-          "https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}";
-        document.head.appendChild(script);
+      // Vérifier le consentement avant de charger GA
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      }
 
-        script.onload = function () {
-          window.dataLayer = window.dataLayer || [];
-          function gtag() {
-            dataLayer.push(arguments);
-          }
-          gtag("js", new Date());
-          gtag("config", "{{ GA_MEASUREMENT_ID }}");
-        };
-      });
+      const analyticsConsent = getCookie('cookie_analytics');
+      
+      if (analyticsConsent === 'accepted') {
+        // Charger GA seulement si le consentement est donné
+        window.addEventListener("load", function () {
+          var script = document.createElement("script");
+          script.async = true;
+          script.src =
+            "https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}";
+          document.head.appendChild(script);
+
+          script.onload = function () {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "{{ GA_MEASUREMENT_ID }}", {
+              'anonymize_ip': true,
+              'cookie_flags': 'SameSite=None;Secure'
+            });
+          };
+        });
+      }
     </script>
     {% endif %}
   </body>
