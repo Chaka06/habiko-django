@@ -21,12 +21,12 @@ def cookie_consent(request):
         response = JsonResponse({'status': 'success'})
         
         # Définir les cookies selon les préférences
-        # Cookie essentiel (toujours nécessaire)
+        # Cookie essentiel (toujours nécessaire) - httpOnly=False pour que JS puisse le lire
         response.set_cookie(
             'cookie_consent',
             'accepted',
             max_age=365 * 24 * 60 * 60,  # 1 an
-            httponly=True,
+            httponly=False,  # Doit être lisible par JavaScript pour vérifier l'affichage
             samesite='Lax',
             secure=not request.META.get('HTTP_X_FORWARDED_PROTO') == 'http'
         )
