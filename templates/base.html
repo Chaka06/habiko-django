@@ -583,11 +583,12 @@
       class="{% block main_class %}max-w-7xl mx-auto p-3 md:p-4{% endblock %}"
     >
       {% if messages %}
-      <div class="max-w-3xl mx-auto mb-4 space-y-2" id="messagesContainer">
+      <div class="max-w-3xl mx-auto mb-4 space-y-2" id="messagesContainer" data-messages-count="{{ messages|length }}">
         {% for message in messages %}
         <div
           class="message-toast rounded-lg border px-4 py-3 text-sm opacity-0 transform translate-y-2 transition-all duration-300 {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800 {% endif %} {% if message.tags == 'info' %} bg-orange-50 border-orange-200 text-orange-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
-          data-message-id="{{ forloop.counter }}"
+          data-message-text="{{ message|escapejs }}"
+          data-message-timestamp="{{ forloop.counter }}"
         >
           <div class="flex items-center justify-between gap-3">
             <span>{{ message }}</span>
@@ -720,11 +721,44 @@
         modal.classList.remove('active');
       }
 
-      // Gérer les messages toast (apparition/disparition automatique)
+      // Gérer les messages toast (apparition/disparition automatique + éviter réaffichage)
       document.addEventListener('DOMContentLoaded', function() {
         const messages = document.querySelectorAll('.message-toast');
+        const messagesContainer = document.getElementById('messagesContainer');
+        
+        // Récupérer les messages déjà affichés depuis localStorage
+        const displayedMessages = JSON.parse(localStorage.getItem('displayed_messages') || '[]');
+        const currentTime = Date.now();
+        const MESSAGE_TTL = 60000; // 1 minute - les messages peuvent réapparaître après 1 minute
+        
+        // Nettoyer les anciens messages (plus de 1 minute)
+        const cleanedMessages = displayedMessages.filter(function(msg) {
+          return (currentTime - msg.timestamp) < MESSAGE_TTL;
+        });
+        localStorage.setItem('displayed_messages', JSON.stringify(cleanedMessages));
         
         messages.forEach(function(message, index) {
+          const messageText = message.getAttribute('data-message-text');
+          const messageHash = btoa(messageText).substring(0, 16); // Hash simple du message
+          
+          // Vérifier si ce message a déjà été affiché récemment
+          const alreadyDisplayed = cleanedMessages.some(function(msg) {
+            return msg.hash === messageHash && (currentTime - msg.timestamp) < MESSAGE_TTL;
+          });
+          
+          if (alreadyDisplayed) {
+            // Message déjà affiché récemment, le supprimer du DOM
+            message.remove();
+            return;
+          }
+          
+          // Marquer ce message comme affiché
+          cleanedMessages.push({
+            hash: messageHash,
+            timestamp: currentTime
+          });
+          localStorage.setItem('displayed_messages', JSON.stringify(cleanedMessages));
+          
           // Animation d'apparition
           setTimeout(function() {
             message.classList.remove('opacity-0', 'translate-y-2');
@@ -751,6 +785,13 @@
             });
           }
         });
+        
+        // Si tous les messages ont été supprimés, supprimer le conteneur
+        setTimeout(function() {
+          if (messagesContainer && messagesContainer.querySelectorAll('.message-toast').length === 0) {
+            messagesContainer.remove();
+          }
+        }, 6000);
       });
 
       // Gérer la soumission des formulaires
