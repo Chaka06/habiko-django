@@ -24,7 +24,18 @@
     "@type": "Offer",
     "availability": "https://schema.org/InStock",
     "priceCurrency": "XOF",
-    "url": "https://ci-habiko.com/ads/{{ ad.slug }}"
+    "price": "0",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "0",
+      "priceCurrency": "XOF",
+      "valueAddedTaxIncluded": false
+    },
+    "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+    "seller": {
+      "@type": "Organization",
+      "name": "HABIKO"
+    }
   },
   "address": {
     "@type": "PostalAddress",

@@ -28,6 +28,13 @@
         "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
         "image": {% if ad.media.count %}"https://ci-habiko.com{{ ad.media.first.image.url }}"{% else %}"https://ci-habiko.com/static/img/logo.png"{% endif %},
         "category": "{{ ad.get_category_display|escapejs }}",
+        "offers": {
+          "@type": "Offer",
+          "availability": "https://schema.org/InStock",
+          "priceCurrency": "XOF",
+          "price": "0",
+          "url": "https://ci-habiko.com/ads/{{ ad.slug }}"
+        },
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "{{ ad.city.name }}",
