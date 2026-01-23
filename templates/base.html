@@ -219,10 +219,23 @@
 
     {% block structured_data %}{% endblock %}
 
-    <!-- Précharger le favicon en premier pour éviter le flash -->
-    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" />
+    <!-- Favicon - Configuration complète pour Google et tous les navigateurs -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon.png' %}" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}" />
     <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon.png' %}" />
+    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon.png' %}" />
     <link rel="apple-touch-icon" href="{% static 'favicon.png' %}" />
+    <!-- Meta tags pour le favicon -->
+    <meta name="msapplication-TileColor" content="#f97316" />
+    <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
     <meta name="theme-color" content="#f97316" />
 
     <!-- Icônes Boxicons (pour les yeux des champs mot de passe, etc.) -->
