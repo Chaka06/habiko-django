@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.views.static import serve
 from ads.models import Ad, AdMedia
 from ads.forms import AdForm
 from accounts.models import Profile
@@ -24,6 +26,16 @@ def age_gate(request: HttpRequest) -> HttpResponse:
         response.set_cookie("age_gate_accepted", "1", max_age=60 * 60 * 24 * 365)
         return response
     return render(request, "core/age_gate.html")
+
+
+def favicon(request: HttpRequest) -> HttpResponse:
+    """Servir le favicon à la racine pour Google et les navigateurs"""
+    import os
+    favicon_path = os.path.join(settings.STATICFILES_DIRS[0], 'favicon.png')
+    if os.path.exists(favicon_path):
+        return serve(request, 'favicon.png', document_root=settings.STATICFILES_DIRS[0])
+    # Fallback si le fichier n'existe pas
+    return HttpResponse(status=404)
 
 
 @login_required
