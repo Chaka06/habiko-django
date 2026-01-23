@@ -33,7 +33,42 @@
           "availability": "https://schema.org/InStock",
           "priceCurrency": "XOF",
           "price": "0",
-          "url": "https://ci-habiko.com/ads/{{ ad.slug }}"
+          "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+          "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "applicableCountry": "CI",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 0,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/FreeReturn"
+          },
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": "0",
+              "currency": "XOF"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "CI"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 0,
+                "maxValue": 0,
+                "unitCode": "DAY"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": 0,
+                "maxValue": 0,
+                "unitCode": "DAY"
+              }
+            }
+          }
         },
         "address": {
           "@type": "PostalAddress",
