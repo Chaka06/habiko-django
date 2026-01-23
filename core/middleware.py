@@ -193,3 +193,32 @@ class GZipCompressionMiddleware:
             return compressed_response
         
         return response
+
+
+class StaticMediaCacheMiddleware:
+    """
+    Ajoute des headers de cache agressifs pour les fichiers statiques et les images d'annonces.
+    - /static/ : géré en grande partie par WhiteNoise, mais on renforce si besoin
+    - /media/ads/ : images d'annonces, rarement modifiées -> cache long (1 an)
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        response = self.get_response(request)
+
+        path = request.path or ""
+        # Ne traiter que les réponses 200 pour GET/HEAD
+        if request.method in ("GET", "HEAD") and response.status_code == 200:
+            # Images d'annonces
+            if path.startswith("/media/ads/"):
+                response["Cache-Control"] = "public, max-age=31536000, immutable"
+            # Ressources statiques (en complément de WhiteNoise)
+            elif path.startswith("/static/"):
+                # Ne pas raccourcir un cache déjà plus agressif
+                existing = response.get("Cache-Control", "")
+                if not existing:
+                    response["Cache-Control"] = "public, max-age=31536000, immutable"
+
+        return response

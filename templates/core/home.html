@@ -146,7 +146,7 @@
         <div class="h-48 bg-gray-200">
           {% if ad.media.count %}
             <img 
-              src="{{ ad.media.first.image.url }}" 
+              src="{{ ad.media.first.thumbnail.url|default:ad.media.first.image.url }}" 
               alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Achetez ou louez sur HABIKO, le site immobilier de référence en Côte d'Ivoire." 
               class="w-full h-full object-cover" 
               loading="lazy" 

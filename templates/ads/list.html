@@ -152,11 +152,10 @@
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
             <img
-              src="{{ ad.media.first.image.url }}"
+              src="{{ ad.media.first.thumbnail.url|default:ad.media.first.image.url }}"
               data-placeholder="{% cycle ph1 ph2 ph3 ph4 %}"
               onerror="this.onerror=null; this.src=this.dataset.placeholder;"
               alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce immobilière sur HABIKO."
-              loading="lazy"
               decoding="async"
               class="w-full h-full object-cover"
               loading="lazy"

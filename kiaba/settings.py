@@ -176,6 +176,8 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     # Compression gzip pour améliorer les performances
     "core.middleware.GZipCompressionMiddleware",
+    # Cache agressif pour static / media (images d'annonces)
+    "core.middleware.StaticMediaCacheMiddleware",
     # En dev on désactive les redirections HTTP->HTTPS pour pouvoir utiliser http://127.0.0.1
     "core.middleware.RedirectMiddleware",  # Redirections HTTP->HTTPS et www->non-www (désactivé si DEBUG=True, voir plus bas)
     "core.middleware.CloudflareMiddleware",  # Récupère l'IP réelle depuis Cloudflare (CF-Connecting-IP)
