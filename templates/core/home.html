@@ -145,14 +145,20 @@
       <a href="/ads/{{ ad.slug }}" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
         <div class="h-48 bg-gray-200">
           {% if ad.media.count %}
-            <img 
-              src="{{ ad.media.first.thumbnail.url|default:ad.media.first.image.url }}" 
-              alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Achetez ou louez sur HABIKO, le site immobilier de référence en Côte d'Ivoire." 
-              class="w-full h-full object-cover" 
-              loading="lazy" 
-              width="400" 
-              height="300"
-            >
+            {% with media=ad.media.first %}
+              <img
+                {% if media.thumbnail %}
+                  src="{{ media.thumbnail.url }}"
+                {% else %}
+                  src="{{ media.image.url }}"
+                {% endif %}
+                alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Achetez ou louez sur HABIKO, le site immobilier de référence en Côte d'Ivoire."
+                class="w-full h-full object-cover"
+                loading="lazy"
+                width="400"
+                height="300"
+              >
+            {% endwith %}
           {% else %}
             <div class="w-full h-full flex items-center justify-center text-gray-400">
               <span>Photo</span>
