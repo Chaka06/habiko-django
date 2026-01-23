@@ -16,4 +16,6 @@ urlpatterns = [
     path("report/<int:ad_id>", views.report_ad, name="report_ad"),
     # Cookies
     path("api/cookie-consent/", cookie_consent, name="cookie_consent"),
+    # Favicon à la racine pour Google
+    path("favicon.ico", views.favicon, name="favicon"),
 ]
