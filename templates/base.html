@@ -87,6 +87,13 @@
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
 
+    <!-- Google AdSense global script (nécessaire pour la validation du site) -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3273662002214639"
+      crossorigin="anonymous"
+    ></script>
+
     <!-- Preconnect to external resources for faster loading -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
@@ -1080,33 +1087,6 @@
             });
           };
         });
-      }
-    </script>
-    {% endif %}
-
-    <!-- Google AdSense - Respect du consentement marketing -->
-    {% if ADSENSE_PUBLISHER_ID %}
-    <script>
-      // Fonction helper pour lire les cookies (réutilisée)
-      function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-      }
-
-      // Charger AdSense seulement si le consentement marketing est donné
-      const marketingConsent = getCookie('cookie_marketing');
-      
-      if (marketingConsent === 'accepted') {
-        // Charger le script AdSense
-        (function() {
-          var script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID }}';
-          script.crossOrigin = 'anonymous';
-          document.head.appendChild(script);
-        })();
       }
     </script>
     {% endif %}
