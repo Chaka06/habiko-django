@@ -154,7 +154,12 @@
                 {% endif %}
                 alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Achetez ou louez sur HABIKO, le site immobilier de référence en Côte d'Ivoire."
                 class="w-full h-full object-cover"
+                {% if forloop.first %}
+                loading="eager"
+                fetchpriority="high"
+                {% else %}
                 loading="lazy"
+                {% endif %}
                 width="400"
                 height="300"
               >

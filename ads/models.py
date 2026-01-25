@@ -96,7 +96,7 @@ class Ad(models.Model):
     contacts_clicks = models.JSONField(default=dict)
     additional_data = models.JSONField(
         default=dict,
-        help_text=_("Données supplémentaires selon la catégorie (prix, surface, etc.)")
+        help_text=_("Données supplémentaires selon la catégorie (prix, surface, etc.)"),
     )
     expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -104,27 +104,17 @@ class Ad(models.Model):
 
     # Champs pour les boosts
     is_premium = models.BooleanField(
-        default=False,
-        help_text=_("Annonce premium (en tête de liste)")
+        default=False, help_text=_("Annonce premium (en tête de liste)")
     )
     premium_until = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text=_("Date jusqu'à laquelle l'annonce est premium")
+        null=True, blank=True, help_text=_("Date jusqu'à laquelle l'annonce est premium")
     )
-    is_urgent = models.BooleanField(
-        default=False,
-        help_text=_("Annonce urgente (logo urgent)")
-    )
+    is_urgent = models.BooleanField(default=False, help_text=_("Annonce urgente (logo urgent)"))
     urgent_until = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text=_("Date jusqu'à laquelle l'annonce est urgente")
+        null=True, blank=True, help_text=_("Date jusqu'à laquelle l'annonce est urgente")
     )
     extended_until = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text=_("Date de prolongation de l'annonce")
+        null=True, blank=True, help_text=_("Date de prolongation de l'annonce")
     )
 
     features = models.ManyToManyField(Feature, through="AdFeature", blank=True)
@@ -132,7 +122,9 @@ class Ad(models.Model):
     class Meta:
         ordering = ["-is_premium", "-is_urgent", "-created_at"]
         indexes = [
-            models.Index(fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"),
+            models.Index(
+                fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"
+            ),
             models.Index(fields=["status", "category"], name="ad_category_idx"),
             models.Index(fields=["status", "city"], name="ad_city_idx"),
             models.Index(fields=["slug"], name="ad_slug_idx"),
@@ -198,6 +190,7 @@ class AdMedia(models.Model):
             return False
 
         import logging
+
         logger = logging.getLogger(__name__)
 
         try:
@@ -264,7 +257,9 @@ class AdMedia(models.Model):
 
             if not os.path.exists(logo_path):
                 # Si le logo n'existe pas, on ne fait rien, mais on peut tout de même générer un thumbnail
-                logger.warning("Logo pour filigrane introuvable, génération seulement du thumbnail.")
+                logger.warning(
+                    "Logo pour filigrane introuvable, génération seulement du thumbnail."
+                )
 
             # Si le logo existe, appliquer le filigrane
             if os.path.exists(logo_path):
@@ -285,9 +280,7 @@ class AdMedia(models.Model):
                     new_logo_height = logo_size
                     new_logo_width = int(logo_size * logo_ratio)
 
-                logo = logo.resize(
-                    (new_logo_width, new_logo_height), Image.Resampling.LANCZOS
-                )
+                logo = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
 
                 # Position au centre
                 x = (img_width - new_logo_width) // 2
@@ -323,9 +316,7 @@ class AdMedia(models.Model):
                 img_format = "WEBP"
                 logger.info("Image sauvegardée en WebP (compression optimale)")
             except Exception as e:
-                logger.warning(
-                    f"WebP non disponible, utilisation du format {img_format}: {str(e)}"
-                )
+                logger.warning(f"WebP non disponible, utilisation du format {img_format}: {str(e)}")
                 if img_format == "PNG":
                     if img.mode != "RGBA":
                         img = img.convert("RGBA")
@@ -397,11 +388,11 @@ class AdMedia(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             self.full_clean()
-            
+
             # Vérifier si c'est une nouvelle image ou si l'image a changé
             is_new = self.pk is None
             image_changed = False
-            
+
             if not is_new:
                 try:
                     old_instance = AdMedia.objects.get(pk=self.pk)
@@ -414,10 +405,10 @@ class AdMedia(models.Model):
             else:
                 # Nouvelle instance, l'image sera traitée
                 image_changed = bool(self.image)
-            
+
             # Sauvegarder d'abord pour obtenir le chemin du fichier
             super().save(*args, **kwargs)
-            
+
             # Appliquer le filigrane + générer la miniature après la sauvegarde
             # (pour avoir accès au chemin du fichier sur le disque)
             if image_changed and self.image:
@@ -425,7 +416,7 @@ class AdMedia(models.Model):
                 # Rafraîchir l'instance si on a modifié le fichier sur le disque
                 if processed:
                     self.refresh_from_db()
-            
+
             # Ensure only one primary
             if self.is_primary:
                 AdMedia.objects.filter(ad=self.ad).exclude(pk=self.pk).update(is_primary=False)

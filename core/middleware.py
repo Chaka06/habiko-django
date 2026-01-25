@@ -11,6 +11,7 @@ class RedirectMiddleware:
     - HTTP vers HTTPS
     - www vers non-www (ou vice versa)
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -18,31 +19,31 @@ class RedirectMiddleware:
         # En développement (DEBUG=True), désactiver toutes les redirections
         if settings.DEBUG:
             return self.get_response(request)
-        
+
         # Vérifier HTTPS en tenant compte des proxies (Render, etc.)
         # Vérifier d'abord le header X-Forwarded-Proto (pour les proxies)
-        forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO', '')
-        is_https = request.is_secure() or forwarded_proto == 'https'
-        
+        forwarded_proto = request.META.get("HTTP_X_FORWARDED_PROTO", "")
+        is_https = request.is_secure() or forwarded_proto == "https"
+
         # Redirection HTTP vers HTTPS (uniquement en production)
         if not is_https:
             # Construire l'URL HTTPS avec tous les paramètres
-            url = request.build_absolute_uri().replace('http://', 'https://', 1)
+            url = request.build_absolute_uri().replace("http://", "https://", 1)
             response = HttpResponsePermanentRedirect(url)
             # Ajouter des headers pour aider Google à comprendre la redirection
-            response['Cache-Control'] = 'public, max-age=3600'
+            response["Cache-Control"] = "public, max-age=3600"
             return response
-        
+
         # Redirection www vers non-www (ou l'inverse selon votre préférence)
         host = request.get_host()
-        if host.startswith('www.'):
+        if host.startswith("www."):
             # Rediriger www.ci-habiko.com vers ci-habiko.com
-            url = request.build_absolute_uri().replace('www.', '', 1)
+            url = request.build_absolute_uri().replace("www.", "", 1)
             response = HttpResponsePermanentRedirect(url)
             # Ajouter des headers pour aider Google à comprendre la redirection
-            response['Cache-Control'] = 'public, max-age=3600'
+            response["Cache-Control"] = "public, max-age=3600"
             return response
-        
+
         # Si on arrive ici, la requête est valide (HTTPS ou DEBUG)
         # On laisse passer normalement
         return self.get_response(request)
@@ -53,18 +54,21 @@ class CloudflareMiddleware:
     Middleware pour récupérer l'IP réelle du client depuis Cloudflare
     Cloudflare envoie l'IP réelle dans le header CF-Connecting-IP
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         # Cloudflare envoie l'IP réelle dans ce header
-        cf_connecting_ip = request.META.get('HTTP_CF_CONNECTING_IP')
+        cf_connecting_ip = request.META.get("HTTP_CF_CONNECTING_IP")
         if cf_connecting_ip:
             # Remplacer REMOTE_ADDR par l'IP réelle du client
-            request.META['REMOTE_ADDR'] = cf_connecting_ip
+            request.META["REMOTE_ADDR"] = cf_connecting_ip
             # Garder aussi l'IP originale dans un header personnalisé
-            request.META['HTTP_X_FORWARDED_FOR_ORIGINAL'] = request.META.get('HTTP_X_FORWARDED_FOR', '')
-        
+            request.META["HTTP_X_FORWARDED_FOR_ORIGINAL"] = request.META.get(
+                "HTTP_X_FORWARDED_FOR", ""
+            )
+
         response = self.get_response(request)
         return response
 
@@ -74,6 +78,7 @@ class AgeGateMiddleware:
     Middleware pour l'age-gate (désactivé pour HABIKO - site immobilier)
     Peut être réactivé si nécessaire en changeant ENABLE_AGE_GATE dans settings
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -81,16 +86,17 @@ class AgeGateMiddleware:
         # Désactiver l'age-gate pour HABIKO (site immobilier, pas de restriction d'âge)
         # Pour réactiver, ajouter ENABLE_AGE_GATE = True dans settings
         from django.conf import settings
-        enable_age_gate = getattr(settings, 'ENABLE_AGE_GATE', False)
-        
+
+        enable_age_gate = getattr(settings, "ENABLE_AGE_GATE", False)
+
         if not enable_age_gate:
             # Age-gate désactivé, laisser passer toutes les requêtes
             return self.get_response(request)
-        
+
         # Code original de l'age-gate (conservé au cas où)
         path = request.path
         user_agent = request.META.get("HTTP_USER_AGENT", "").lower()
-        
+
         # Detect search engine crawlers and allow them to bypass age gate
         is_search_engine = any(
             bot in user_agent
@@ -111,11 +117,15 @@ class AgeGateMiddleware:
                 "mj12bot",
             ]
         )
-        
-        client_ip = request.META.get('REMOTE_ADDR', '')
-        if client_ip.startswith('66.249.') or client_ip.startswith('64.233.') or client_ip.startswith('72.14.'):
+
+        client_ip = request.META.get("REMOTE_ADDR", "")
+        if (
+            client_ip.startswith("66.249.")
+            or client_ip.startswith("64.233.")
+            or client_ip.startswith("72.14.")
+        ):
             is_search_engine = True
-        
+
         if not request.COOKIES.get("age_gate_accepted") and not is_search_engine:
             allowed = (
                 path.startswith("/age-gate/")
@@ -137,61 +147,65 @@ class GZipCompressionMiddleware:
     Middleware pour compresser les réponses avec gzip
     Améliore les performances en réduisant la taille des réponses HTTP
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest):
         response = self.get_response(request)
-        
+
         # Ne compresser que les réponses HTML, CSS, JS, JSON, XML
-        content_type = response.get('Content-Type', '')
+        content_type = response.get("Content-Type", "")
         compressible_types = [
-            'text/html',
-            'text/css',
-            'text/javascript',
-            'application/javascript',
-            'application/json',
-            'application/xml',
-            'text/xml',
+            "text/html",
+            "text/css",
+            "text/javascript",
+            "application/javascript",
+            "application/json",
+            "application/xml",
+            "text/xml",
         ]
-        
+
         # Vérifier si le type de contenu est compressible
         should_compress = any(ct in content_type for ct in compressible_types)
-        
+
         # Vérifier si le client accepte gzip
-        accept_encoding = request.META.get('HTTP_ACCEPT_ENCODING', '')
-        accepts_gzip = 'gzip' in accept_encoding
-        
+        accept_encoding = request.META.get("HTTP_ACCEPT_ENCODING", "")
+        accepts_gzip = "gzip" in accept_encoding
+
         # Ne pas compresser si déjà compressé ou si trop petit (< 200 bytes)
-        if (should_compress and accepts_gzip and 
-            'Content-Encoding' not in response and 
-            len(response.content) > 200):
-            
+        if (
+            should_compress
+            and accepts_gzip
+            and "Content-Encoding" not in response
+            and len(response.content) > 200
+        ):
+
             # Compresser le contenu
             compressed_content = BytesIO()
-            with gzip.GzipFile(fileobj=compressed_content, mode='wb') as gz_file:
+            with gzip.GzipFile(fileobj=compressed_content, mode="wb") as gz_file:
                 gz_file.write(response.content)
             compressed_content.seek(0)
-            
+
             # Créer une nouvelle réponse avec le contenu compressé
             compressed_response = HttpResponse(
                 compressed_content.read(),
-                content_type=response.get('Content-Type'),
-                status=response.status_code
+                content_type=response.get("Content-Type"),
+                status=response.status_code,
             )
-            
+
             # Copier les headers de la réponse originale
             for header, value in response.items():
-                if header.lower() != 'content-length':
+                if header.lower() != "content-length":
                     compressed_response[header] = value
-            
+
             # Ajouter le header Content-Encoding
-            compressed_response['Content-Encoding'] = 'gzip'
-            compressed_response['Content-Length'] = str(len(compressed_response.content))
-            compressed_response['Vary'] = 'Accept-Encoding'
-            
+            compressed_response["Content-Encoding"] = "gzip"
+            compressed_response["Content-Length"] = str(len(compressed_response.content))
+            compressed_response["Vary"] = "Accept-Encoding"
+
             return compressed_response
-        
+
         return response
 
 

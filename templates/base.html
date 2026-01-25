@@ -90,21 +90,13 @@
     <!-- Google AdSense global script - Chargé de manière différée pour ne pas bloquer le rendu -->
     {% if ADSENSE_PUBLISHER_ID %}
     <script>
-      // Charger AdSense seulement après le chargement de la page et si le consentement marketing est accepté
+      // Charger AdSense seulement après le chargement complet de la page et si le consentement marketing est accepté
       (function() {
         function getCookie(name) {
           const value = `; ${document.cookie}`;
           const parts = value.split(`; ${name}=`);
           if (parts.length === 2) return parts.pop().split(';').shift();
           return null;
-        }
-
-        // Attendre que la page soit chargée
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', loadAdSense);
-        } else {
-          // Page déjà chargée, attendre un peu pour ne pas bloquer le rendu initial
-          setTimeout(loadAdSense, 1000);
         }
 
         function loadAdSense() {
@@ -121,6 +113,24 @@
             script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID }}';
             script.crossOrigin = 'anonymous';
             document.head.appendChild(script);
+          }
+        }
+
+        // Utiliser requestIdleCallback pour charger AdSense quand le navigateur est inactif
+        // Fallback pour les navigateurs qui ne supportent pas requestIdleCallback
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(function() {
+            // Attendre encore un peu pour être sûr que le rendu initial est terminé
+            setTimeout(loadAdSense, 2000);
+          }, { timeout: 3000 });
+        } else {
+          // Fallback : attendre que la page soit complètement chargée
+          if (document.readyState === 'loading') {
+            window.addEventListener('load', function() {
+              setTimeout(loadAdSense, 2000);
+            });
+          } else {
+            setTimeout(loadAdSense, 2000);
           }
         }
       })();
@@ -271,26 +281,33 @@
     <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
     <meta name="theme-color" content="#f97316" />
 
-    <!-- Icônes Boxicons (pour les yeux des champs mot de passe, etc.) -->
+    <!-- Icônes Boxicons - Chargement asynchrone pour ne pas bloquer le rendu -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"></noscript>
 
     {% block tailwind_css %}
-    <!-- Charger Tailwind CSS de manière synchrone pour éviter le FOUC -->
+    <!-- Tailwind CSS - Chargement asynchrone pour ne pas bloquer le rendu -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"></noscript>
     {% endblock %} {% block htmx_js %}
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
     {% endblock %}
 
-    <!-- Police propre pour le bandeau HABIKO -->
+    <!-- Google Fonts - Optimisé avec preconnect et display=swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
     <style>
       /* Styles critiques pour éviter le flash */
@@ -562,6 +579,7 @@
               alt="HABIKO - Site immobilier en Côte d'Ivoire"
               class="h-12 md:h-16 w-auto"
               loading="eager"
+              fetchpriority="high"
               width="264"
               height="112"
             />
