@@ -458,12 +458,22 @@ CSRF_TRUSTED_ORIGINS = _base_csrf + _dynamic_csrf
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
-# En développement, désactiver les cookies sécurisés (nécessaire pour HTTP local)
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+# Configuration des cookies CSRF et Session
+# En production (HTTPS), activer Secure pour les cookies
+# En développement (HTTP), désactiver Secure pour permettre les cookies locaux
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 # Renforcer la protection des cookies en toutes circonstances
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+# SameSite pour les cookies CSRF : 'Lax' permet les requêtes GET cross-site mais bloque les POST malveillants
+# 'Lax' est un bon compromis entre sécurité et fonctionnalité
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+# Domaine des cookies : None pour utiliser le domaine par défaut (fonctionne avec Cloudflare)
+# Ne pas définir de domaine explicite pour éviter les problèmes avec les sous-domaines
+CSRF_COOKIE_DOMAIN = None
+SESSION_COOKIE_DOMAIN = None
 # Durée des sessions (14 jours)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 SESSION_SAVE_EVERY_REQUEST = False
