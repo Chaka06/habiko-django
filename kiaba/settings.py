@@ -142,6 +142,12 @@ if RENDER_EXTERNAL_URL:
     except Exception:
         pass
 
+# Add Vercel host automatically if present
+VERCEL_URL = os.environ.get("VERCEL_URL")
+if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(VERCEL_URL)
+    ALLOWED_HOSTS.append(f".{VERCEL_URL}")  # Pour les sous-domaines *.vercel.app
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -270,16 +276,15 @@ else:
     else:
         # Fallback : utiliser les variables individuelles
         postgres_host = env("POSTGRES_HOST", default="")
-        is_render_db = "render.com" in postgres_host.lower() or os.environ.get(
-            "RENDER_EXTERNAL_URL"
-        )
+        is_render_db = "render.com" in postgres_host.lower() or os.environ.get("RENDER_EXTERNAL_URL")
+        is_supabase_db = "supabase.co" in postgres_host.lower()
 
         # Options de connexion de base
         db_options = {
             "connect_timeout": 10,
         }
 
-        if is_render_db:
+        if is_render_db or is_supabase_db:
             # Sur Render, PostgreSQL exige SSL/TLS pour toutes les connexions
             # Utiliser 'prefer' qui essaie SSL mais ne l'exige pas strictement
             # Cela évite les problèmes de validation de certificat
@@ -366,22 +371,37 @@ WHITENOISE_MAX_AGE = 31536000
 MEDIA_URL = env("MEDIA_URL")
 _media_root = env("MEDIA_ROOT")
 
-# Sur Render, utiliser le disque persistant monté sur /app/media
-# Le disque persistant est configuré dans render.yaml avec mountPath: /app/media
-# IMPORTANT: Toujours utiliser /app/media en production sur Render pour éviter la perte d'images
-# Test de persistance - 2026-01-20
+# Détection de la plateforme de déploiement
 RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL")
+VERCEL = os.environ.get("VERCEL") == "1"
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
-if is_render and not DEBUG:
-    # Production sur Render : FORCER l'utilisation du disque persistant
+# Configuration Media selon la plateforme
+USE_SUPABASE_STORAGE = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
+
+if VERCEL and USE_SUPABASE_STORAGE:
+    # Vercel : stockage Supabase (S3-compatible, filesystem éphémère sur Vercel)
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_ACCESS_KEY_ID = os.environ.get("SUPABASE_S3_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("SUPABASE_S3_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("SUPABASE_STORAGE_BUCKET", "media")
+    AWS_S3_ENDPOINT_URL = os.environ.get("SUPABASE_S3_ENDPOINT")
+    AWS_S3_REGION_NAME = os.environ.get("AWS_REGION", "auto")
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=31536000, public"}
+    AWS_DEFAULT_ACL = "public-read"
+    if os.environ.get("SUPABASE_STORAGE_PUBLIC_URL"):
+        AWS_S3_CUSTOM_DOMAIN = os.environ.get("SUPABASE_STORAGE_PUBLIC_URL", "").replace("https://", "").replace("http://", "")
+        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STORAGE_BUCKET_NAME}/"
+    else:
+        MEDIA_URL = os.environ.get("MEDIA_URL", f"{AWS_S3_ENDPOINT_URL or ''}/{AWS_STORAGE_BUCKET_NAME}/")
+    MEDIA_ROOT = str(BASE_DIR / "media")
+    logger.info("📁 Stockage média : Supabase (S3-compatible)")
+elif is_render and not DEBUG:
+    # Production sur Render : disque persistant
     MEDIA_ROOT = "/app/media"
     logger.info(f"📁 MEDIA_ROOT configuré pour Render (disque persistant): {MEDIA_ROOT}")
-    logger.info(f"📁 Vérification: /app/media existe = {os.path.exists('/app/media')}")
-    # Créer le dossier ads s'il n'existe pas
     ads_dir = os.path.join(MEDIA_ROOT, "ads")
     os.makedirs(ads_dir, exist_ok=True)
-    logger.info(f"📁 Dossier ads créé/vérifié: {ads_dir}")
 elif not os.path.isabs(_media_root):
     # Développement local : utiliser le chemin relatif
     MEDIA_ROOT = BASE_DIR / _media_root
@@ -392,8 +412,9 @@ else:
     logger.info(f"📁 MEDIA_ROOT configuré (chemin absolu): {MEDIA_ROOT}")
 
 # S'assurer que le dossier media existe
-os.makedirs(MEDIA_ROOT, exist_ok=True)
-logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT} (existe: {os.path.exists(MEDIA_ROOT)})")
+if MEDIA_ROOT:
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -452,6 +473,9 @@ try:
         _r = _urlparse(RENDER_EXTERNAL_URL)
         if _r.scheme and _r.netloc:
             _dynamic_csrf.append(f"{_r.scheme}://{_r.netloc}")
+    if VERCEL_URL:
+        _dynamic_csrf.append(f"https://{VERCEL_URL}")
+        _dynamic_csrf.append(f"https://www.{VERCEL_URL}")
 except Exception:
     pass
 CSRF_TRUSTED_ORIGINS = _base_csrf + _dynamic_csrf

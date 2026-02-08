@@ -224,9 +224,9 @@ class AdMedia(models.Model):
                 )
                 return False
 
-            # OPTIMISATION : Redimensionner l'image si trop grande (max 1920px)
-            MAX_WIDTH = 1920
-            MAX_HEIGHT = 1920
+            # OPTIMISATION : Redimensionner l'image si trop grande (max 1200px pour réduire la taille)
+            MAX_WIDTH = 1200
+            MAX_HEIGHT = 1200
             img_width, img_height = img.size
 
             if img_width > MAX_WIDTH or img_height > MAX_HEIGHT:
@@ -309,7 +309,7 @@ class AdMedia(models.Model):
                 img_rgb.save(
                     output,
                     format="WEBP",
-                    quality=80,
+                    quality=72,
                     method=6,
                     optimize=True,
                 )
@@ -326,7 +326,7 @@ class AdMedia(models.Model):
                         rgb_img = Image.new("RGB", img.size, (255, 255, 255))
                         rgb_img.paste(img, mask=img.split()[3])
                         img = rgb_img
-                    img.save(output, format="JPEG", quality=80, optimize=True, progressive=True)
+                    img.save(output, format="JPEG", quality=72, optimize=True, progressive=True)
 
             output.seek(0)
             image_content = output.read()
@@ -354,14 +354,14 @@ class AdMedia(models.Model):
                 # Si on ne peut pas rouvrir depuis le disque, repartir de img_rgb/img
                 thumb_img = img.convert("RGB")
 
-            THUMBNAIL_SIZE = (400, 400)
+            THUMBNAIL_SIZE = (320, 320)
             thumb_img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
 
             thumb_output = BytesIO()
             thumb_img.save(
                 thumb_output,
                 format="WEBP",
-                quality=75,
+                quality=65,
                 method=6,
                 optimize=True,
             )

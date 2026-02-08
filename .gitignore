@@ -47,6 +47,4 @@ Thumbs.db
 .cache/
 
 # Sensitive files (auto-detected)
-.env.example
-
 .env
