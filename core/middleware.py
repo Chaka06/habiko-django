@@ -34,15 +34,13 @@ class RedirectMiddleware:
             response["Cache-Control"] = "public, max-age=3600"
             return response
 
-        # Redirection www vers non-www (ou l'inverse selon votre préférence)
-        host = request.get_host()
-        if host.startswith("www."):
-            # Rediriger www.ci-habiko.com vers ci-habiko.com
-            url = request.build_absolute_uri().replace("www.", "", 1)
-            response = HttpResponsePermanentRedirect(url)
-            # Ajouter des headers pour aider Google à comprendre la redirection
-            response["Cache-Control"] = "public, max-age=3600"
-            return response
+        # Redirection www vers non-www DÉSACTIVÉE : sur Vercel, seul www.ci-habiko.com peut être
+        # configuré (ci-habiko.com non-www absent). La redirection provoquait 404 ou "CSRF cookie not set"
+        # car le cookie n'était jamais posé sur www (301 sans Set-Cookie). Garder www actif.
+        # host = request.get_host()
+        # if host.startswith("www."):
+        #     url = request.build_absolute_uri().replace("www.", "", 1)
+        #     ...
 
         # Si on arrive ici, la requête est valide (HTTPS ou DEBUG)
         # On laisse passer normalement

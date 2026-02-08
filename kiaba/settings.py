@@ -534,15 +534,11 @@ CSRF_COOKIE_HTTPONLY = True
 # 'Lax' est un bon compromis entre sécurité et fonctionnalité
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
-# Domaine des cookies : en production sur ci-habiko.com, utiliser .ci-habiko.com
-# pour partager les cookies entre www et non-www (évite les 403 CSRF lors des redirections)
-_site_url = env("SITE_URL", default="") or SITE_URL
-if not DEBUG and "ci-habiko.com" in str(_site_url):
-    CSRF_COOKIE_DOMAIN = ".ci-habiko.com"
-    SESSION_COOKIE_DOMAIN = ".ci-habiko.com"
-else:
-    CSRF_COOKIE_DOMAIN = None
-    SESSION_COOKIE_DOMAIN = None
+# Domaine des cookies : None pour que chaque host (www, non-www, vercel.app) ait son propre cookie.
+# .ci-habiko.com cassait www et vercel.app car le navigateur rejette un cookie Domain=.ci-habiko.com
+# quand la réponse vient de ci-habiko.vercel.app (pas un sous-domaine).
+CSRF_COOKIE_DOMAIN = None
+SESSION_COOKIE_DOMAIN = None
 # Durée des sessions (14 jours)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 SESSION_SAVE_EVERY_REQUEST = False
