@@ -501,7 +501,6 @@ _base_csrf = [
     "https://ci-habiko.com",
     "https://www.ci-habiko.com",
     "https://ci-habiko.vercel.app",
-    "https://*.vercel.app",  # Tous les déploiements (ci-habiko-xxx-devprompts-projects-4c0f439c.vercel.app)
 ]
 _dynamic_csrf = []
 try:
