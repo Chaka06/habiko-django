@@ -261,6 +261,25 @@ else:
     database_url = os.environ.get("DATABASE_URL")
 
     if database_url:
+        # Vercel serverless : Supabase direct (db.xxx.supabase.co) est IPv6-only, échoue avec "Cannot assign requested address"
+        # Convertir automatiquement vers le pooler (IPv4 compatible) quand on est sur Vercel
+        _vercel = os.environ.get("VERCEL") == "1"
+        if _vercel and "db." in database_url and ".supabase.co" in database_url and "pooler.supabase.com" not in database_url:
+            import re
+            # Extraire project ref : db.PROJECT_REF.supabase.co
+            _m = re.search(r"db\.([a-z0-9]+)\.supabase\.co", database_url)
+            if _m:
+                _ref = _m.group(1)
+                _region = os.environ.get("SUPABASE_POOLER_REGION", "eu-central-1")
+                _pooler_host = f"aws-0-{_region}.pooler.supabase.com"
+                # Remplacer db.XXX.supabase.co par pooler host, et forcer port 6543
+                database_url = re.sub(r"db\.[a-z0-9]+\.supabase\.co(:\d+)?", f"{_pooler_host}:6543", database_url)
+                # User pooler : postgres.PROJECT_REF au lieu de postgres
+                if f"postgres.{_ref}" not in database_url and "postgres:" in database_url:
+                    database_url = database_url.replace("postgres:", f"postgres.{_ref}:", 1)
+                os.environ["DATABASE_URL"] = database_url
+                logger.info("🔄 DATABASE_URL converti vers Supabase pooler (IPv4) pour Vercel")
+
         # Render fournit DATABASE_URL automatiquement quand on lie une base de données
         # Utiliser django-environ pour parser DATABASE_URL
         DATABASES = {"default": env.db("DATABASE_URL")}
