@@ -411,8 +411,8 @@ else:
     MEDIA_ROOT = _media_root
     logger.info(f"📁 MEDIA_ROOT configuré (chemin absolu): {MEDIA_ROOT}")
 
-# S'assurer que le dossier media existe
-if MEDIA_ROOT:
+# S'assurer que le dossier media existe (sauf sur Vercel/serverless, filesystem read-only)
+if MEDIA_ROOT and not VERCEL and not USE_SUPABASE_STORAGE:
     os.makedirs(MEDIA_ROOT, exist_ok=True)
 logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 
