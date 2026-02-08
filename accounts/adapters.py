@@ -150,35 +150,34 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     logger.warning(f"Erreur lors du rendu texte pour {template_prefix}: {e}")
                     text_content = None
 
-                # Envoyer via EmailService (avec contexte enrichi pour le logo)
-                # Utiliser un thread pour ne pas bloquer la requête
+                # Envoyer via EmailService
+                # SUR VERCEL : envoi synchrone obligatoire (la fonction serverless s'arrête dès la réponse,
+                # un thread en arrière-plan n'a pas le temps d'envoyer l'email)
+                import os
+
+                def _do_send():
+                    EmailService.send_email(
+                        subject=subject,
+                        to_emails=[email],
+                        html_content=html_content,
+                        text_content=text_content,
+                        context=context,
+                        fail_silently=True,
+                    )
+
                 try:
-                    import threading
-
-                    def send_email_async():
-                        try:
-                            EmailService.send_email(
-                                subject=subject,
-                                to_emails=[email],
-                                html_content=html_content,
-                                text_content=text_content,
-                                context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
-                                fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
-                            )
-                        except Exception as e:
-                            logger.error(f"Erreur dans thread email: {e}")
-
-                    # Lancer l'envoi en arrière-plan
-                    thread = threading.Thread(target=send_email_async, daemon=True)
-                    thread.start()
-                    logger.info(f"📧 Email {template_prefix} envoyé en arrière-plan à {email}")
+                    if os.environ.get("VERCEL") == "1":
+                        _do_send()  # Synchrone sur Vercel
+                    else:
+                        import threading
+                        thread = threading.Thread(target=_do_send, daemon=True)
+                        thread.start()
+                    logger.info(f"📧 Email {template_prefix} envoyé à {email}")
                     return
                 except Exception as email_error:
                     logger.error(
                         f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}"
                     )
-                    # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera
-                    # L'utilisateur pourra renvoyer l'email plus tard
                     return
             else:
                 # Pour les autres types d'emails, utiliser la méthode par défaut mais avec EmailService
@@ -205,34 +204,32 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 except Exception:
                     pass
 
-                # Envoyer via EmailService (avec contexte enrichi pour le logo)
-                # Utiliser un thread pour ne pas bloquer la requête
+                # Envoyer via EmailService (même logique : synchrone sur Vercel)
+                import os
+
+                def _do_send():
+                    EmailService.send_email(
+                        subject=subject,
+                        to_emails=[email],
+                        html_content=html_content,
+                        text_content=text_content,
+                        context=context,
+                        fail_silently=True,
+                    )
+
                 try:
-                    import threading
-
-                    def send_email_async():
-                        try:
-                            EmailService.send_email(
-                                subject=subject,
-                                to_emails=[email],
-                                html_content=html_content,
-                                text_content=text_content,
-                                context=context,  # Passer le contexte enrichi (logo_url, activate_url, etc.)
-                                fail_silently=True,  # Ne pas bloquer l'inscription/connexion si l'email échoue
-                            )
-                        except Exception as e:
-                            logger.error(f"Erreur dans thread email: {e}")
-
-                    # Lancer l'envoi en arrière-plan
-                    thread = threading.Thread(target=send_email_async, daemon=True)
-                    thread.start()
-                    logger.info(f"📧 Email {template_prefix} envoyé en arrière-plan à {email}")
+                    if os.environ.get("VERCEL") == "1":
+                        _do_send()
+                    else:
+                        import threading
+                        thread = threading.Thread(target=_do_send, daemon=True)
+                        thread.start()
+                    logger.info(f"📧 Email {template_prefix} envoyé à {email}")
                     return
                 except Exception as email_error:
                     logger.error(
                         f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}"
                     )
-                    # Ne pas utiliser le fallback d'allauth car il utilisera aussi SMTP et échouera
                     return
 
         except Exception as e:

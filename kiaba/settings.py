@@ -630,8 +630,8 @@ if REDIS_URL and REDIS_URL.strip():
     CELERY_RESULT_BACKEND = REDIS_URL
     CELERY_TASK_ALWAYS_EAGER = False  # Utiliser Celery avec Redis
 else:
-    # Fallback vers base de données pour le développement
-    CELERY_BROKER_URL = "memory://"
+    # Fallback memory (évite le warning Kombu "No hostname was supplied")
+    CELERY_BROKER_URL = "memory://localhost/"
     CELERY_RESULT_BACKEND = "cache+memory://"
     # En production sans Redis, exécuter les tâches Celery en mode synchrone
     CELERY_TASK_ALWAYS_EAGER = True  # Mode synchrone si pas de Redis

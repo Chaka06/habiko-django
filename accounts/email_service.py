@@ -1,15 +1,17 @@
 """
 Service d'envoi d'emails professionnel pour HABIKO
-Gère l'envoi d'emails avec templates HTML/text via SendGrid HTTP API ou SMTP
+Gère l'envoi d'emails avec templates HTML/text via Resend, SendGrid HTTP API ou SMTP
 """
 
 import logging
+import os
 from typing import List, Optional, Dict, Any
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
 SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
+RESEND_API_URL = "https://api.resend.com/emails"
 
 
 class EmailService:
@@ -150,6 +152,35 @@ class EmailService:
             elif not text_content:
                 text_content = subject
 
+            # --- Envoi via Resend API (recommandé pour Vercel - simple, gratuit) ---
+            resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
+            if resend_api_key:
+                try:
+                    import requests
+
+                    sender_email = cls.get_from_email_value()
+                    if "<" in sender_email:
+                        import re
+                        m = re.search(r"<(.+?)>", sender_email)
+                        sender_email = m.group(1) if m else sender_email
+                    payload = {
+                        "from": f"{cls.FROM_NAME} <{sender_email}>",
+                        "to": to_emails,
+                        "subject": subject,
+                        "text": text_content or subject,
+                    }
+                    if html_content:
+                        payload["html"] = html_content
+                    headers = {"Authorization": f"Bearer {resend_api_key}", "Content-Type": "application/json"}
+                    logger.info(f"📧 Envoi via Resend API à {', '.join(to_emails)} sujet='{subject}'")
+                    resp = requests.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(f"✅ Email envoyé via Resend à {', '.join(to_emails)}")
+                        return True
+                    logger.error(f"❌ Erreur Resend API ({resp.status_code}): {resp.text}")
+                except Exception as e:
+                    logger.error(f"❌ Erreur Resend API: {e}", exc_info=True)
+
             # --- Envoi via SendGrid HTTP API (recommandé pour Render) ---
             sendgrid_api_key = getattr(settings, "SENDGRID_API_KEY", None)
             if not sendgrid_api_key:
@@ -217,6 +248,17 @@ class EmailService:
                     # Continue vers SMTP en fallback
 
             # --- Fallback SMTP (pour local ou autres environnements) ---
+            email_host = getattr(settings, "EMAIL_HOST", "") or ""
+            if os.environ.get("VERCEL") == "1" and not email_host.strip():
+                logger.warning(
+                    "⚠️ Vercel: aucun service email configuré. Ajoute RESEND_API_KEY ou SENDGRID_API_KEY "
+                    "dans les variables d'environnement Vercel pour activer les emails d'inscription."
+                )
+                return False
+            if not email_host.strip():
+                logger.warning("⚠️ EMAIL_HOST non configuré. Les emails ne seront pas envoyés.")
+                return False
+
             from django.core.mail import EmailMultiAlternatives
 
             email = EmailMultiAlternatives(

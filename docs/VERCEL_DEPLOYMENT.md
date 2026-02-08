@@ -63,12 +63,20 @@ SUPABASE_S3_ACCESS_KEY_ID=<access_key_id>
 SUPABASE_S3_SECRET_ACCESS_KEY=<secret_access_key>
 SUPABASE_STORAGE_PUBLIC_URL=https://<project-ref>.supabase.co/storage/v1/object/public
 
-# Emails (SendGrid ou SMTP Supabase)
+# Emails - OBLIGATOIRE pour l'inscription (confirmation par email)
+# Option 1 - Resend (recommandé, simple, gratuit 3000/mois) : https://resend.com
+RESEND_API_KEY=re_xxxxxxxx
+DEFAULT_FROM_EMAIL=HABIKO <onboarding@resend.dev>
+
+# Option 2 - SendGrid : https://sendgrid.com
+SENDGRID_API_KEY=SG.xxxxxxxx
+DEFAULT_FROM_EMAIL=HABIKO <no-reply@ci-habiko.com>
+
+# Option 3 - SMTP (Brevo, LWS, etc.)
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=...
+EMAIL_HOST=smtp.example.com
 EMAIL_HOST_USER=...
 EMAIL_HOST_PASSWORD=...
-DEFAULT_FROM_EMAIL=HABIKO <no-reply@ci-habiko.com>
 
 # CinetPay (si utilisé)
 CINETPAY_SITE_ID=...
@@ -126,3 +134,8 @@ Ou utilise un script de build personnalisé qui exécute les migrations.
 ### Migrations non appliquées
 - Exécute les migrations manuellement au premier déploiement
 - Ou ajoute un script de post-deploy dans `vercel.json` si supporté
+
+### Pas d'email reçu après inscription
+- Configure **RESEND_API_KEY** (recommandé) ou **SENDGRID_API_KEY** dans Vercel → Settings → Environment Variables
+- Resend : crée un compte sur https://resend.com, API Keys → Create API Key, colle la clé dans Vercel
+- Pour Resend, utilise `onboarding@resend.dev` comme expéditeur (ou vérifie ton domaine)
