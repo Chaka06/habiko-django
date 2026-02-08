@@ -81,6 +81,24 @@ else:
             except Exception:
                 return default
 
+        def db(self, key, default=None):
+            """Parse DATABASE_URL when django-environ is not available."""
+            from urllib.parse import urlparse, unquote_plus
+
+            url = os.environ.get(key, default)
+            if not url:
+                raise ValueError(f"{key} is not set")
+            parsed = urlparse(url)
+            path = parsed.path.lstrip("/") or "postgres"
+            return {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": path,
+                "USER": unquote_plus(parsed.username) if parsed.username else "",
+                "PASSWORD": unquote_plus(parsed.password) if parsed.password else "",
+                "HOST": parsed.hostname or "",
+                "PORT": str(parsed.port) if parsed.port else "5432",
+            }
+
     env = _DummyEnv(
         DEBUG=(bool, False),
         SECRET_KEY=(str, "change-me"),
@@ -479,6 +497,9 @@ _base_csrf = [
     "http://127.0.0.1:8000",
     "http://localhost:8001",
     "http://127.0.0.1:8001",
+    # Domaine de production (requis pour l'inscription et les formulaires)
+    "https://ci-habiko.com",
+    "https://www.ci-habiko.com",
 ]
 _dynamic_csrf = []
 try:

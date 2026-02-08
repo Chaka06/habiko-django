@@ -1,3 +1,4 @@
+# isort:skip_file
 """
 Entry point for Vercel serverless deployment.
 Vercel expects a variable named `app` for Python WSGI applications.
