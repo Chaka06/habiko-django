@@ -500,7 +500,8 @@ _base_csrf = [
     # Domaine de production (requis pour l'inscription et les formulaires)
     "https://ci-habiko.com",
     "https://www.ci-habiko.com",
-    "https://ci-habiko.vercel.app",  # Domaine Vercel (VERCEL_URL change à chaque déploiement)
+    "https://ci-habiko.vercel.app",
+    "https://*.vercel.app",  # Tous les déploiements (ci-habiko-xxx-devprompts-projects-4c0f439c.vercel.app)
 ]
 _dynamic_csrf = []
 try:

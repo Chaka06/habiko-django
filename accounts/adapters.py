@@ -156,14 +156,17 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 import os
 
                 def _do_send():
-                    EmailService.send_email(
-                        subject=subject,
-                        to_emails=[email],
-                        html_content=html_content,
-                        text_content=text_content,
-                        context=context,
-                        fail_silently=True,
-                    )
+                    try:
+                        EmailService.send_email(
+                            subject=subject,
+                            to_emails=[email],
+                            html_content=html_content,
+                            text_content=text_content,
+                            context=context,
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        logger.error(f"❌ Envoi email {template_prefix} échoué: {e}")
 
                 try:
                     if os.environ.get("VERCEL") == "1":
@@ -178,7 +181,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     logger.error(
                         f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}"
                     )
-                    return
+                    return  # Ne jamais bloquer le flux d'inscription
             else:
                 # Pour les autres types d'emails, utiliser la méthode par défaut mais avec EmailService
                 # Rendre le sujet
@@ -208,14 +211,17 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 import os
 
                 def _do_send():
-                    EmailService.send_email(
-                        subject=subject,
-                        to_emails=[email],
-                        html_content=html_content,
-                        text_content=text_content,
-                        context=context,
-                        fail_silently=True,
-                    )
+                    try:
+                        EmailService.send_email(
+                            subject=subject,
+                            to_emails=[email],
+                            html_content=html_content,
+                            text_content=text_content,
+                            context=context,
+                            fail_silently=True,
+                        )
+                    except Exception as e:
+                        logger.error(f"❌ Envoi email {template_prefix} échoué: {e}")
 
                 try:
                     if os.environ.get("VERCEL") == "1":
@@ -230,7 +236,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     logger.error(
                         f"❌ Erreur lors de l'envoi de l'email {template_prefix} à {email}: {email_error}"
                     )
-                    return
+                    return  # Ne jamais bloquer le flux
 
         except Exception as e:
             logger.error(
