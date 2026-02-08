@@ -1,21 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput --clear",
   "installCommand": "pip install -r requirements.txt",
   "framework": null,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
   ],
-  "functions": {
-    "api/index.py": {
-      "runtime": "python3.12",
-      "memory": 1024,
-      "maxDuration": 30,
-      "excludeFiles": "{tests/**,**/test_*.py,**/tests.py,*.md,docs/**,locale/**}"
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
     }
-  },
-  "regions": ["cdg1"]
+  ]
 }
