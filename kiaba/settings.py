@@ -534,16 +534,23 @@ CSRF_COOKIE_HTTPONLY = True
 # 'Lax' est un bon compromis entre sécurité et fonctionnalité
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
-# Domaine des cookies : None pour utiliser le domaine par défaut (fonctionne avec Cloudflare)
-# Ne pas définir de domaine explicite pour éviter les problèmes avec les sous-domaines
-CSRF_COOKIE_DOMAIN = None
-SESSION_COOKIE_DOMAIN = None
+# Domaine des cookies : en production sur ci-habiko.com, utiliser .ci-habiko.com
+# pour partager les cookies entre www et non-www (évite les 403 CSRF lors des redirections)
+_site_url = env("SITE_URL", default="") or SITE_URL
+if not DEBUG and "ci-habiko.com" in str(_site_url):
+    CSRF_COOKIE_DOMAIN = ".ci-habiko.com"
+    SESSION_COOKIE_DOMAIN = ".ci-habiko.com"
+else:
+    CSRF_COOKIE_DOMAIN = None
+    SESSION_COOKIE_DOMAIN = None
 # Durée des sessions (14 jours)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
 SESSION_SAVE_EVERY_REQUEST = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-# Politique de referrer plus stricte
-SECURE_REFERRER_POLICY = "same-origin"
+# Politique de referrer : strict-origin-when-cross-origin permet d'envoyer Referer/Origin
+# pour les requêtes cross-origin (nécessaire pour CSRF avec www/non-www et proxies)
+# "same-origin" était trop stricte et bloquait la vérification CSRF dans certains cas
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 # Désactiver complètement HSTS en développement pour éviter les redirections HTTPS forcées
 SECURE_HSTS_SECONDS = 0  # Toujours 0 pour permettre HTTP en local
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
