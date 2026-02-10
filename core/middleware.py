@@ -118,24 +118,25 @@ class EnsureCsrfCookieForAuthMiddleware:
         return self.get_response(request)
 
 
+# Clé session utilisée par django.contrib.messages (SessionStorage)
+MESSAGES_SESSION_KEY = "_messages"
+
+
 class ConsumeMessagesAfterResponseMiddleware:
     """
-    Après chaque réponse HTML (200), consomme les messages pour qu'ils ne
-    réapparaissent pas sur les pages suivantes. On ne touche pas aux messages
-    en cas de redirection (302) pour que « Connexion réussie » etc. s'affichent
-    une fois sur la page d'arrivée.
+    Après chaque réponse 200, vide la liste des messages en session pour qu'ils
+    ne réapparaissent jamais sur les pages suivantes. On ne touche pas en cas de
+    redirection (302) pour que « Connexion réussie » s'affiche une fois sur la page d'arrivée.
     """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest):
         response = self.get_response(request)
-        if response.status_code == 200:
-            try:
-                from django.contrib import messages
-                list(messages.get_messages(request))
-            except Exception:
-                pass
+        if response.status_code == 200 and hasattr(request, "session"):
+            if MESSAGES_SESSION_KEY in request.session:
+                del request.session[MESSAGES_SESSION_KEY]
+                request.session.modified = True
         return response
 
 
