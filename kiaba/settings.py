@@ -417,14 +417,16 @@ VERCEL = os.environ.get("VERCEL") == "1"
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
 # Configuration Media selon la plateforme
-# Sur Vercel le disque est en lecture seule : les photos DOIVENT aller dans Supabase Storage.
+# Sur Vercel le disque est en lecture seule : on utilise TOUJOURS S3/Supabase, jamais le filesystem.
 _use_supabase_env = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
 _supabase_endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").strip()
-# Sur Vercel, forcer Supabase si l'endpoint S3 est défini (sinon Read-only file system)
-if VERCEL and _supabase_endpoint:
+if VERCEL:
+    # Vercel = disque read-only : forcer le backend S3 (Supabase ou autre). Sans les clés, l'upload échouera avec une erreur S3 claire.
     USE_SUPABASE_STORAGE = True
-    if not _use_supabase_env:
-        logger.warning("Vercel : stockage Supabase activé (SUPABASE_S3_ENDPOINT présent, disque read-only)")
+    if not _supabase_endpoint:
+        logger.warning("Vercel : USE_SUPABASE_STORAGE forcé à True (disque read-only). Définir SUPABASE_S3_* pour que les photos fonctionnent.")
+elif _supabase_endpoint or _use_supabase_env:
+    USE_SUPABASE_STORAGE = True
 else:
     USE_SUPABASE_STORAGE = _use_supabase_env
 
