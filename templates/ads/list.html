@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces{% if selected_category %} {{ selected_category|title }}{% endif %} · HABIKO{% endblock %}
-{% block description %}{% if selected_city %}Découvrez les meilleures annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire sur HABIKO. Maisons à vendre, villas à louer, appartements et terrains vérifiés. Contactez directement les propriétaires.{% else %}HABIKO - Le site immobilier #1 en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces vérifiées : maisons à vendre, villas à louer, appartements et terrains à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
-{% block keywords %}{% if selected_city %}immobilier {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}habiko, habiko ci, immobilier côte d'ivoire, maison à vendre abidjan, villa à louer, appartement abidjan, terrain à vendre, résidence meublée, immobilier abidjan, côte d'ivoire, ivoire{% endblock %}
+{% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} · KIABA Rencontres{% endblock %}
+{% block description %}{% if selected_city %}Découvrez les meilleures annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} à {{ selected_city.name }}, Côte d'Ivoire sur KIABA Rencontres : escort girls, escort boys et transgenres.{% else %}KIABA Rencontres - Site de petites annonces adultes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces vérifiées : escort girls, escort boys et transgenres à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
+{% block keywords %}{% if selected_city %}rencontres adultes {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}kiaba, kiaba rencontres, escort girl, escort boy, transgenre, annonces adultes, escorte côte d'ivoire{% endblock %}
 {% block canonical_url %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 {% block hreflang_fr_ci %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 {% block hreflang_default %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
@@ -12,8 +12,9 @@
 {
   "@context": "https://schema.org",
   "@type": "ItemList",
-    "name": "{% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}{% else %}Annonces immobilières en Côte d'Ivoire{% endif %}",
-    "description": "{% if selected_city %}Découvrez les meilleures annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces immobilières en Côte d'Ivoire{% endif %}",
+    "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:"escorte"}}
+ à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
+    "description": "{% if selected_city %}Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces adultes en Côte d'Ivoire{% endif %}",
   "url": "https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
   "numberOfItems": "{{ ads|length }}",
   "itemListElement": [
@@ -138,13 +139,13 @@
   <div class="flex-1">
 <header class="mb-3 md:mb-4">
   <h1 class="text-2xl font-bold text-gray-900">
-    {% if selected_city %}Annonces immobilières {{ selected_category|default:"immobilier" }} à {{ selected_city.name }}, Côte d'Ivoire · HABIKO{% elif selected_category %}Annonces {{ selected_category|title }} en Côte d'Ivoire · HABIKO{% else %}Annonces Immobilières en Côte d'Ivoire · HABIKO{% endif %}
+    {% if selected_city %}Annonces adultes {{ selected_category|default:"escorte"}} à {{ selected_city.name }}, Côte d'Ivoire · KIABA Rencontres{% elif selected_category %}Annonces {{ selected_category|title }} en Côte d'Ivoire · KIABA Rencontres{% else %}Annonces Adultes en Côte d'Ivoire · KIABA Rencontres{% endif %}
   </h1>
   <p class="text-sm text-gray-600 mt-1">
     {% if selected_city %}
-      Découvrez les meilleures annonces {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire. Maisons, villas, appartements, terrains.
+      Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire : escort girls, escort boys et transgenres.
     {% else %}
-      Parcourez des annonces vérifiées dans toute la Côte d'Ivoire.
+      Parcourez des annonces adultes vérifiées dans toute la Côte d'Ivoire.
     {% endif %}
   </p>
 </header>
@@ -159,10 +160,9 @@
     </select>
     <select name="category" class="col-span-1 border rounded-lg px-3 py-2">
       <option value="">Catégorie</option>
-      <option value="maisons_appartements" {% if request.GET.category == 'maisons_appartements' %}selected{% endif %}>Maisons et Appartements</option>
-      <option value="villas_residences" {% if request.GET.category == 'villas_residences' %}selected{% endif %}>Villas et Résidences</option>
-      <option value="terrains" {% if request.GET.category == 'terrains' %}selected{% endif %}>Terrains</option>
-      <option value="locations" {% if request.GET.category == 'locations' %}selected{% endif %}>Locations</option>
+      <option value="escorte_girl" {% if request.GET.category == 'escorte_girl' %}selected{% endif %}>Escorte girl</option>
+      <option value="escorte_boy" {% if request.GET.category == 'escorte_boy' %}selected{% endif %}>Escorte boy</option>
+      <option value="transgenre" {% if request.GET.category == 'transgenre' %}selected{% endif %}>Transgenre</option>
     </select>
     <div class="col-span-2 md:col-span-1 flex gap-2">
       <button type="submit" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition shadow-sm inline-flex items-center justify-center gap-2">
@@ -195,7 +195,7 @@
                 {% endif %}
                 data-placeholder="{% cycle ph1 ph2 ph3 ph4 %}"
                 onerror="this.onerror=null; this.src=this.dataset.placeholder;"
-                alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce immobilière sur HABIKO."
+                alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce adulte sur KIABA Rencontres."
                 decoding="async"
                 class="w-full h-full object-cover"
                 {% if forloop.first %}
@@ -211,7 +211,7 @@
           {% else %}
             <img
               src="{% cycle ph1 ph2 ph3 ph4 %}"
-              alt="Annonce immobilière {{ ad.get_category_display|default:'immobilier' }} à {{ ad.city.name }}, Côte d'Ivoire - HABIKO"
+              alt="Annonce adulte {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
               class="w-full h-full object-cover"
               loading="lazy"
               width="160"
