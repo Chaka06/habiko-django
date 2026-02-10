@@ -3,16 +3,23 @@ from django.urls import reverse
 from django.conf import settings
 from ads.models import Ad, City
 
-# Domaine canonique : Django utilise le framework Sites par défaut (souvent example.com).
-# En fixant domain ici, les URLs du sitemap sont toujours en https://ci-kiaba.com/...
+# Domaine canonique : la vue Django passe get_current_site(request) à get_urls(), donc
+# le domaine vient de la table Site (souvent example.com). On force ci-kiaba.com en
+# surchargeant get_domain() dans une base commune.
 SITEMAP_DOMAIN = "ci-kiaba.com"
 
 # Catégories réelles du modèle Ad (escorte, etc.)
 AD_CATEGORY_SLUGS = [c.value for c in Ad.Category]
 
 
-class StaticSitemap(Sitemap):
-    domain = SITEMAP_DOMAIN
+class KiabaSitemapBase(Sitemap):
+    """Base qui force le domaine ci-kiaba.com (Django utilise sinon get_current_site(request).domain)."""
+
+    def get_domain(self, site=None):
+        return SITEMAP_DOMAIN
+
+
+class StaticSitemap(KiabaSitemapBase):
     changefreq = "daily"
     priority = 1.0
     protocol = "https"
@@ -37,8 +44,7 @@ class StaticSitemap(Sitemap):
         return timezone.now()
 
 
-class AdSitemap(Sitemap):
-    domain = SITEMAP_DOMAIN
+class AdSitemap(KiabaSitemapBase):
     changefreq = "daily"
     priority = 0.9
     protocol = "https"
@@ -54,8 +60,7 @@ class AdSitemap(Sitemap):
         return obj.updated_at
 
 
-class CitySitemap(Sitemap):
-    domain = SITEMAP_DOMAIN
+class CitySitemap(KiabaSitemapBase):
     changefreq = "weekly"
     priority = 0.7
     protocol = "https"
@@ -67,8 +72,7 @@ class CitySitemap(Sitemap):
         return f"/ads?city={obj.slug}"
 
 
-class CategorySitemap(Sitemap):
-    domain = SITEMAP_DOMAIN
+class CategorySitemap(KiabaSitemapBase):
     changefreq = "weekly"
     priority = 0.6
     protocol = "https"
@@ -80,9 +84,8 @@ class CategorySitemap(Sitemap):
         return f"/ads?category={item}"
 
 
-class CityCategorySitemap(Sitemap):
+class CityCategorySitemap(KiabaSitemapBase):
     """Villes × catégories : uniquement les combinaisons qui ont des annonces approuvées."""
-    domain = SITEMAP_DOMAIN
     changefreq = "weekly"
     priority = 0.8
     protocol = "https"
