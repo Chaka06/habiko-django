@@ -24,12 +24,16 @@ from seo.sitemaps import StaticSitemap, AdSitemap, CitySitemap, CategorySitemap,
 from django.views.static import serve
 from django.http import HttpRequest, HttpResponse
 
+# Domaine canonique du sitemap (indépendant du framework Sites)
+SITEMAP_DOMAIN = "ci-kiaba.com"
+
+
 def sitemap_https(request: HttpRequest) -> HttpResponse:
-    """Vue personnalisée pour forcer HTTPS dans le sitemap"""
-    # Forcer HTTPS dans les headers de la requête
-    request.META['wsgi.url_scheme'] = 'https'
-    request.META['HTTP_X_FORWARDED_PROTO'] = 'https'
-    # Appeler la vue sitemap avec les sitemaps (sitemaps doit être un dict)
+    """Vue personnalisée pour forcer HTTPS et le domaine ci-kiaba.com dans le sitemap."""
+    request.META["wsgi.url_scheme"] = "https"
+    request.META["HTTP_X_FORWARDED_PROTO"] = "https"
+    # Forcer le host pour que toutes les URLs du sitemap soient en https://ci-kiaba.com/...
+    request.META["HTTP_HOST"] = SITEMAP_DOMAIN
     return sitemap(
         request,
         {
