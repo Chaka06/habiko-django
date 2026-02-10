@@ -148,28 +148,38 @@
 <section class="mb-4 md:mb-6">
   <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3" method="get">
     <div class="col-span-2 md:col-span-2 relative">
-      <input id="searchInput" name="q" type="text" placeholder="Rechercher (mots, catégorie, sous-catégorie…)" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
+      <label for="searchInput" class="block text-xs font-medium text-gray-600 mb-1">Recherche</label>
+      <input id="searchInput" name="q" type="text" placeholder="Mots, catégorie, sous-catégorie…" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
       <div id="searchSuggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-auto hidden"></div>
     </div>
-    <select name="city" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Ville">
-      <option value="">Toutes villes</option>
-      {% for c in cities %}
-        <option value="{{ c.slug }}" {% if request.GET.city == c.slug %}selected{% endif %}>{{ c.name }}</option>
-      {% endfor %}
-    </select>
-    <select name="category" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Catégorie">
-      <option value="">Catégorie</option>
-      {% for value, label in category_choices %}
-        <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-    <select name="subcategory" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Sous-catégorie">
-      <option value="">Sous-catégorie</option>
-      {% for sub in subcategory_choices %}
-        <option value="{{ sub }}" {% if selected_subcategory == sub %}selected{% endif %}>{{ sub }}</option>
-      {% endfor %}
-    </select>
-    <div class="col-span-2 md:col-span-1 flex gap-2">
+    <div>
+      <label for="ads-filter-city" class="block text-xs font-medium text-gray-600 mb-1">Ville</label>
+      <select id="ads-filter-city" name="city" class="w-full border rounded-lg px-3 py-2">
+        <option value="">Toutes villes</option>
+        {% for c in cities %}
+          <option value="{{ c.slug }}" {% if request.GET.city == c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="ads-filter-category" class="block text-xs font-medium text-gray-600 mb-1">Catégorie</label>
+      <select id="ads-filter-category" name="category" class="w-full border rounded-lg px-3 py-2">
+        <option value="">Toutes</option>
+        {% for value, label in category_choices %}
+          <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="ads-filter-subcategory" class="block text-xs font-medium text-gray-600 mb-1">Sous-catégorie</label>
+      <select id="ads-filter-subcategory" name="subcategory" class="w-full border rounded-lg px-3 py-2">
+        <option value="">Toutes</option>
+        {% for sub in subcategory_choices %}
+          <option value="{{ sub }}" {% if selected_subcategory == sub %}selected{% endif %}>{{ sub }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-span-2 md:col-span-1 flex flex-col justify-end gap-2">
       <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm inline-flex items-center justify-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
           <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414a1 1 0 0 0-.293.707V17l-4 4v-6.586a1 1 0 0 0-.293-.707L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>

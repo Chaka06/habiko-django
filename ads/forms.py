@@ -70,29 +70,15 @@ class AdForm(forms.Form):
         return
 
     def get_subcategory_choices(self, category):
-        """Retourne les sous-catégories selon la catégorie"""
-        subcategory_mapping = {
-            "escorte_girl": [
-                "Sex vaginal",
-                "Sex anal (sodomie)",
-                "Massage sexuel",
-                "Massage du corps",
-            ],
-            "escorte_boy": [
-                "Sex vaginal",
-                "Sex anal (sodomie)",
-                "Massage sexuel",
-                "Massage du corps",
-            ],
-            "transgenre": [
-                "Sex vaginal",
-                "Sex anal (sodomie)",
-                "Massage sexuel",
-                "Massage du corps",
-            ],
-        }
-        subcategories = subcategory_mapping.get(category, [])
-        return [(choice, choice) for choice in subcategories]
+        """Retourne les sous-catégories (toujours les mêmes pour escorte_girl/boy/transgenre)."""
+        # Une seule source de vérité : le modèle Ad
+        choices = getattr(Ad, "SUBCATEGORY_CHOICES", None) or [
+            "Sex vaginal",
+            "Sex anal (sodomie)",
+            "Massage sexuel",
+            "Massage du corps",
+        ]
+        return [(c, c) for c in choices]
 
     def clean_subcategories(self):
         # Convertir la liste en JSON pour le stockage
