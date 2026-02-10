@@ -187,6 +187,8 @@ INSTALLED_APPS = [
     "storages",
     "allauth",
     "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     # Local apps
     "accounts.apps.AccountsConfig",
     "ads",
@@ -417,11 +419,11 @@ VERCEL = os.environ.get("VERCEL") == "1"
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
 # Configuration Media selon la plateforme
-# Sur Vercel le disque est en lecture seule : on utilise TOUJOURS S3/Supabase, jamais le filesystem.
+# Sur Vercel le disque est en lecture seule : on utilise le stockage Supabase (S3-compatible).
 _use_supabase_env = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
 _supabase_endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").strip()
 if VERCEL:
-    # Vercel = disque read-only : forcer le backend S3 (Supabase ou autre). Sans les clés, l'upload échouera avec une erreur S3 claire.
+    # Vercel = disque read-only : forcer le backend S3 (Supabase). Sans les clés, l'upload échouera avec une erreur S3 claire.
     USE_SUPABASE_STORAGE = True
     if not _supabase_endpoint:
         logger.warning("Vercel : USE_SUPABASE_STORAGE forcé à True (disque read-only). Définir SUPABASE_S3_* pour que les photos fonctionnent.")
@@ -476,18 +478,15 @@ if MEDIA_ROOT and not VERCEL and not USE_SUPABASE_STORAGE:
     os.makedirs(MEDIA_ROOT, exist_ok=True)
 if VERCEL and not USE_SUPABASE_STORAGE:
     logger.warning(
-        "Vercel : le disque est en lecture seule. Pour que les photos des annonces s'enregistrent, "
-        "configurez SUPABASE_S3_ENDPOINT (et SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY, "
-        "SUPABASE_STORAGE_BUCKET) — voir docs/MEDIA_STORAGE.md"
+        "Vercel : le disque est en lecture seule. Définir SUPABASE_S3_* pour que les photos des annonces s'enregistrent — voir docs/MEDIA_STORAGE.md"
     )
 # Diagnostic : quel storage sera utilisé (vérifier les logs Vercel en cas de problème)
 _storage_label = "S3/Supabase" if USE_SUPABASE_STORAGE else "FileSystem"
 logger.info(
-    "📁 Media storage: %s | USE_SUPABASE_STORAGE=%s | VERCEL=%s | SUPABASE_S3_ENDPOINT=%s",
+    "📁 Media storage: %s | USE_SUPABASE_STORAGE=%s | VERCEL=%s",
     _storage_label,
     USE_SUPABASE_STORAGE,
     VERCEL,
-    "set" if _supabase_endpoint else "not set",
 )
 logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 
@@ -754,6 +753,28 @@ ACCOUNT_FORMS = {
     "login": "accounts.forms.CustomLoginForm",
     "signup": "accounts.forms.CustomSignupForm",
 }
+
+# Connexion / inscription avec Google (OAuth 2.0)
+# Créer des identifiants : https://console.cloud.google.com/apis/credentials → Créer des identifiants OAuth 2.0
+# URI de redirection autorisés : https://ci-kiaba.com/auth/google/login/callback/ (et http://localhost:8000/auth/google/login/callback/ en dev)
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "APPS": [
+            {
+                "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID", ""),
+                "secret": os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", ""),
+                "key": "",
+            }
+        ],
+    }
+}
+# Comptes créés via Google : pas de vérification email (déjà vérifié par Google)
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Custom user model
 AUTH_USER_MODEL = "accounts.CustomUser"
