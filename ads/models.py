@@ -41,10 +41,9 @@ class Feature(models.Model):
 
 class Ad(models.Model):
     class Category(models.TextChoices):
-        MAISONS_APPARTEMENTS = "maisons_appartements", "Maisons et Appartements"
-        VILLAS_RESIDENCES = "villas_residences", "Villas et Résidences"
-        TERRAINS = "terrains", "Terrains"
-        LOCATIONS = "locations", "Locations"
+        ESCORTE_GIRL = "escorte_girl", "Escorte girl"
+        ESCORTE_BOY = "escorte_boy", "Escorte boy"
+        TRANSGENRE = "transgenre", "Transgenre"
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -53,33 +52,12 @@ class Ad(models.Model):
         REJECTED = "rejected", "Rejected"
         ARCHIVED = "archived", "Archived"
 
+    # Sous-catégories communes aux annonces adultes / escortes
     SUBCATEGORY_CHOICES = [
-        # Maisons et Appartements
-        "Maison à vendre",
-        "Appartement à vendre",
-        "Studio à vendre",
-        "Duplex à vendre",
-        "Villa à vendre",
-        "Maison meublée à vendre",
-        "Appartement meublé à vendre",
-        # Villas et Résidences
-        "Villa de luxe",
-        "Résidence meublée",
-        "Résidence de standing",
-        "Villa avec piscine",
-        "Résidence sécurisée",
-        # Terrains
-        "Terrain à vendre",
-        "Terrain constructible",
-        "Terrain viabilisé",
-        "Parcelle à vendre",
-        "Terrain commercial",
-        # Locations
-        "Maison à louer",
-        "Appartement à louer",
-        "Studio à louer",
-        "Villa à louer",
-        "Résidence meublée à louer",
+        "Sex vaginal",
+        "Sex anal (sodomie)",
+        "Massage sexuel",
+        "Massage du corps",
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

@@ -82,7 +82,7 @@ def password_change(request: HttpRequest) -> HttpResponse:
             from .email_service import EmailService
             from django.conf import settings
             EmailService.send_email(
-                subject="Code de confirmation pour changement de mot de passe - HABIKO",
+                subject="Code de confirmation pour changement de mot de passe - KIABA Rencontres",
                 to_emails=[request.user.email],
                 template_name="account/email/password_change_otp",
                 context={
@@ -151,7 +151,7 @@ def resend_password_change_code(request: HttpRequest) -> HttpResponse:
         from .email_service import EmailService
         from django.conf import settings
         EmailService.send_email(
-            subject="Code de confirmation pour changement de mot de passe - HABIKO",
+            subject="Code de confirmation pour changement de mot de passe - KIABA Rencontres",
             to_emails=[request.user.email],
             template_name="account/email/password_change_otp",
             context={

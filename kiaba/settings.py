@@ -53,8 +53,8 @@ if environ is not None:
         MEDIA_ROOT=(str, "media"),
         # Email (console backend pour développement)
         EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
-        DEFAULT_FROM_EMAIL=(str, "HABIKO <no-reply@example.com>"),
-        SERVER_EMAIL=(str, "HABIKO Errors <errors@example.com>"),
+        DEFAULT_FROM_EMAIL=(str, "KIABA Rencontres <no-reply@example.com>"),
+        SERVER_EMAIL=(str, "KIABA Rencontres Errors <errors@example.com>"),
         # CinetPay
         CINETPAY_SITE_ID=(str, ""),
         CINETPAY_API_KEY=(str, ""),
@@ -118,8 +118,8 @@ else:
         MEDIA_URL=(str, "/media/"),
         MEDIA_ROOT=(str, "media"),
         EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
-        DEFAULT_FROM_EMAIL=(str, "HABIKO <no-reply@example.com>"),
-        SERVER_EMAIL=(str, "HABIKO Errors <errors@example.com>"),
+        DEFAULT_FROM_EMAIL=(str, "KIABA Rencontres <no-reply@example.com>"),
+        SERVER_EMAIL=(str, "KIABA Rencontres Errors <errors@example.com>"),
         # CinetPay
         CINETPAY_SITE_ID=(str, ""),
         CINETPAY_API_KEY=(str, ""),
@@ -575,11 +575,11 @@ EMAIL_BACKEND = env(
 # Identité d'envoi
 DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
-    default="HABIKO <no-replay@ci-habiko.com>",
+    default="KIABA Rencontres <no-replay@ci-habiko.com>",
 )
 SERVER_EMAIL = env(
     "SERVER_EMAIL",
-    default="HABIKO Errors <no-replay@ci-habiko.com>",
+    default="KIABA Rencontres Errors <no-replay@ci-habiko.com>",
 )
 
 # Paramètres SMTP (LWS, Brevo, SendGrid, etc.)
@@ -600,7 +600,7 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="True").lower() in ("true", "1", "y
 
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)  # Timeout pour SMTP
 EMAIL_USE_LOCALTIME = True
-EMAIL_SUBJECT_PREFIX = "[HABIKO] "
+EMAIL_SUBJECT_PREFIX = "[KIABA] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
 

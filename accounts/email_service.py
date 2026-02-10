@@ -1,5 +1,5 @@
 """
-Service d'envoi d'emails professionnel pour HABIKO
+Service d'envoi d'emails professionnel pour KIABA Rencontres
 Gère l'envoi d'emails avec templates HTML/text via Resend, SendGrid HTTP API ou SMTP
 """
 
@@ -18,7 +18,7 @@ class EmailService:
     """Service centralisé pour l'envoi d'emails professionnels"""
 
     # Nom d'expéditeur standardisé
-    FROM_NAME = "HABIKO"
+    FROM_NAME = "KIABA Rencontres"
 
     @classmethod
     def get_from_email_value(cls) -> str:
@@ -28,11 +28,11 @@ class EmailService:
 
             return settings.DEFAULT_FROM_EMAIL
         except (ImportError, AttributeError):
-            return "HABIKO <support@ci-habiko.com>"
+            return "KIABA Rencontres <support@ci-habiko.com>"
 
     @classmethod
     def get_from_email(cls) -> str:
-        """Retourne l'email formaté avec le nom HABIKO"""
+        """Retourne l'email formaté avec le nom KIABA Rencontres"""
         # Nettoyer l'email si il contient déjà le format
         email = cls.get_from_email_value()
         if "<" in email:
@@ -84,7 +84,7 @@ class EmailService:
             static_url = "/static/"
 
         # Toujours ajouter ces valeurs au contexte pour que le logo apparaisse
-        context["site_name"] = context.get("site_name", "HABIKO")
+        context["site_name"] = context.get("site_name", "KIABA Rencontres")
         context["site_url"] = context.get("site_url", site_url)
         context["support_email"] = context.get("support_email", "support@ci-habiko.com")
         context["logo_url"] = context.get("logo_url", f"{site_url}{static_url}img/logo.png")

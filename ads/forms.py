@@ -63,10 +63,9 @@ class AdForm(forms.Form):
             if not self.fields["subcategories"].choices:
                 all_subcategories = []
                 for category_choices in (
-                    self.get_subcategory_choices("maisons_appartements")
-                    + self.get_subcategory_choices("villas_residences")
-                    + self.get_subcategory_choices("terrains")
-                    + self.get_subcategory_choices("locations")
+                    self.get_subcategory_choices("escorte_girl")
+                    + self.get_subcategory_choices("escorte_boy")
+                    + self.get_subcategory_choices("transgenre")
                 ):
                     all_subcategories.append(category_choices)
                 self.fields["subcategories"].choices = all_subcategories
@@ -77,143 +76,31 @@ class AdForm(forms.Form):
             "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         }
         
-        if category == "villas_residences":
-            # Pour les résidences meublées : prix jours ouvrables et non ouvrables
-            self.fields["prix_jours_ouvrables"] = forms.DecimalField(
-                required=False,
-                max_digits=10,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Prix en FCFA"}),
-                label="Prix jours ouvrables (FCFA/jour)",
-                help_text="Prix pour les jours ouvrables (lundi-vendredi)"
-            )
-            self.fields["prix_jours_non_ouvrables"] = forms.DecimalField(
-                required=False,
-                max_digits=10,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Prix en FCFA"}),
-                label="Prix jours non ouvrables (FCFA/jour)",
-                help_text="Prix pour les weekends et jours fériés"
-            )
-            self.fields["surface"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Surface en m²"}),
-                label="Surface (m²)",
-            )
-            self.fields["nombre_chambres"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Nombre de chambres"}),
-                label="Nombre de chambres",
-            )
-        
-        elif category == "maisons_appartements":
-            # Pour les maisons/appartements à vendre : prix, surface, chambres, salles de bain
-            self.fields["prix_vente"] = forms.DecimalField(
-                required=False,
-                max_digits=12,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Prix en FCFA"}),
-                label="Prix de vente (FCFA)",
-            )
-            self.fields["surface"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Surface en m²"}),
-                label="Surface (m²)",
-            )
-            self.fields["nombre_chambres"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Nombre de chambres"}),
-                label="Nombre de chambres",
-            )
-            self.fields["nombre_salles_bain"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Nombre de salles de bain"}),
-                label="Nombre de salles de bain",
-            )
-        
-        elif category == "terrains":
-            # Pour les terrains : prix, surface
-            self.fields["prix"] = forms.DecimalField(
-                required=False,
-                max_digits=12,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Prix en FCFA"}),
-                label="Prix (FCFA)",
-            )
-            self.fields["surface"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Surface en m²"}),
-                label="Surface (m²)",
-            )
-        
-        elif category == "locations":
-            # Pour les locations : loyer, charges, caution
-            self.fields["loyer_mensuel"] = forms.DecimalField(
-                required=False,
-                max_digits=10,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Loyer en FCFA"}),
-                label="Loyer mensuel (FCFA)",
-            )
-            self.fields["charges"] = forms.DecimalField(
-                required=False,
-                max_digits=10,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Charges en FCFA"}),
-                label="Charges (FCFA/mois)",
-                help_text="Charges mensuelles (eau, électricité, etc.)"
-            )
-            self.fields["caution"] = forms.DecimalField(
-                required=False,
-                max_digits=10,
-                decimal_places=0,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Caution en FCFA"}),
-                label="Caution (FCFA)",
-                help_text="Dépôt de garantie"
-            )
-            self.fields["surface"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Surface en m²"}),
-                label="Surface (m²)",
-            )
-            self.fields["nombre_chambres"] = forms.IntegerField(
-                required=False,
-                widget=forms.NumberInput(attrs={**base_attrs, "placeholder": "Nombre de chambres"}),
-                label="Nombre de chambres",
-            )
+        # Pour KIABA (annonces adultes), on ne gère plus les champs
+        # immobiliers spécifiques (surface, chambres, etc.) ici.
+        # On garde uniquement les champs génériques du formulaire.
+        return
 
     def get_subcategory_choices(self, category):
         """Retourne les sous-catégories selon la catégorie"""
         subcategory_mapping = {
-            "maisons_appartements": [
-                "Maison à vendre",
-                "Appartement à vendre",
-                "Studio à vendre",
-                "Duplex à vendre",
-                "Villa à vendre",
-                "Maison meublée à vendre",
-                "Appartement meublé à vendre",
+            "escorte_girl": [
+                "Sex vaginal",
+                "Sex anal (sodomie)",
+                "Massage sexuel",
+                "Massage du corps",
             ],
-            "villas_residences": [
-                "Villa de luxe",
-                "Résidence meublée",
-                "Résidence de standing",
-                "Villa avec piscine",
-                "Résidence sécurisée",
+            "escorte_boy": [
+                "Sex vaginal",
+                "Sex anal (sodomie)",
+                "Massage sexuel",
+                "Massage du corps",
             ],
-            "terrains": [
-                "Terrain à vendre",
-                "Terrain constructible",
-                "Terrain viabilisé",
-                "Parcelle à vendre",
-                "Terrain commercial",
-            ],
-            "locations": [
-                "Maison à louer",
-                "Appartement à louer",
-                "Studio à louer",
-                "Villa à louer",
-                "Résidence meublée à louer",
+            "transgenre": [
+                "Sex vaginal",
+                "Sex anal (sodomie)",
+                "Massage sexuel",
+                "Massage du corps",
             ],
         }
         subcategories = subcategory_mapping.get(category, [])
