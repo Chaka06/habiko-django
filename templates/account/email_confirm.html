@@ -3,8 +3,8 @@
 {% block content %}
 <section class="max-w-md mx-auto bg-white rounded-2xl p-6 md:p-8 border shadow-sm">
   <div class="text-center">
-    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
     </div>
@@ -14,8 +14,8 @@
       Nous avons envoyé un email de confirmation à <strong>{{ email }}</strong>
     </p>
     
-    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-      <p class="text-sm text-orange-800">
+    <div class="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6">
+      <p class="text-sm text-pink-800">
         <strong>Prochaines étapes :</strong><br>
         1. Vérifiez votre boîte email<br>
         2. Cliquez sur le lien de confirmation<br>
@@ -25,14 +25,14 @@
     
     <form method="post" action="{% url 'account_confirm_email' key=confirmation.key %}">
       {% csrf_token %}
-      <button type="submit" class="w-full bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition">
+      <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
         Confirmer mon email
       </button>
     </form>
     
     <div class="mt-6 text-sm text-gray-500">
       <p>Vous n'avez pas reçu l'email ?</p>
-      <a href="{% url 'account_email' %}" class="text-orange-600 hover:text-orange-700 underline">
+      <a href="{% url 'account_email' %}" class="text-pink-600 hover:text-pink-700 underline">
         Renvoyer l'email de confirmation
       </a>
     </div>

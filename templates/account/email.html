@@ -7,11 +7,11 @@
   {% if user.emailaddress_set.all %}
     <div class="space-y-4">
       {% for emailaddress in user.emailaddress_set.all %}
-        <div class="flex items-center justify-between p-4 border rounded-lg {% if emailaddress.verified %}bg-green-50 border-green-200{% else %}bg-yellow-50 border-yellow-200{% endif %}">
+        <div class="flex items-center justify-between p-4 border rounded-lg {% if emailaddress.verified %}bg-blue-50 border-blue-200{% else %}bg-yellow-50 border-yellow-200{% endif %}">
           <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 {% if emailaddress.verified %}bg-green-100{% else %}bg-yellow-100{% endif %}">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 {% if emailaddress.verified %}bg-blue-100{% else %}bg-yellow-100{% endif %}">
               {% if emailaddress.verified %}
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               {% else %}
@@ -22,7 +22,7 @@
             </div>
             <div>
               <p class="font-medium text-gray-900">{{ emailaddress.email }}</p>
-              <p class="text-sm {% if emailaddress.verified %}text-green-600{% else %}text-yellow-600{% endif %}">
+              <p class="text-sm {% if emailaddress.verified %}text-blue-600{% else %}text-yellow-600{% endif %}">
                 {% if emailaddress.verified %}Vérifié{% else %}En attente de vérification{% endif %}
               </p>
             </div>
@@ -32,7 +32,7 @@
               <form method="post" action="{% url 'account_email' %}">
                 {% csrf_token %}
                 <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                <button type="submit" name="action_send" class="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                <button type="submit" name="action_send" class="text-pink-600 hover:text-pink-700 text-sm font-medium">
                   Renvoyer
                 </button>
               </form>
@@ -51,7 +51,7 @@
   {% endif %}
   
   <div class="mt-8 pt-6 border-t">
-    <a href="/dashboard/" class="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium">
+    <a href="/dashboard/" class="inline-flex items-center text-pink-600 hover:text-pink-700 font-medium">
       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
       </svg>

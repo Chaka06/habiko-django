@@ -17,12 +17,12 @@
         <label class="block text-sm font-medium text-gray-700 mb-3">Choisissez une formule</label>
         <div class="space-y-3">
           {% for package in packages %}
-          <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition {% if form.package.value == package.id %}border-green-500 bg-green-50{% endif %}">
+          <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition {% if form.package.value == package.id %}border-blue-500 bg-blue-50{% endif %}">
             <input type="radio" name="package" value="{{ package.id }}" class="mt-1 mr-3" required>
             <div class="flex-1">
               <div class="flex items-center justify-between">
                 <h3 class="font-semibold text-lg">{{ package.name }}</h3>
-                <span class="text-2xl font-bold text-green-600">{{ package.amount|floatformat:0 }} FCFA</span>
+                <span class="text-2xl font-bold text-blue-600">{{ package.amount|floatformat:0 }} FCFA</span>
               </div>
               <ul class="mt-2 space-y-1 text-sm text-gray-600">
                 <li>✓ {{ package.ads_included }} annonces incluses</li>
@@ -43,7 +43,7 @@
       </div>
 
       <div class="flex gap-3">
-        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
           Payer avec CinetPay
         </button>
         <a href="{% url 'accounts:account_balance' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium">
@@ -54,9 +54,9 @@
   </section>
 
   <!-- Info -->
-  <section class="bg-orange-50 rounded-2xl p-4 md:p-6 border border-orange-200">
-    <h3 class="font-semibold text-orange-900 mb-2">💡 Comment ça marche ?</h3>
-    <ul class="space-y-1 text-sm text-orange-800">
+  <section class="bg-pink-50 rounded-2xl p-4 md:p-6 border border-pink-200">
+    <h3 class="font-semibold text-pink-900 mb-2">💡 Comment ça marche ?</h3>
+    <ul class="space-y-1 text-sm text-pink-800">
       <li>• Choisissez une formule de recharge</li>
       <li>• Payez via CinetPay (Mobile Money, Carte bancaire)</li>
       <li>• Vos crédits sont ajoutés automatiquement</li>

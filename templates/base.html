@@ -277,9 +277,9 @@
     <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon.png' %}?v=2" />
     <link rel="apple-touch-icon" href="{% static 'favicon.png' %}?v=2" />
     <!-- Meta tags pour le favicon -->
-    <meta name="msapplication-TileColor" content="#f97316" />
+    <meta name="msapplication-TileColor" content="#ec4899" />
     <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}?v=2" />
-    <meta name="theme-color" content="#f97316" />
+    <meta name="theme-color" content="#ec4899" />
 
     <!-- Icônes Boxicons - Chargement asynchrone pour ne pas bloquer le rendu -->
     <link
@@ -342,12 +342,12 @@
 
       /* Style pour les liens du footer au survol */
       footer a:hover {
-        color: #f97316 !important;
+        color: #ec4899 !important;
       }
 
       /* CTA Section - Copié exactement de age_gate.html */
       .cta-section {
-        background: linear-gradient(to bottom right, #f97316, #22c55e);
+        background: linear-gradient(to bottom right, #ec4899, #3b82f6);
         color: #fff;
         padding: 0.75rem 1rem;
         text-align: center;
@@ -387,7 +387,7 @@
         display: inline-flex;
         align-items: center;
         background-color: #fff;
-        color: #ea580c;
+        color: #db2777;
         padding: 0.5rem 1.25rem;
         border-radius: 0.5rem;
         font-weight: 500;
@@ -415,7 +415,7 @@
       .kiaba-banner {
         background-color: #111827; /* gris très foncé, sobre */
         border-radius: 0.75rem;
-        border: 1px solid rgba(249, 115, 22, 0.35); /* léger rappel orange */
+        border: 1px solid rgba(236, 72, 153, 0.35); /* léger rappel rose */
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       }
       .kiaba-banner-text,
@@ -424,9 +424,9 @@
         font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       }
-      /* Texte orange -> dégradé vert animé */
+      /* Texte rose -> dégradé bleu animé */
       .kiaba-banner-text {
-        background: linear-gradient(90deg, #f97316, #22c55e);
+        background: linear-gradient(90deg, #ec4899, #3b82f6);
         background-size: 200% 100%;
         -webkit-background-clip: text;
         background-clip: text;
@@ -458,11 +458,11 @@
         }
       }
       .kiaba-banner-cta {
-        background: linear-gradient(135deg, #f97316, #22c55e);
+        background: linear-gradient(135deg, #ec4899, #3b82f6);
         color: #ffffff;
       }
       .kiaba-banner-cta:hover {
-        background: linear-gradient(135deg, #ea580c, #16a34a);
+        background: linear-gradient(135deg, #db2777, #2563eb);
       }
 
       /* Modale de chargement */
@@ -566,7 +566,7 @@
 
     {% block extra_head %}{% endblock %}
   </head>
-  <body class="min-h-full bg-gradient-to-b from-orange-50 to-white">
+  <body class="min-h-full bg-gradient-to-b from-pink-50 to-white">
     {% block header %}
     <header class="sticky top-0 z-40 glass border-b">
       <div
@@ -590,14 +590,14 @@
           {% if user.is_authenticated %}
           <a
             href="/dashboard/"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
           >
             Mon compte
           </a>
           {% else %}
           <a
             href="/auth/login/"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
           >
             Se connecter
           </a>
@@ -607,13 +607,13 @@
           {% if user.is_authenticated %}
           <a
             href="/dashboard/"
-            class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
+            class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
             >Mon compte</a
           >
           {% else %}
           <a
             href="/auth/login/"
-            class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
+            class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
             >Se connecter</a
           >
           {% endif %}
@@ -657,7 +657,7 @@
       <div class="max-w-3xl mx-auto mb-4 space-y-2" id="messagesContainer" data-messages-count="{{ messages|length }}">
         {% for message in messages %}
         <div
-          class="message-toast rounded-lg border px-4 py-3 text-sm opacity-0 transform translate-y-2 transition-all duration-300 {% if message.tags == 'success' %} bg-green-50 border-green-200 text-green-800 {% endif %} {% if message.tags == 'info' %} bg-orange-50 border-orange-200 text-orange-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
+          class="message-toast rounded-lg border px-4 py-3 text-sm opacity-0 transform translate-y-2 transition-all duration-300 {% if message.tags == 'success' %} bg-blue-50 border-blue-200 text-blue-800 {% endif %} {% if message.tags == 'info' %} bg-pink-50 border-pink-200 text-pink-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
           data-message-text="{{ message|escapejs }}"
           data-message-timestamp="{{ forloop.counter }}"
         >
@@ -687,29 +687,29 @@
             <h3 class="font-semibold text-gray-900 mb-3">Navigation</h3>
             <ul class="space-y-2 text-sm text-gray-600">
               <li>
-                <a href="/ads" class="hover:text-orange-600 transition-colors"
+                <a href="/ads" class="hover:text-pink-600 transition-colors"
                   >Annonces</a
                 >
               </li>
               <li>
-                <a href="/post" class="hover:text-orange-600 transition-colors"
+                <a href="/post" class="hover:text-pink-600 transition-colors"
                   >Publier une annonce</a
                 >
               </li>
               <li>
-                <a href="/legal/tos" class="hover:text-orange-600 transition-colors"
+                <a href="/legal/tos" class="hover:text-pink-600 transition-colors"
                   >CGU</a
                 >
               </li>
               <li>
-                <a href="/legal/privacy" class="hover:text-orange-600 transition-colors"
+                <a href="/legal/privacy" class="hover:text-pink-600 transition-colors"
                   >Confidentialité</a
                 >
               </li>
               <li>
                 <a
                   href="/legal/content-policy"
-                  class="hover:text-orange-600 transition-colors"
+                  class="hover:text-pink-600 transition-colors"
                   >Politique de contenu</a
                 >
               </li>
@@ -725,7 +725,7 @@
               <li>
                 <a
                   href="/ads?city={{ city.slug }}"
-                  class="hover:text-orange-600 transition-colors"
+                  class="hover:text-pink-600 transition-colors"
                   >Annonces à {{ city.name }}</a
                 >
               </li>
@@ -742,7 +742,7 @@
                 Email:
                 <a
                   href="mailto:support@ci-kiaba.com"
-                  class="hover:text-orange-600 transition-colors"
+                  class="hover:text-pink-600 transition-colors"
                   >support@ci-kiaba.com</a
                 >
               </li>
@@ -943,7 +943,7 @@
     <div id="cookieBanner" class="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50 hidden">
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex-1 flex items-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6 flex-shrink-0 text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6 flex-shrink-0 text-pink-400">
             <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
             <circle cx="12" cy="12" r="10" stroke="currentColor"/>
             <circle cx="8" cy="9" r="1.5" fill="currentColor"/>
@@ -955,17 +955,17 @@
           <p class="text-sm">
             Nous utilisons des cookies pour améliorer votre expérience sur KIABA Rencontres. 
             En continuant, vous acceptez notre utilisation des cookies. 
-            <a href="/legal/privacy" class="underline hover:text-orange-400">En savoir plus</a>
+            <a href="/legal/privacy" class="underline hover:text-pink-400">En savoir plus</a>
           </p>
         </div>
         <div class="flex gap-2">
-          <button id="cookieAcceptAll" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+          <button id="cookieAcceptAll" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition">
             Tout accepter
           </button>
           <button id="cookieRejectAll" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
             Refuser
           </button>
-          <button id="cookieCustomize" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+          <button id="cookieCustomize" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded-lg text-sm font-medium transition">
             Personnaliser
           </button>
         </div>
@@ -987,7 +987,7 @@
                 <h3 class="font-semibold text-gray-900">Cookies essentiels</h3>
                 <p class="text-sm text-gray-600">Nécessaires au fonctionnement du site (sessions, sécurité)</p>
               </div>
-              <span class="text-green-600 font-semibold">Toujours actifs</span>
+              <span class="text-blue-600 font-semibold">Toujours actifs</span>
             </div>
           </div>
           
@@ -999,7 +999,7 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="cookieAnalytics" class="sr-only peer" checked>
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
               </label>
             </div>
           </div>
@@ -1012,14 +1012,14 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="cookieMarketing" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
               </label>
             </div>
           </div>
         </div>
         
         <div class="flex gap-2 justify-end">
-          <button id="cookieSave" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition">
+          <button id="cookieSave" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
             Enregistrer les préférences
           </button>
           <button id="cookieCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium transition">

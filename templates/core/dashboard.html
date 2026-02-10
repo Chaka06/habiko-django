@@ -20,7 +20,7 @@
     <div class="flex flex-col md:flex-row items-start gap-4 md:gap-6 mb-4">
       <!-- Avatar -->
       <div class="flex items-center gap-4">
-        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-orange-500/70">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center ring-2 ring-pink-500/70">
           {% if profile.avatar %}
             <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name|default:user.username }}" class="w-full h-full object-cover">
           {% else %}
@@ -71,7 +71,7 @@
       </div>
     </div>
     <div class="mt-5 flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
-      <a href="/accounts/password/change/" class="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm md:text-base font-medium shadow-sm hover:shadow-md w-full sm:w-auto">
+      <a href="/accounts/password/change/" class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm md:text-base font-medium shadow-sm hover:shadow-md w-full sm:w-auto">
         <i class="bx bx-lock-alt text-lg"></i>
         <span>Modifier le mot de passe</span>
       </a>
@@ -90,7 +90,7 @@
   <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-900">Mes annonces</h2>
-      <a href="/post/" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium">
+      <a href="/post/" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
         Nouvelle annonce
       </a>
     </div>
@@ -118,14 +118,14 @@
                     <p class="text-sm text-gray-600">{{ ad.get_category_display }} • {{ ad.city.name }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                       Créée le {{ ad.created_at|date:"d/m/Y" }} • 
-                      <span class="font-medium {% if ad.status == 'approved' %}text-green-600{% elif ad.status == 'pending' %}text-yellow-600{% elif ad.status == 'rejected' %}text-red-600{% endif %}">
+                      <span class="font-medium {% if ad.status == 'approved' %}text-blue-600{% elif ad.status == 'pending' %}text-yellow-600{% elif ad.status == 'rejected' %}text-red-600{% endif %}">
                         {{ ad.get_status_display }}
                       </span>
                     </p>
                   </div>
                   <!-- Boutons d'action - toujours visibles et bien espacés -->
                   <div class="flex flex-row sm:flex-col items-center gap-2 sm:gap-2 w-full sm:w-auto">
-                    <a href="/ads/{{ ad.slug }}/" class="inline-flex items-center justify-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium text-sm shadow-md hover:shadow-lg flex-1 sm:flex-none min-w-[100px]">
+                    <a href="/ads/{{ ad.slug }}/" class="inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm shadow-md hover:shadow-lg flex-1 sm:flex-none min-w-[100px]">
                       <i class="bx bx-show text-base"></i>
                       <span>Voir</span>
                     </a>
@@ -143,7 +143,7 @@
     {% else %}
       <div class="text-center py-8">
         <p class="text-gray-500 mb-4">Vous n'avez pas encore d'annonces.</p>
-        <a href="/post/" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+        <a href="/post/" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
           Créer ma première annonce
         </a>
       </div>

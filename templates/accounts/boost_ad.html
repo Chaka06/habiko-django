@@ -55,10 +55,10 @@
 
       <!-- Booster gratuit -->
       {% if account.free_boosters_remaining > 0 %}
-      <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <label class="flex items-center cursor-pointer">
           <input type="checkbox" name="use_free_booster" class="mr-2">
-          <span class="text-sm font-medium text-green-800">
+          <span class="text-sm font-medium text-blue-800">
             Utiliser un booster gratuit ({{ account.free_boosters_remaining }} disponible(s))
           </span>
         </label>
@@ -66,14 +66,14 @@
       {% endif %}
 
       <!-- Solde -->
-      <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
-        <p class="text-sm text-orange-800">
+      <div class="bg-pink-50 p-4 rounded-lg border border-pink-200">
+        <p class="text-sm text-pink-800">
           Solde disponible : <span class="font-bold">{{ account.balance|floatformat:0 }} FCFA</span>
         </p>
       </div>
 
       <div class="flex gap-3">
-        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium">
+        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
           Appliquer le boost
         </button>
         <a href="/dashboard/" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium">
