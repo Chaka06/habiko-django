@@ -250,6 +250,34 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
             )
             return
 
+    def add_message(self, request, level, message_template=None, message_context=None, extra_tags="", message=None):
+        """
+        Surcharge pour le message « email_confirmation_sent » : utiliser l'email du login
+        en cours (utilisateur qui vient de s'inscrire) au lieu de request.user, afin d'éviter
+        d'afficher l'email d'une session précédente (ex: philippedavid190 au lieu de ircccanadasocial).
+        """
+        if message_template and "email_confirmation_sent" in message_template:
+            try:
+                from allauth.account.internal.stagekit import unstash_login
+
+                login = unstash_login(request, peek=True)
+                if login and getattr(login, "user", None) and login.user:
+                    # Utiliser l'email de l'utilisateur qui vient de s'inscrire
+                    email = getattr(login.user, "email", None) or getattr(login, "email", None)
+                    if email:
+                        if message_context is None:
+                            message_context = {}
+                        message_context = dict(message_context, email=email)
+            except Exception as e:
+                logger.warning(f"add_message: impossible de récupérer le login pour email_confirmation_sent: {e}")
+        return super().add_message(
+            request, level,
+            message_template=message_template,
+            message_context=message_context,
+            extra_tags=extra_tags,
+            message=message,
+        )
+
     def get_login_redirect_url(self, request):
         """Redirection après connexion"""
         # Vérifier que l'utilisateur est authentifié
