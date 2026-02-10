@@ -4,7 +4,7 @@ from django.conf import settings
 from ads.models import Ad, City
 
 # Forcer le domaine HTTPS pour le sitemap
-SITEMAP_DOMAIN = 'https://ci-habiko.com'
+SITEMAP_DOMAIN = 'https://ci-kiaba.com'
 
 
 class StaticSitemap(Sitemap):

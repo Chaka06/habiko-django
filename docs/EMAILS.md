@@ -205,9 +205,9 @@ Automatiquement ajoutées par `EmailService` :
 | Variable | Description | Exemple |
 |----------|-------------|---------|
 | `site_name` | Nom du site | "KIABA Rencontres" |
-| `site_url` | URL du site | "https://ci-habiko.com" |
-| `support_email` | Email de support | "support@ci-habiko.com" |
-| `logo_url` | URL du logo | "https://ci-habiko.com/static/img/logo.png" |
+| `site_url` | URL du site | "https://ci-kiaba.com" |
+| `support_email` | Email de support | "support@ci-kiaba.com" |
+| `logo_url` | URL du logo | "https://ci-kiaba.com/static/img/logo.png" |
 | `user` | Objet utilisateur | `{{ user.username }}` |
 
 ### Classes CSS disponibles
@@ -255,15 +255,15 @@ EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.example.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=no-reply@ci-habiko.com
+EMAIL_HOST_USER=no-reply@ci-kiaba.com
 EMAIL_HOST_PASSWORD=your-password
 
 # Expéditeur par défaut
-DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-habiko.com>
-SERVER_EMAIL=KIABA Rencontres Errors <errors@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-kiaba.com>
+SERVER_EMAIL=KIABA Rencontres Errors <errors@ci-kiaba.com>
 
 # Site URL (pour les liens dans les emails)
-SITE_URL=https://ci-habiko.com
+SITE_URL=https://ci-kiaba.com
 
 # Timeout
 EMAIL_TIMEOUT=10
@@ -274,8 +274,8 @@ EMAIL_TIMEOUT=10
 ```python
 # Email simple (console backend pour développement)
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="KIABA Rencontres <no-reply@ci-habiko.com>")
-SERVER_EMAIL = env("SERVER_EMAIL", default="KIABA Rencontres Errors <errors@ci-habiko.com>")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="KIABA Rencontres <no-reply@ci-kiaba.com>")
+SERVER_EMAIL = env("SERVER_EMAIL", default="KIABA Rencontres Errors <errors@ci-kiaba.com>")
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 
 # Assurer que le nom "KIABA Rencontres" apparaît dans les emails
@@ -409,7 +409,7 @@ LOGGING = {
 **Alternative** : Utiliser une URL complète hardcodée
 
 ```python
-logo_url = "https://ci-habiko.com/static/img/logo.png"
+logo_url = "https://ci-kiaba.com/static/img/logo.png"
 ```
 
 ### Problème : Templates non trouvés
@@ -459,8 +459,8 @@ TEMPLATES = [
 
 Système d'emails développé pour **KIABA Rencontres** par Diarrassouba Issiaka Konateh.
 
-📧 Contact : support@ci-habiko.com  
-🌐 Site : https://ci-habiko.com
+📧 Contact : support@ci-kiaba.com  
+🌐 Site : https://ci-kiaba.com
 
 ---
 

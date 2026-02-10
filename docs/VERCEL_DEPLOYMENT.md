@@ -1,6 +1,6 @@
 # Déploiement KIABA Rencontres sur Vercel + Supabase
 
-Ce guide explique comment déployer le projet **KIABA Rencontres** sur Vercel avec Supabase (PostgreSQL + Storage). Le domaine actuel est ci-habiko.com (à remplacer par ci-kiaba.com plus tard si besoin).
+Ce guide explique comment déployer le projet **KIABA Rencontres** sur Vercel avec Supabase (PostgreSQL + Storage). Domaine : **ci-kiaba.com**.
 
 ## Architecture
 
@@ -8,7 +8,7 @@ Ce guide explique comment déployer le projet **KIABA Rencontres** sur Vercel av
 - **Hébergement** : Vercel (Python serverless)
 - **Base de données** : Supabase PostgreSQL
 - **Stockage des images** : Supabase Storage (S3-compatible)
-- **Domaine** : ci-habiko.com (via Cloudflare), à migrer vers ci-kiaba.com plus tard
+- **Domaine** : ci-kiaba.com (via Cloudflare)
 
 ## Prérequis
 
@@ -49,8 +49,8 @@ SECRET_KEY=<génère une clé sécurisée>
 DJANGO_SETTINGS_MODULE=kiaba.settings
 
 # Hosts
-ALLOWED_HOSTS=ci-habiko.com,www.ci-habiko.com,.vercel.app
-SITE_URL=https://ci-habiko.com
+ALLOWED_HOSTS=ci-kiaba.com,www.ci-kiaba.com,.vercel.app
+SITE_URL=https://ci-kiaba.com
 
 # Base de données Supabase
 DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
@@ -70,7 +70,7 @@ DEFAULT_FROM_EMAIL=KIABA Rencontres <onboarding@resend.dev>
 
 # Option 2 - SendGrid : https://sendgrid.com
 SENDGRID_API_KEY=SG.xxxxxxxx
-DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-kiaba.com>
 
 # Option 3 - SMTP (Brevo, LWS, etc.)
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
@@ -108,9 +108,9 @@ Ou utilise un script de build personnalisé qui exécute les migrations.
 ## Étape 4 : Domaine personnalisé
 
 1. Vercel → Project → Settings → Domains
-2. Ajoute `ci-habiko.com` et `www.ci-habiko.com`
+2. Ajoute `ci-kiaba.com` et `www.ci-kiaba.com`
 3. Configure les DNS chez ton registrar ou Cloudflare :
-   - CNAME `ci-habiko.com` → `cname.vercel-dns.com`
+   - CNAME `ci-kiaba.com` → `cname.vercel-dns.com`
    - Ou A record vers l’IP Vercel
 
 ## Limites Vercel à connaître
@@ -123,7 +123,7 @@ Ou utilise un script de build personnalisé qui exécute les migrations.
 ## Troubleshooting
 
 ### Erreur CSRF
-- Vérifie que `CSRF_TRUSTED_ORIGINS` inclut `https://ci-habiko.com` et `https://*.vercel.app`
+- Vérifie que `CSRF_TRUSTED_ORIGINS` inclut `https://ci-kiaba.com` et `https://*.vercel.app`
 - Vérifie que les cookies sont bien envoyés (SameSite, Secure)
 
 ### Images non servies

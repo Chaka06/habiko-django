@@ -59,8 +59,8 @@ if environ is not None:
         CINETPAY_SITE_ID=(str, ""),
         CINETPAY_API_KEY=(str, ""),
         CINETPAY_SITE_KEY=(str, ""),
-        CINETPAY_NOTIFY_URL=(str, "https://ci-habiko.com/accounts/payment/cinetpay/notify/"),
-        CINETPAY_RETURN_URL=(str, "https://ci-habiko.com/accounts/payment/cinetpay/return/"),
+        CINETPAY_NOTIFY_URL=(str, "https://ci-kiaba.com/accounts/payment/cinetpay/notify/"),
+        CINETPAY_RETURN_URL=(str, "https://ci-kiaba.com/accounts/payment/cinetpay/return/"),
     )
     environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, ".env"))
 else:
@@ -124,8 +124,8 @@ else:
         CINETPAY_SITE_ID=(str, ""),
         CINETPAY_API_KEY=(str, ""),
         CINETPAY_SITE_KEY=(str, ""),
-        CINETPAY_NOTIFY_URL=(str, "https://ci-habiko.com/accounts/payment/cinetpay/notify/"),
-        CINETPAY_RETURN_URL=(str, "https://ci-habiko.com/accounts/payment/cinetpay/return/"),
+        CINETPAY_NOTIFY_URL=(str, "https://ci-kiaba.com/accounts/payment/cinetpay/notify/"),
+        CINETPAY_RETURN_URL=(str, "https://ci-kiaba.com/accounts/payment/cinetpay/return/"),
     )
 
 # Quick-start development settings - unsuitable for production
@@ -146,7 +146,7 @@ ALLOWED_HOSTS = [h.strip() for h in env("ALLOWED_HOSTS").split(",") if h.strip()
 
 # Add www version and Render external host automatically (uniquement en production)
 if not DEBUG:
-    ALLOWED_HOSTS.append("www.ci-habiko.com")  # Pour accepter www avant redirection
+    ALLOWED_HOSTS.append("www.ci-kiaba.com")  # Pour accepter www avant redirection
 
 # Add Render external host automatically if present
 RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL")
@@ -464,7 +464,7 @@ SITE_ID = 1
 if DEBUG:
     SITE_URL = env("SITE_URL", default="http://localhost:8080")
 else:
-    SITE_URL = env("SITE_URL", default="https://ci-habiko.com")
+    SITE_URL = env("SITE_URL", default="https://ci-kiaba.com")
 
 # Caches (Forcer le cache local pour éviter les erreurs Redis)
 CACHES = {
@@ -498,9 +498,9 @@ _base_csrf = [
     "http://localhost:8001",
     "http://127.0.0.1:8001",
     # Domaine de production (requis pour l'inscription et les formulaires)
-    "https://ci-habiko.com",
-    "https://www.ci-habiko.com",
-    "https://ci-habiko.vercel.app",
+    "https://ci-kiaba.com",
+    "https://www.ci-kiaba.com",
+    "https://ci-kiaba.vercel.app",
 ]
 _dynamic_csrf = []
 try:
@@ -536,8 +536,8 @@ CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 # Domaine des cookies : None pour que chaque host (www, non-www, vercel.app) ait son propre cookie.
-# .ci-habiko.com cassait www et vercel.app car le navigateur rejette un cookie Domain=.ci-habiko.com
-# quand la réponse vient de ci-habiko.vercel.app (pas un sous-domaine).
+# .ci-kiaba.com cassait www et vercel.app car le navigateur rejette un cookie Domain=.ci-kiaba.com
+# quand la réponse vient de ci-kiaba.vercel.app (pas un sous-domaine).
 CSRF_COOKIE_DOMAIN = None
 SESSION_COOKIE_DOMAIN = None
 # Durée des sessions (14 jours)
@@ -575,11 +575,11 @@ EMAIL_BACKEND = env(
 # Identité d'envoi
 DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
-    default="KIABA Rencontres <no-replay@ci-habiko.com>",
+    default="KIABA Rencontres <no-replay@ci-kiaba.com>",
 )
 SERVER_EMAIL = env(
     "SERVER_EMAIL",
-    default="KIABA Rencontres Errors <no-replay@ci-habiko.com>",
+    default="KIABA Rencontres Errors <no-replay@ci-kiaba.com>",
 )
 
 # Paramètres SMTP (LWS, Brevo, SendGrid, etc.)
@@ -698,8 +698,8 @@ CINETPAY_API_KEY = env("CINETPAY_API_KEY", default="")
 CINETPAY_SITE_KEY = env("CINETPAY_SITE_KEY", default="")
 CINETPAY_MODE = env("CINETPAY_MODE", default="PRODUCTION")  # PRODUCTION ou TEST
 CINETPAY_NOTIFY_URL = env(
-    "CINETPAY_NOTIFY_URL", default="https://ci-habiko.com/accounts/payment/cinetpay/notify/"
+    "CINETPAY_NOTIFY_URL", default="https://ci-kiaba.com/accounts/payment/cinetpay/notify/"
 )
 CINETPAY_RETURN_URL = env(
-    "CINETPAY_RETURN_URL", default="https://ci-habiko.com/accounts/payment/cinetpay/return/"
+    "CINETPAY_RETURN_URL", default="https://ci-kiaba.com/accounts/payment/cinetpay/return/"
 )

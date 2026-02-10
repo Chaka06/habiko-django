@@ -3,9 +3,9 @@
 {% block title %}{{ ad.title }} · {{ ad.city.name }} · KIABA Rencontres{% endblock %}
 {% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:20|striptags }}. Annonce vérifiée sur KIABA Rencontres. Contactez directement l'annonceur par WhatsApp, SMS ou appel direct.{% endblock %}
 {% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, kiaba, kiaba rencontres, annonces adultes {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
-{% block hreflang_fr_ci %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
-{% block hreflang_default %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
-{% block canonical_url %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
+{% block hreflang_default %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
 {% block structured_data %}
 <script type="application/ld+json">
 {
@@ -13,8 +13,8 @@
   "@type": "Product",
   "name": "{{ ad.title|escapejs }}",
   "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
-  "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
-  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-habiko.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-habiko.com/static/img/logo.png"]{% endif %},
+  "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
+  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-kiaba.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-kiaba.com/static/img/logo.png"]{% endif %},
   "category": "{{ ad.get_category_display|escapejs }}",
   "brand": {
     "@type": "Brand",
@@ -31,7 +31,7 @@
       "priceCurrency": "XOF",
       "valueAddedTaxIncluded": false
     },
-    "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+    "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
     "seller": {
       "@type": "Organization",
       "name": "KIABA Rencontres"
@@ -89,25 +89,25 @@
       "@type": "ListItem",
       "position": 1,
       "name": "Accueil",
-      "item": "https://ci-habiko.com"
+      "item": "https://ci-kiaba.com"
     },
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Annonces",
-      "item": "https://ci-habiko.com/ads"
+      "item": "https://ci-kiaba.com/ads"
     },
     {
       "@type": "ListItem",
       "position": 3,
       "name": "{{ ad.city.name }}",
-      "item": "https://ci-habiko.com/ads?city={{ ad.city.slug }}"
+      "item": "https://ci-kiaba.com/ads?city={{ ad.city.slug }}"
     },
     {
       "@type": "ListItem",
       "position": 4,
       "name": "{{ ad.title|escapejs }}",
-      "item": "https://ci-habiko.com/ads/{{ ad.slug }}"
+      "item": "https://ci-kiaba.com/ads/{{ ad.slug }}"
     }
   ]
 }

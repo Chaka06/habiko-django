@@ -20,7 +20,7 @@ class Command(BaseCommand):
         call_command("collectstatic", "--noinput")
 
         self.stdout.write("Sitemap generated successfully!")
-        self.stdout.write("Sitemap available at: https://ci-habiko.com/sitemap.xml")
+        self.stdout.write("Sitemap available at: https://ci-kiaba.com/sitemap.xml")
 
         if options["ping"]:
             try:

@@ -19,7 +19,7 @@ def robots_txt(_: object) -> HttpResponse:
         "Disallow: /edit/",
         "",
         "# Sitemaps",
-        "Sitemap: https://ci-habiko.com/sitemap.xml",
+        "Sitemap: https://ci-kiaba.com/sitemap.xml",
         "",
         "# Crawl-delay (optionnel, pour éviter de surcharger le serveur)",
         "Crawl-delay: 1",

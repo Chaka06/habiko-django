@@ -15,7 +15,7 @@ class Command(BaseCommand):
         username = "kaliadmin2"
         # Utiliser une variable d'environnement pour le mot de passe (plus sécurisé)
         password = getattr(settings, "INITIAL_SUPERUSER_PASSWORD", "Ch@coul@melo72")
-        email = "admin@ci-habiko.com"
+        email = "admin@ci-kiaba.com"
 
         if User.objects.filter(username=username).exists():
             self.stdout.write(

@@ -20,9 +20,9 @@ EMAIL_HOST = mail55.lwspanel.com (ou ton serveur LWS)
 EMAIL_PORT = 587  ⚠️ IMPORTANT : Changer de 465 à 587
 EMAIL_USE_TLS = True  ⚠️ IMPORTANT : True pour port 587
 EMAIL_USE_SSL = False  ⚠️ IMPORTANT : False pour port 587
-EMAIL_HOST_USER = no-replay@ci-habiko.com
+EMAIL_HOST_USER = no-replay@ci-kiaba.com
 EMAIL_HOST_PASSWORD = <ton_mot_de_passe_lws>
-DEFAULT_FROM_EMAIL = KIABA Rencontres <no-replay@ci-habiko.com>
+DEFAULT_FROM_EMAIL = KIABA Rencontres <no-replay@ci-kiaba.com>
 ```
 
 ### 2. Vérifier que LWS accepte le port 587
@@ -77,7 +77,7 @@ Pour tester si la configuration fonctionne :
 # Dans Django shell sur Render
 python manage.py shell
 >>> from django.core.mail import send_mail
->>> send_mail('Test', 'Message test', 'no-replay@ci-habiko.com', ['ton-email@gmail.com'], fail_silently=False)
+>>> send_mail('Test', 'Message test', 'no-replay@ci-kiaba.com', ['ton-email@gmail.com'], fail_silently=False)
 ```
 
 ## Logs à surveiller

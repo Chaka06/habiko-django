@@ -10,7 +10,7 @@ Ce document explique comment configurer l'envoi d'emails via SMTP Supabase.
    - Va dans **Settings** → **Auth** → **SMTP Settings**
 
 2. **Configurer un sender email** :
-   - Ajoute un email sender (ex: `no-replay@ci-habiko.com`)
+   - Ajoute un email sender (ex: `no-replay@ci-kiaba.com`)
    - Vérifie l'email si nécessaire
    - Récupère les paramètres SMTP fournis par Supabase
 
@@ -36,8 +36,8 @@ EMAIL_USE_SSL=True                        # True pour port 465 (SSL)
 EMAIL_USE_TLS=False                       # False pour port 465 (SSL)
 
 # Identité d'envoi
-DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-habiko.com>
-SERVER_EMAIL=KIABA Rencontres Errors <no-replay@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-kiaba.com>
+SERVER_EMAIL=KIABA Rencontres Errors <no-replay@ci-kiaba.com>
 
 # Timeout (optionnel)
 EMAIL_TIMEOUT=10
@@ -54,7 +54,7 @@ EMAIL_HOST_USER=ton-user-supabase
 EMAIL_HOST_PASSWORD=ton-password-supabase
 EMAIL_USE_SSL=False
 EMAIL_USE_TLS=True
-DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-kiaba.com>
 ```
 
 ### Pour port 465 (SSL)
@@ -66,7 +66,7 @@ EMAIL_HOST_USER=ton-user-supabase
 EMAIL_HOST_PASSWORD=ton-password-supabase
 EMAIL_USE_SSL=True
 EMAIL_USE_TLS=False
-DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-kiaba.com>
 ```
 
 ## Configuration sur Render
@@ -77,7 +77,7 @@ DEFAULT_FROM_EMAIL=KIABA Rencontres <no-replay@ci-habiko.com>
 
 ## Test de l'envoi d'emails
 
-1. Crée un compte de test sur https://ci-habiko.com/auth/signup/
+1. Crée un compte de test sur https://ci-kiaba.com/auth/signup/
 2. Vérifie les logs Render pour voir les messages :
    - `📧 Envoi email via SMTP Supabase`
    - `✅ Email envoyé avec succès via SMTP Supabase`

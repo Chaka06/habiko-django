@@ -11,8 +11,8 @@ from django.conf import settings
 from django.core.management import call_command
 
 try:
-    # Utiliser le domaine depuis les settings (SITE_URL) ou fallback sur ci-habiko.com
-    default_domain = "ci-habiko.com"
+    # Utiliser le domaine depuis les settings (SITE_URL) ou fallback sur ci-kiaba.com
+    default_domain = "ci-kiaba.com"
     if hasattr(settings, "SITE_URL") and settings.SITE_URL:
         from urllib.parse import urlparse
         parsed = urlparse(settings.SITE_URL)

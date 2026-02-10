@@ -3,21 +3,21 @@
 ## 🎯 Vérification Finale Complète
 
 ### ✅ 1. Domaines et Configuration
-- ✅ **Domaine principal** : `ci-habiko.com` (vérifié dans tous les fichiers)
-- ✅ **Domaine www** : `www.ci-habiko.com` → redirige vers `ci-habiko.com`
+- ✅ **Domaine principal** : `ci-kiaba.com` (vérifié dans tous les fichiers)
+- ✅ **Domaine www** : `www.ci-kiaba.com` → redirige vers `ci-kiaba.com`
 - ✅ **HTTPS** : Activé et forcé
-- ✅ **Anciens domaines** : Tous les `ci-kiaba.com` remplacés par `ci-habiko.com`
+- ✅ **Domaine** : `ci-kiaba.com` (unifié)
 
 ### ✅ 2. Fichiers SEO Essentiels
 
 #### robots.txt
-- ✅ URL : `https://ci-habiko.com/robots.txt`
-- ✅ Sitemap : `https://ci-habiko.com/sitemap.xml` (référencé)
+- ✅ URL : `https://ci-kiaba.com/robots.txt`
+- ✅ Sitemap : `https://ci-kiaba.com/sitemap.xml` (référencé)
 - ✅ Permissions : Correctes (Allow/Disallow)
 - ✅ Route : Configurée dans `seo/urls.py`
 
 #### sitemap.xml
-- ✅ URL : `https://ci-habiko.com/sitemap.xml`
+- ✅ URL : `https://ci-kiaba.com/sitemap.xml`
 - ✅ HTTPS : Forcé via `sitemap_https` view
 - ✅ Sections :
   - ✅ Pages statiques (accueil, liste, post, légales)
@@ -30,7 +30,7 @@
 
 #### Google Verification
 - ✅ **Meta tag** : `uJGTtVemQQT42MBUlLWzHWvX7r3IpCy2iczSO-mXBP0` dans `base.html`
-- ✅ **Fichier HTML** : `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html`
+- ✅ **Fichier HTML** : `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html`
 - ✅ Route : Configurée dans `seo/urls.py` et `seo/views.py`
 - ✅ Fichier statique : Présent dans `static/googleb96ecc9cfd50e4a1.html`
 
@@ -120,7 +120,7 @@
 ### Étape 2 : Ajouter la propriété
 1. Cliquer sur "Ajouter une propriété" (en haut à gauche)
 2. Choisir "Préfixe d'URL"
-3. Entrer : `https://ci-habiko.com`
+3. Entrer : `https://ci-kiaba.com`
 4. Cliquer sur "Continuer"
 
 ### Étape 3 : Vérifier la propriété
@@ -135,7 +135,7 @@
 
 **Alternative : Fichier HTML**
 - Si le meta tag ne fonctionne pas
-- Vérifier que `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html` est accessible
+- Vérifier que `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html` est accessible
 - Le fichier doit contenir : `google-site-verification: googleb96ecc9cfd50e4a1.html`
 
 ### Étape 4 : Soumettre le sitemap
@@ -148,16 +148,16 @@
 
 ### Étape 5 : Demander l'indexation (optionnel mais recommandé)
 1. Aller dans "Inspection d'URL" (menu de gauche)
-2. Entrer : `https://ci-habiko.com`
+2. Entrer : `https://ci-kiaba.com`
 3. Cliquer sur "Demander l'indexation"
 4. Répéter pour :
-   - `https://ci-habiko.com/ads`
-   - `https://ci-habiko.com/post`
+   - `https://ci-kiaba.com/ads`
+   - `https://ci-kiaba.com/post`
    - Quelques annonces populaires
 
 ## ✅ CHECKLIST FINALE
 
-- [x] Domaine `ci-habiko.com` correct partout
+- [x] Domaine `ci-kiaba.com` correct partout
 - [x] robots.txt accessible et correct
 - [x] sitemap.xml accessible et complet
 - [x] Google verification meta tag configuré
@@ -176,10 +176,10 @@
 **TOUT EST PRÊT ! Tu peux maintenant aller sur Google Search Console !**
 
 ### URLs à vérifier avant :
-1. `https://ci-habiko.com/robots.txt` → Doit afficher le contenu avec sitemap
-2. `https://ci-habiko.com/sitemap.xml` → Doit afficher le XML du sitemap
-3. `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html` → Doit afficher le texte de vérification
-4. `https://ci-habiko.com` → Doit charger normalement
+1. `https://ci-kiaba.com/robots.txt` → Doit afficher le contenu avec sitemap
+2. `https://ci-kiaba.com/sitemap.xml` → Doit afficher le XML du sitemap
+3. `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html` → Doit afficher le texte de vérification
+4. `https://ci-kiaba.com` → Doit charger normalement
 
 ### Si tout fonctionne :
 ✅ **Tu peux aller sur Google Search Console maintenant !**

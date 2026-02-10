@@ -44,12 +44,12 @@ try:
     site, created = Site.objects.get_or_create(
         id=settings.SITE_ID,
         defaults={
-            "domain": "ci-habiko.com",
+            "domain": "ci-kiaba.com",
             "name": "KIABA Rencontres",
         }
     )
-    if not created and site.domain != "ci-habiko.com":
-        site.domain = "ci-habiko.com"
+    if not created and site.domain != "ci-kiaba.com":
+        site.domain = "ci-kiaba.com"
         site.name = "KIABA Rencontres"
         site.save()
     print(f"✓ Site configured: {site.domain} (ID: {site.id})")

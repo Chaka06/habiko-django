@@ -349,9 +349,9 @@ class Command(BaseCommand):
         
         # Créer un utilisateur de test si nécessaire
         user, _ = User.objects.get_or_create(
-            username="habiko_immobilier",
+            username="kiaba_demo",
             defaults={
-                "email": "contact@habiko-ci.com",
+                "email": "contact@ci-kiaba.com",
                 "is_active": True,
                 "phone_e164": "+2250708091011",  # Numéro de téléphone pour afficher les contacts
             }

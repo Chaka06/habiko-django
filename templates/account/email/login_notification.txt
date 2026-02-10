@@ -16,7 +16,7 @@ Date et heure : {% now "d/m/Y à H:i" %}
 
 Si cette connexion n'a pas été effectuée par vous, veuillez :
 1. Changer immédiatement votre mot de passe
-2. Nous contacter à support@ci-habiko.com
+2. Nous contacter à support@ci-kiaba.com
 
 Changer votre mot de passe :
 {{ site_url }}/accounts/password/change/
@@ -25,4 +25,4 @@ Changer votre mot de passe :
 
 Cordialement,
 L'équipe KIABA Rencontres
-https://ci-habiko.com
+https://ci-kiaba.com

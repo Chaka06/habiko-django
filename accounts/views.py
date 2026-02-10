@@ -88,7 +88,7 @@ def password_change(request: HttpRequest) -> HttpResponse:
                 context={
                     "user": request.user,
                     "code": otp.code,
-                    "site_url": getattr(settings, "SITE_URL", "https://ci-habiko.com"),
+                    "site_url": getattr(settings, "SITE_URL", "https://ci-kiaba.com"),
                 },
                 fail_silently=False,
             )
@@ -157,7 +157,7 @@ def resend_password_change_code(request: HttpRequest) -> HttpResponse:
             context={
                 "user": request.user,
                 "code": otp.code,
-                "site_url": getattr(settings, "SITE_URL", "https://ci-habiko.com"),
+                "site_url": getattr(settings, "SITE_URL", "https://ci-kiaba.com"),
             },
             fail_silently=False,
         )

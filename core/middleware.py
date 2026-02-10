@@ -34,8 +34,8 @@ class RedirectMiddleware:
             response["Cache-Control"] = "public, max-age=3600"
             return response
 
-        # Redirection www vers non-www DÉSACTIVÉE : sur Vercel, seul www.ci-habiko.com peut être
-        # configuré (ci-habiko.com non-www absent). La redirection provoquait 404 ou "CSRF cookie not set"
+        # Redirection www vers non-www DÉSACTIVÉE : sur Vercel, seul www.ci-kiaba.com peut être
+        # configuré (ci-kiaba.com non-www absent). La redirection provoquait 404 ou "CSRF cookie not set"
         # car le cookie n'était jamais posé sur www (301 sans Set-Cookie). Garder www actif.
         # host = request.get_host()
         # if host.startswith("www."):

@@ -16,9 +16,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "ci-habiko.com,www.ci-habiko.com"
+        value: "ci-kiaba.com,www.ci-kiaba.com"
       - key: SITE_URL
-        value: "https://ci-habiko.com"
+        value: "https://ci-kiaba.com"
       # Database (configure these in Render dashboard, not here)
       - key: DB_ENGINE
         value: "postgres"
@@ -47,9 +47,9 @@ services:
       # - key: SENDGRID_API_KEY
       #   value: "your_sendgrid_api_key"
       # - key: DEFAULT_FROM_EMAIL
-      #   value: "KIABA Rencontres <no-reply@ci-habiko.com>"
+      #   value: "KIABA Rencontres <no-reply@ci-kiaba.com>"
       # - key: SERVER_EMAIL
-      #   value: "KIABA Rencontres Errors <errors@ci-habiko.com>"
+      #   value: "KIABA Rencontres Errors <errors@ci-kiaba.com>"
       # CinetPay configuration (configure these in Render dashboard, not here)
       # - key: CINETPAY_SITE_ID
       #   value: "your_site_id"
@@ -60,9 +60,9 @@ services:
       # - key: CINETPAY_MODE
       #   value: "PRODUCTION"
       # - key: CINETPAY_NOTIFY_URL
-      #   value: "https://ci-habiko.com/accounts/payment/cinetpay/notify/"
+      #   value: "https://ci-kiaba.com/accounts/payment/cinetpay/notify/"
       # - key: CINETPAY_RETURN_URL
-      #   value: "https://ci-habiko.com/accounts/payment/cinetpay/return/"
+      #   value: "https://ci-kiaba.com/accounts/payment/cinetpay/return/"
     disks:
       - name: media
         mountPath: /app/media

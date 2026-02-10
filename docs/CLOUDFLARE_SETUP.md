@@ -17,7 +17,7 @@ Cloudflare apporte plusieurs avantages importants à KIABA Rencontres :
 
 1. Aller sur https://dash.cloudflare.com/sign-up
 2. Créer un compte gratuit (plan Free suffit pour commencer)
-3. Ajouter votre site : `ci-habiko.com`
+3. Ajouter votre site : `ci-kiaba.com`
 
 ### Étape 2 : Configurer les DNS dans LWS Panel
 
@@ -28,7 +28,7 @@ Cloudflare apporte plusieurs avantages importants à KIABA Rencontres :
    - Exemple : `dana.ns.cloudflare.com` et `jim.ns.cloudflare.com`
 
 2. **Dans LWS Panel** :
-   - Aller dans la gestion de ton domaine `ci-habiko.com`
+   - Aller dans la gestion de ton domaine `ci-kiaba.com`
    - Modifier les nameservers pour pointer vers ceux de Cloudflare
    - ⚠️ **ATTENTION** : Cela peut prendre 24-48h pour se propager
 
@@ -40,11 +40,11 @@ Une fois les nameservers mis à jour, ajouter ces enregistrements DNS dans Cloud
 |------|------|---------|-------|-----|
 | A | @ | IP de Render | ✅ Proxied (orange) | Auto |
 | A | www | IP de Render | ✅ Proxied (orange) | Auto |
-| CNAME | www | ci-habiko.com | ✅ Proxied (orange) | Auto |
+| CNAME | www | ci-kiaba.com | ✅ Proxied (orange) | Auto |
 
 **Comment trouver l'IP de Render ?**
 - Dans Render Dashboard → Service → Settings → Networking
-- Ou utiliser `nslookup` : `nslookup ci-habiko.com`
+- Ou utiliser `nslookup` : `nslookup ci-kiaba.com`
 
 ### Étape 4 : Configuration SSL/TLS
 
@@ -96,7 +96,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 **Dans Render Dashboard** :
 1. Aller dans Settings → Networking
-2. Vérifier que le domaine `ci-habiko.com` est bien configuré
+2. Vérifier que le domaine `ci-kiaba.com` est bien configuré
 3. Render doit accepter les requêtes depuis Cloudflare
 
 **Important** : Avec Cloudflare, Render reçoit les requêtes depuis les IPs de Cloudflare, pas directement depuis les utilisateurs.

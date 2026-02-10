@@ -3,9 +3,9 @@
 {% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} · KIABA Rencontres{% endblock %}
 {% block description %}{% if selected_city %}Découvrez les meilleures annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} à {{ selected_city.name }}, Côte d'Ivoire sur KIABA Rencontres : escort girls, escort boys et transgenres.{% else %}KIABA Rencontres - Site de petites annonces adultes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces vérifiées : escort girls, escort boys et transgenres à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
 {% block keywords %}{% if selected_city %}rencontres adultes {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}kiaba, kiaba rencontres, escort girl, escort boy, transgenre, annonces adultes, escorte côte d'ivoire{% endblock %}
-{% block canonical_url %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
-{% block hreflang_fr_ci %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
-{% block hreflang_default %}https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_default %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -14,7 +14,7 @@
   "@type": "ItemList",
     "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:'escorte' }} à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
     "description": "{% if selected_city %}Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces adultes en Côte d'Ivoire{% endif %}",
-  "url": "https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
+  "url": "https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
   "numberOfItems": "{{ ads|length }}",
   "itemListElement": [
     {% for ad in ads %}
@@ -25,15 +25,15 @@
         "@type": "Product",
         "name": "{{ ad.title|escapejs }}",
         "description": "{{ ad.description_sanitized|truncatewords:20|escapejs }}",
-        "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
-        "image": {% if ad.media.count %}"https://ci-habiko.com{{ ad.media.first.image.url }}"{% else %}"https://ci-habiko.com/static/img/logo.png"{% endif %},
+        "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
+        "image": {% if ad.media.count %}"https://ci-kiaba.com{{ ad.media.first.image.url }}"{% else %}"https://ci-kiaba.com/static/img/logo.png"{% endif %},
         "category": "{{ ad.get_category_display|escapejs }}",
         "offers": {
           "@type": "Offer",
           "availability": "https://schema.org/InStock",
           "priceCurrency": "XOF",
           "price": "0",
-          "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
+          "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
           "hasMerchantReturnPolicy": {
             "@type": "MerchantReturnPolicy",
             "applicableCountry": "CI",

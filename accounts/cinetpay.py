@@ -83,12 +83,12 @@ class CinetPayService:
         notify_url = getattr(
             settings,
             "CINETPAY_NOTIFY_URL",
-            "https://ci-habiko.com/accounts/payment/cinetpay/notify/"
+            "https://ci-kiaba.com/accounts/payment/cinetpay/notify/"
         )
         return_url = getattr(
             settings,
             "CINETPAY_RETURN_URL",
-            "https://ci-habiko.com/accounts/payment/cinetpay/return/"
+            "https://ci-kiaba.com/accounts/payment/cinetpay/return/"
         )
         
         # Récupérer les informations utilisateur

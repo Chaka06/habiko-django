@@ -41,13 +41,13 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
         try:
             from django.conf import settings
 
-            site_url = getattr(settings, "SITE_URL", "https://ci-habiko.com")
+            site_url = getattr(settings, "SITE_URL", "https://ci-kiaba.com")
             static_url = getattr(settings, "STATIC_URL", "/static/")
 
             # Ajouter les valeurs par défaut au contexte si elles n'existent pas
             context.setdefault("site_name", "KIABA Rencontres")
             context.setdefault("site_url", site_url)
-            context.setdefault("support_email", "support@ci-habiko.com")
+            context.setdefault("support_email", "support@ci-kiaba.com")
             context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
 
             # Pour les emails de confirmation, construire activate_url si key est présent

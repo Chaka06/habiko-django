@@ -1,6 +1,6 @@
 # KIABA Rencontres - Site de rencontres adultes & annonces (Côte d'Ivoire)
 
-Plateforme web **KIABA Rencontres** : site de petites annonces adultes et rencontres en Côte d'Ivoire, développée avec Django/Python. Publication d'annonces, profils vérifiés, contact sécurisé. Domaine actuel : **ci-habiko.com** (migration vers ci-kiaba.com prévue).
+Plateforme web **KIABA Rencontres** : site de petites annonces adultes et rencontres en Côte d'Ivoire, développée avec Django/Python. Publication d'annonces, profils vérifiés, contact sécurisé. Domaine actuel : **ci-kiaba.com** (migration vers ci-kiaba.com prévue).
 
 **Développé par** [Diarrassouba Issiaka Konateh](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
 
@@ -232,7 +232,7 @@ coverage report
 ```bash
 DEBUG=False
 SECRET_KEY=your-secret-key
-ALLOWED_HOSTS=ci-habiko.com,www.ci-habiko.com
+ALLOWED_HOSTS=ci-kiaba.com,www.ci-kiaba.com
 DB_ENGINE=postgresql
 POSTGRES_DB=habiko
 POSTGRES_USER=habiko

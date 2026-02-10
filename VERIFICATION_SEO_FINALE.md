@@ -1,25 +1,25 @@
 # ✅ Vérification SEO Finale - KIABA Rencontres
 
-Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tard.
+Domaine : **ci-kiaba.com**
 
 ## 📋 Checklist Complète avant Google Search Console
 
 ### 1. ✅ Domaines et URLs
-- [x] Domaine principal : `ci-habiko.com` (tous les fichiers vérifiés)
-- [x] Domaine avec www : `www.ci-habiko.com` (redirige vers `ci-habiko.com`)
+- [x] Domaine principal : `ci-kiaba.com` (tous les fichiers vérifiés)
+- [x] Domaine avec www : `www.ci-kiaba.com` (redirige vers `ci-kiaba.com`)
 - [x] HTTPS : Activé et forcé
-- [x] Tous les anciens domaines `ci-kiaba.com` remplacés par `ci-habiko.com`
+- [x] Tous les anciens domaines `ci-kiaba.com` remplacés par `ci-kiaba.com`
 
 ### 2. ✅ Fichiers SEO Essentiels
 
 #### robots.txt
-- [x] URL : `https://ci-habiko.com/robots.txt`
-- [x] Sitemap référencé : `https://ci-habiko.com/sitemap.xml`
+- [x] URL : `https://ci-kiaba.com/robots.txt`
+- [x] Sitemap référencé : `https://ci-kiaba.com/sitemap.xml`
 - [x] Permissions correctes (Allow/Disallow)
 - [x] Accessible et fonctionnel
 
 #### sitemap.xml
-- [x] URL : `https://ci-habiko.com/sitemap.xml`
+- [x] URL : `https://ci-kiaba.com/sitemap.xml`
 - [x] HTTPS forcé dans la vue `sitemap_https`
 - [x] Sections incluses :
   - [x] Pages statiques (accueil, liste, post, légales)
@@ -31,7 +31,7 @@ Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tar
 - [x] changefreq configuré (daily/weekly)
 
 #### Google Verification
-- [x] Fichier HTML : `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html`
+- [x] Fichier HTML : `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html`
 - [x] Route configurée dans `seo/urls.py`
 - [x] Meta tag dans `base.html` : `uJGTtVemQQT42MBUlLWzHWvX7r3IpCy2iczSO-mXBP0`
 
@@ -167,7 +167,7 @@ Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tar
 1. Aller sur https://search.google.com/search-console
 2. Cliquer sur "Ajouter une propriété"
 3. Choisir "Préfixe d'URL"
-4. Entrer : `https://ci-habiko.com`
+4. Entrer : `https://ci-kiaba.com`
 5. Cliquer sur "Continuer"
 
 ### Étape 2 : Vérifier la propriété
@@ -177,7 +177,7 @@ Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tar
 3. Cliquer sur "Vérifier"
 
 **Option B : Fichier HTML (Alternative)**
-1. Vérifier que `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html` est accessible
+1. Vérifier que `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html` est accessible
 2. Si le code est différent, mettre à jour `seo/views.py`
 
 ### Étape 3 : Soumettre le sitemap
@@ -189,18 +189,18 @@ Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tar
 
 ### Étape 4 : Demander l'indexation
 1. Aller dans "Inspection d'URL"
-2. Entrer l'URL de la page d'accueil : `https://ci-habiko.com`
+2. Entrer l'URL de la page d'accueil : `https://ci-kiaba.com`
 3. Cliquer sur "Demander l'indexation"
 4. Répéter pour quelques pages importantes :
-   - `https://ci-habiko.com/ads`
-   - `https://ci-habiko.com/post`
+   - `https://ci-kiaba.com/ads`
+   - `https://ci-kiaba.com/post`
    - Quelques annonces populaires
 
 ## ✅ Statut Final
 
 **Tout est prêt pour Google Search Console !**
 
-- ✅ Tous les domaines sont corrects (`ci-habiko.com`)
+- ✅ Tous les domaines sont corrects (`ci-kiaba.com`)
 - ✅ Le sitemap est configuré et accessible
 - ✅ Le robots.txt est correct
 - ✅ Les structured data sont en place

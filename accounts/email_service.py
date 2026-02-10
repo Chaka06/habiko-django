@@ -28,7 +28,7 @@ class EmailService:
 
             return settings.DEFAULT_FROM_EMAIL
         except (ImportError, AttributeError):
-            return "KIABA Rencontres <support@ci-habiko.com>"
+            return "KIABA Rencontres <support@ci-kiaba.com>"
 
     @classmethod
     def get_from_email(cls) -> str:
@@ -77,16 +77,16 @@ class EmailService:
         try:
             from django.conf import settings
 
-            site_url = getattr(settings, "SITE_URL", "https://ci-habiko.com")
+            site_url = getattr(settings, "SITE_URL", "https://ci-kiaba.com")
             static_url = getattr(settings, "STATIC_URL", "/static/")
         except (ImportError, AttributeError):
-            site_url = "https://ci-habiko.com"
+            site_url = "https://ci-kiaba.com"
             static_url = "/static/"
 
         # Toujours ajouter ces valeurs au contexte pour que le logo apparaisse
         context["site_name"] = context.get("site_name", "KIABA Rencontres")
         context["site_url"] = context.get("site_url", site_url)
-        context["support_email"] = context.get("support_email", "support@ci-habiko.com")
+        context["support_email"] = context.get("support_email", "support@ci-kiaba.com")
         context["logo_url"] = context.get("logo_url", f"{site_url}{static_url}img/logo.png")
 
         # Pour les emails de confirmation, construire activate_url si key est présent
@@ -273,8 +273,8 @@ class EmailService:
             email_headers = getattr(settings, "EMAIL_HEADERS", {})
             for key, value in email_headers.items():
                 email.extra_headers[key] = value
-            email.extra_headers["Reply-To"] = "support@ci-habiko.com"
-            email.extra_headers["Return-Path"] = "support@ci-habiko.com"
+            email.extra_headers["Reply-To"] = "support@ci-kiaba.com"
+            email.extra_headers["Return-Path"] = "support@ci-kiaba.com"
 
             try:
                 logger.info(

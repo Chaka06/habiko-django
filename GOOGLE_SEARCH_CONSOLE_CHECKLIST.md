@@ -1,26 +1,26 @@
 # ✅ Checklist Google Search Console - KIABA Rencontres
 
-Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si besoin).
+Domaine : **ci-kiaba.com**
 
 ## 📋 Vérifications préalables
 
 ### 1. Domaine et Configuration
-- ✅ **Domaine principal** : `ci-habiko.com`
-- ✅ **Domaine avec www** : `www.ci-habiko.com` (redirige vers `ci-habiko.com`)
+- ✅ **Domaine principal** : `ci-kiaba.com`
+- ✅ **Domaine avec www** : `www.ci-kiaba.com` (redirige vers `ci-kiaba.com`)
 - ✅ **ALLOWED_HOSTS** : Configuré dans `render.yaml` et `settings.py`
-- ✅ **SITE_URL** : `https://ci-habiko.com` (configuré dans Render)
+- ✅ **SITE_URL** : `https://ci-kiaba.com` (configuré dans Render)
 - ✅ **HTTPS** : Activé et forcé via `SECURE_PROXY_SSL_HEADER`
 
 ### 2. Fichiers SEO essentiels
 
 #### robots.txt
-- ✅ **URL** : `https://ci-habiko.com/robots.txt`
-- ✅ **Sitemap référencé** : `https://ci-habiko.com/sitemap.xml`
+- ✅ **URL** : `https://ci-kiaba.com/robots.txt`
+- ✅ **Sitemap référencé** : `https://ci-kiaba.com/sitemap.xml`
 - ✅ **Permissions** : Toutes les pages publiques autorisées
 - ✅ **Disallow** : Admin, auth, dashboard, age-gate correctement bloqués
 
 #### sitemap.xml
-- ✅ **URL** : `https://ci-habiko.com/sitemap.xml`
+- ✅ **URL** : `https://ci-kiaba.com/sitemap.xml`
 - ✅ **HTTPS forcé** : Oui (via `sitemap_https` view)
 - ✅ **Sections incluses** :
   - Pages statiques (accueil, liste annonces, post, pages légales)
@@ -32,7 +32,7 @@ Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si bes
 - ✅ **changefreq** : Configuré (daily pour annonces, weekly pour villes/catégories)
 
 #### Google Verification
-- ✅ **Fichier HTML** : `https://ci-habiko.com/googleb96ecc9cfd50e4a1.html`
+- ✅ **Fichier HTML** : `https://ci-kiaba.com/googleb96ecc9cfd50e4a1.html`
 - ✅ **Meta tag** : Présent dans `base.html` avec le code `uJGTtVemQQT42MBUlLWzHWvX7r3IpCy2iczSO-mXBP0`
 - ✅ **Route configurée** : Oui dans `seo/urls.py`
 
@@ -57,7 +57,7 @@ Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si bes
 - ✅ **Slugs** : Toutes les annonces utilisent des slugs
 - ✅ **HTTPS** : Toutes les URLs en HTTPS
 - ✅ **Pas de paramètres inutiles** : URLs propres
-- ✅ **Redirection www** : `www.ci-habiko.com` → `ci-habiko.com`
+- ✅ **Redirection www** : `www.ci-kiaba.com` → `ci-kiaba.com`
 
 ### 6. Performance et Technique
 - ✅ **Mobile-friendly** : Responsive design
@@ -71,14 +71,14 @@ Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si bes
 1. Aller sur https://search.google.com/search-console
 2. Cliquer sur "Ajouter une propriété"
 3. Choisir "Préfixe d'URL"
-4. Entrer : `https://ci-habiko.com`
+4. Entrer : `https://ci-kiaba.com`
 5. Cliquer sur "Continuer"
 
 ### Étape 2 : Vérifier la propriété
 **Option A : Fichier HTML (Recommandé)**
 1. Google va proposer de télécharger un fichier HTML
 2. **NE PAS télécharger** - nous avons déjà le fichier configuré
-3. Vérifier que `https://ci-habiko.com/googleb96ecc9cfd50e1.html` est accessible
+3. Vérifier que `https://ci-kiaba.com/googleb96ecc9cfd50e1.html` est accessible
 4. Si le code est différent, mettre à jour `seo/views.py` et `templates/base.html`
 
 **Option B : Meta tag (Déjà configuré)**
@@ -100,11 +100,11 @@ Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si bes
 
 ### Étape 4 : Demander l'indexation
 1. Aller dans "Inspection d'URL"
-2. Entrer l'URL de la page d'accueil : `https://ci-habiko.com`
+2. Entrer l'URL de la page d'accueil : `https://ci-kiaba.com`
 3. Cliquer sur "Demander l'indexation"
 4. Répéter pour quelques pages importantes :
-   - `https://ci-habiko.com/ads`
-   - `https://ci-habiko.com/post`
+   - `https://ci-kiaba.com/ads`
+   - `https://ci-kiaba.com/post`
    - Quelques annonces populaires
 
 ## 🔍 Vérifications post-soumission
@@ -118,14 +118,14 @@ Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si bes
 ## ⚠️ Points d'attention
 
 ### Render + LWS
-- ✅ Le domaine `ci-habiko.com` est configuré chez LWS
+- ✅ Le domaine `ci-kiaba.com` est configuré chez LWS
 - ✅ Les DNS pointent vers Render
 - ✅ Le certificat SSL est valide (géré par Render)
 - ✅ Les redirections HTTPS fonctionnent
 
 ### Fichiers statiques
 - ✅ Les fichiers statiques sont servis correctement
-- ✅ Le logo est accessible : `https://ci-habiko.com/static/img/logo.png`
+- ✅ Le logo est accessible : `https://ci-kiaba.com/static/img/logo.png`
 - ✅ Le fichier de vérification Google est accessible
 
 ### Middleware
@@ -154,7 +154,7 @@ Une fois indexé, surveiller dans Google Search Console :
 
 **Tout est prêt pour Google Search Console !**
 
-- ✅ Tous les domaines sont corrects (`ci-habiko.com`)
+- ✅ Tous les domaines sont corrects (`ci-kiaba.com`)
 - ✅ Le sitemap est configuré et accessible
 - ✅ Le robots.txt est correct
 - ✅ Les structured data sont en place
@@ -166,7 +166,7 @@ Une fois indexé, surveiller dans Google Search Console :
 
 **Tu peux maintenant :**
 1. Aller sur Google Search Console
-2. Ajouter la propriété `https://ci-habiko.com`
+2. Ajouter la propriété `https://ci-kiaba.com`
 3. Vérifier avec le meta tag (déjà configuré)
 4. Soumettre le sitemap `sitemap.xml`
 5. Demander l'indexation de la page d'accueil
