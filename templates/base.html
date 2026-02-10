@@ -262,23 +262,24 @@
 
     {% block structured_data %}{% endblock %}
 
-    <!-- Favicon - Configuration complète pour Google et tous les navigateurs (?v=3 cache-bust) -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="shortcut icon" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon.png' %}?v=3" />
-    <link rel="apple-touch-icon" href="{% static 'favicon.png' %}?v=3" />
+    <!-- Favicon - URL absolue pour éviter le favicon Render sur certaines pages -->
+    {% static 'favicon.png' as favicon_path %}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="shortcut icon" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
+    <link rel="apple-touch-icon" href="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
     <!-- Meta tags pour le favicon -->
     <meta name="msapplication-TileColor" content="#ec4899" />
-    <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}?v=3" />
+    <meta name="msapplication-TileImage" content="{{ request.scheme }}://{{ request.get_host }}{{ favicon_path }}?v=4" />
     <meta name="theme-color" content="#ec4899" />
 
     <!-- Icônes Boxicons - Chargement asynchrone pour ne pas bloquer le rendu -->
