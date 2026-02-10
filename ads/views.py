@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import Ad, City
@@ -14,6 +14,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     )
     city = request.GET.get("city")
     category = request.GET.get("category")
+    subcategory = request.GET.get("subcategory", "").strip()
     provider = request.GET.get("provider")
     selected_city = None
     selected_category = None
@@ -27,14 +28,20 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     if category:
         selected_category = category
         qs = qs.filter(category=category)
+    if subcategory:
+        qs = qs.filter(subcategories__contains=[subcategory])
     if provider:
         if provider.isdigit():
             qs = qs.filter(user_id=int(provider))
         else:
             qs = qs.filter(user__username=provider)
-    q = request.GET.get("q")
+    q = request.GET.get("q", "").strip()
     if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(description_sanitized__icontains=q))
+        q_search = Q(title__icontains=q) | Q(description_sanitized__icontains=q)
+        for sub in Ad.SUBCATEGORY_CHOICES:
+            if q.lower() in sub.lower():
+                q_search |= Q(subcategories__contains=[sub])
+        qs = qs.filter(q_search)
 
     # Pagination - 10 annonces par page
     paginator = Paginator(qs, 10)
@@ -47,6 +54,8 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     if cities is None:
         cities = City.objects.all()
         cache.set("all_cities", cities, 3600)  # Cache 1 heure
+
+    total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
     return render(
         request,
         "ads/list.html",
@@ -57,8 +66,44 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "is_paginated": page_obj.has_other_pages(),
             "selected_city": selected_city,
             "selected_category": selected_category,
+            "selected_subcategory": subcategory or None,
+            "subcategory_choices": Ad.SUBCATEGORY_CHOICES,
+            "category_choices": Ad.Category.choices,
+            "total_approved_ads": total_approved_ads,
         },
     )
+
+
+def search_suggestions(request: HttpRequest) -> JsonResponse:
+    """Retourne des suggestions de recherche (catégories, sous-catégories, termes des annonces)."""
+    q = (request.GET.get("q") or "").strip()[:80]
+    if len(q) < 2:
+        return JsonResponse({"suggestions": []})
+
+    q_lower = q.lower()
+    suggestions = []
+
+    # Catégories dont le label contient la requête
+    for value, label in Ad.Category.choices:
+        if q_lower in label.lower():
+            suggestions.append({"type": "category", "label": label, "value": value})
+
+    # Sous-catégories qui contiennent la requête
+    for sub in Ad.SUBCATEGORY_CHOICES:
+        if q_lower in sub.lower() and sub not in [s.get("label") for s in suggestions]:
+            suggestions.append({"type": "subcategory", "label": sub, "value": sub})
+
+    # Titres d'annonces qui contiennent la requête (max 8)
+    title_matches = (
+        Ad.objects.filter(status=Ad.Status.APPROVED, title__icontains=q)
+        .values_list("title", flat=True)
+        .distinct()[:8]
+    )
+    for title in title_matches:
+        if title and title not in [s.get("label") for s in suggestions]:
+            suggestions.append({"type": "title", "label": title[:60] + ("…" if len(title) > 60 else ""), "value": title})
+
+    return JsonResponse({"suggestions": suggestions[:15]})
 
 
 def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:

@@ -86,10 +86,10 @@
 {% block extra_head %}
   {% if is_paginated %}
     {% if page_obj.has_previous %}
-      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}">
     {% endif %}
     {% if page_obj.has_next %}
-      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}">
     {% endif %}
   {% endif %}
 {% endblock %}
@@ -146,19 +146,28 @@
   </p>
 </header>
 <section class="mb-4 md:mb-6">
-  <form class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
-    <input name="q" placeholder="Rechercher" class="col-span-2 md:col-span-2 border rounded-lg px-3 py-2" value="{{ request.GET.q }}">
-    <select name="city" class="col-span-1 border rounded-lg px-3 py-2">
+  <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3" method="get">
+    <div class="col-span-2 md:col-span-2 relative">
+      <input id="searchInput" name="q" type="text" placeholder="Rechercher (mots, catégorie, sous-catégorie…)" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
+      <div id="searchSuggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-auto hidden"></div>
+    </div>
+    <select name="city" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Ville">
       <option value="">Toutes villes</option>
       {% for c in cities %}
         <option value="{{ c.slug }}" {% if request.GET.city == c.slug %}selected{% endif %}>{{ c.name }}</option>
       {% endfor %}
     </select>
-    <select name="category" class="col-span-1 border rounded-lg px-3 py-2">
+    <select name="category" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Catégorie">
       <option value="">Catégorie</option>
-      <option value="escorte_girl" {% if request.GET.category == 'escorte_girl' %}selected{% endif %}>Escorte girl</option>
-      <option value="escorte_boy" {% if request.GET.category == 'escorte_boy' %}selected{% endif %}>Escorte boy</option>
-      <option value="transgenre" {% if request.GET.category == 'transgenre' %}selected{% endif %}>Transgenre</option>
+      {% for value, label in category_choices %}
+        <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="subcategory" class="col-span-1 border rounded-lg px-3 py-2" aria-label="Sous-catégorie">
+      <option value="">Sous-catégorie</option>
+      {% for sub in subcategory_choices %}
+        <option value="{{ sub }}" {% if selected_subcategory == sub %}selected{% endif %}>{{ sub }}</option>
+      {% endfor %}
     </select>
     <div class="col-span-2 md:col-span-1 flex gap-2">
       <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm inline-flex items-center justify-center gap-2">
@@ -244,7 +253,7 @@
   <div class="mt-8 flex justify-center">
     <nav class="flex items-center space-x-2" aria-label="Pagination">
       {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
            class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
           ← Précédent
         </a>
@@ -259,7 +268,7 @@
         {% if page_obj.number == num %}
           <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
              class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
             {{ num }}
           </a>
@@ -267,7 +276,7 @@
       {% endfor %}
 
       {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
            class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
           Suivant →
         </a>
@@ -293,6 +302,74 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var searchInput = document.getElementById('searchInput');
+  var suggestionsEl = document.getElementById('searchSuggestions');
+  var form = document.getElementById('adsSearchForm');
+  if (!searchInput || !suggestionsEl || !form) return;
+  var debounceTimer;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    var q = (searchInput.value || '').trim();
+    if (q.length < 2) {
+      suggestionsEl.classList.add('hidden');
+      suggestionsEl.innerHTML = '';
+      return;
+    }
+    debounceTimer = setTimeout(function() {
+      fetch('/ads/api/search-suggestions/?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var list = data.suggestions || [];
+          if (list.length === 0) {
+            suggestionsEl.classList.add('hidden');
+            suggestionsEl.innerHTML = '';
+            return;
+          }
+          suggestionsEl.innerHTML = list.map(function(s) {
+            var typeLabel = s.type === 'category' ? 'Catégorie' : (s.type === 'subcategory' ? 'Sous-catégorie' : 'Annonce');
+            var val = (s.value || s.label || '').replace(/"/g, '&quot;');
+            var type = (s.type || '').replace(/"/g, '&quot;');
+            return '<button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-0 flex justify-between items-center gap-2" data-type="' + type + '" data-value="' + val + '"><span>' + (s.label || '').replace(/</g, '&lt;') + '</span><span class="text-xs text-gray-400">' + typeLabel + '</span></button>';
+          }).join('');
+          suggestionsEl.classList.remove('hidden');
+        })
+        .catch(function() { suggestionsEl.classList.add('hidden'); });
+    }, 280);
+  });
+  suggestionsEl.addEventListener('click', function(e) {
+    var btn = e.target && e.target.closest('button[data-value]');
+    if (btn) {
+      var type = btn.getAttribute('data-type');
+      var value = btn.getAttribute('data-value');
+      if (type === 'category') {
+        var catSelect = form.querySelector('select[name=category]');
+        if (catSelect) catSelect.value = value;
+        searchInput.value = '';
+      } else if (type === 'subcategory') {
+        var subSelect = form.querySelector('select[name=subcategory]');
+        if (subSelect) subSelect.value = value;
+        searchInput.value = '';
+      } else {
+        searchInput.value = value;
+      }
+      suggestionsEl.classList.add('hidden');
+      suggestionsEl.innerHTML = '';
+      form.submit();
+    }
+  });
+  document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !suggestionsEl.contains(e.target)) suggestionsEl.classList.add('hidden');
+  });
+  searchInput.addEventListener('focus', function() {
+    if (suggestionsEl.innerHTML) suggestionsEl.classList.remove('hidden');
+  });
+})();
+</script>
 {% endblock %}
 
 

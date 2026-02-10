@@ -53,22 +53,10 @@ class AdForm(forms.Form):
             elif "initial" in kwargs and "category" in kwargs["initial"]:
                 category = kwargs["initial"].get("category")
         
-        # Mettre à jour les sous-catégories selon la catégorie sélectionnée
+        # Sous-catégories : mêmes choix pour toutes les catégories (escorte_girl, escorte_boy, transgenre)
+        self.fields["subcategories"].choices = self.get_subcategory_choices(category or "escorte_girl")
         if category:
-            self.fields["subcategories"].choices = self.get_subcategory_choices(category)
-            # Ajouter les champs dynamiques selon la catégorie
             self.add_category_fields(category)
-        else:
-            # Toujours initialiser avec toutes les sous-catégories possibles pour éviter les erreurs de validation
-            if not self.fields["subcategories"].choices:
-                all_subcategories = []
-                for category_choices in (
-                    self.get_subcategory_choices("escorte_girl")
-                    + self.get_subcategory_choices("escorte_boy")
-                    + self.get_subcategory_choices("transgenre")
-                ):
-                    all_subcategories.append(category_choices)
-                self.fields["subcategories"].choices = all_subcategories
     
     def add_category_fields(self, category):
         """Ajoute des champs dynamiques selon la catégorie"""
