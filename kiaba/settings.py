@@ -490,12 +490,18 @@ logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 if USE_SUPABASE_STORAGE:
     STORAGES = {
         "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "OPTIONS": {"manifest_strict": False},
+        },
     }
 else:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "OPTIONS": {"manifest_strict": False},
+        },
     }
 
 # Default primary key field type
