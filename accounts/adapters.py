@@ -48,7 +48,9 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
             context.setdefault("site_name", "KIABA Rencontres")
             context.setdefault("site_url", site_url)
             context.setdefault("support_email", "support@ci-kiaba.com")
-            context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
+            # Logo du site en URL absolue (?v=3 = même que le site, évite cache ancien)
+            base = site_url.rstrip("/")
+            context.setdefault("logo_url", f"{base}/static/img/logo.png?v=3")
 
             # Pour les emails de confirmation, construire activate_url si key est présent
             # Allauth peut passer 'key' ou 'activate_url' dans le contexte
