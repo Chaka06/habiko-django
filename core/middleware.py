@@ -7,8 +7,18 @@ from django.middleware.csrf import get_token
 import gzip
 from io import BytesIO
 
-# Chemin allauth « définir nouveau mot de passe » (lien avec clé unique)
+# Chemins allauth réinitialisation mot de passe (exemption CSRF si session/cookie absents)
+PASSWORD_RESET_REQUEST_PATH = "/auth/password/reset/"
 PASSWORD_RESET_FROM_KEY_PATH = re.compile(r"^/auth/password/reset/key/[0-9A-Za-z]+-.+")
+
+
+def _is_password_reset_post(request: HttpRequest) -> bool:
+    """POST vers « mot de passe oublié » (saisie email) ou « définir nouveau mot de passe » (lien email)."""
+    if request.method != "POST":
+        return False
+    if request.path.rstrip("/") == PASSWORD_RESET_REQUEST_PATH.rstrip("/"):
+        return True
+    return bool(PASSWORD_RESET_FROM_KEY_PATH.match(request.path))
 
 
 class RedirectMiddleware:
@@ -79,16 +89,14 @@ class CloudflareMiddleware:
 
 class CsrfExemptPasswordResetFromKeyMiddleware:
     """
-    Exempte du CSRF uniquement la page « Définir un nouveau mot de passe » (lien email).
-    Sur iPhone/Chrome le cookie de session n'est parfois pas envoyé quand on ouvre le lien
-    depuis l'app Mail, ce qui provoque une erreur CSRF au submit. La sécurité reste
-    assurée par la clé unique dans l'URL (one-time use).
+    Exempte du CSRF les formulaires réinitialisation mot de passe (saisie email + lien email).
+    Évite « Vérification de sécurité » quand session/cookie ne sont pas envoyés. Abus limité par rate-limit allauth.
     """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest):
-        if request.method == "POST" and PASSWORD_RESET_FROM_KEY_PATH.match(request.path):
+        if _is_password_reset_post(request):
             request.csrf_exempt = True
         return self.get_response(request)
 
