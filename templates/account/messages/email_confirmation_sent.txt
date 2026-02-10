@@ -1,1 +1,1 @@
-E-mail de confirmation envoyé à {{ email }}.
+Un e-mail de confirmation a été envoyé. Vérifiez votre boîte de réception (et les spams).
