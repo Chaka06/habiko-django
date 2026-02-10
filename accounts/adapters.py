@@ -254,17 +254,10 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
 
     def add_message(self, request, level, message_template=None, message_context=None, extra_tags="", message=None):
         """
-        Pour « email_confirmation_sent », on utilise un template sans adresse email
-        (message générique) pour éviter d'afficher un mauvais email quand les sessions
-        se mélangent (ex. philippedavid190 au lieu de ircccanadasocial).
+        Ne pas ajouter de messages allauth (connexion réussie, déconnexion, etc.)
+        pour éviter d'afficher des toasts / bannières non stylées.
         """
-        return super().add_message(
-            request, level,
-            message_template=message_template,
-            message_context=message_context,
-            extra_tags=extra_tags,
-            message=message,
-        )
+        return  # pas de message
 
     def get_login_redirect_url(self, request):
         """Redirection après connexion"""

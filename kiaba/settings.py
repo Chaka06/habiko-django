@@ -775,6 +775,8 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
+# Redirection directe vers Google sans page « Vous êtes sur le point de vous connecter... »
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Custom user model
 AUTH_USER_MODEL = "accounts.CustomUser"
