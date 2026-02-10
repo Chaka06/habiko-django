@@ -1,6 +1,8 @@
 # Stockage des images (médias)
 
-Pour que **les images des annonces ne se perdent pas au déploiement**, il faut stocker les fichiers dans un espace persistant (Supabase Storage ou S3), et non sur le disque local du serveur (éphémère sur Render/Vercel).
+**Sur Vercel** : le disque est **en lecture seule** (`/var/task/`). Sans Supabase Storage, les photos des annonces **ne peuvent pas être enregistrées** (erreur `Read-only file system`). Il faut **obligatoirement** configurer Supabase Storage (voir ci‑dessous).
+
+Pour que **les images ne se perdent pas au déploiement** (Render, etc.), stocker les fichiers dans un espace persistant (Supabase Storage ou S3), et non sur le disque local.
 
 ## Comportement
 
@@ -24,6 +26,8 @@ SUPABASE_STORAGE_PUBLIC_URL=xxx.supabase.co
 ```
 
 4. Redéployer. Les nouvelles images seront enregistrées dans le bucket ; le **lien** (chemin) reste en base, le **fichier** est dans Supabase.
+
+**Vercel** : si `SUPABASE_S3_ENDPOINT` (et les autres variables Supabase S3) sont définis, le projet active automatiquement le stockage Supabase même sans `USE_SUPABASE_STORAGE=true`, car le disque est en lecture seule.
 
 ## Optimisation des images
 

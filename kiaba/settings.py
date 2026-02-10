@@ -417,8 +417,16 @@ VERCEL = os.environ.get("VERCEL") == "1"
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
 # Configuration Media selon la plateforme
-# USE_SUPABASE_STORAGE=true : images dans Supabase Storage (recommandé en prod pour ne pas perdre les images au déploiement)
-USE_SUPABASE_STORAGE = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
+# Sur Vercel le disque est en lecture seule : les photos DOIVENT aller dans Supabase Storage.
+_use_supabase_env = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
+_supabase_endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").strip()
+# Sur Vercel, forcer Supabase si l'endpoint S3 est défini (sinon Read-only file system)
+if VERCEL and _supabase_endpoint:
+    USE_SUPABASE_STORAGE = True
+    if not _use_supabase_env:
+        logger.warning("Vercel : stockage Supabase activé (SUPABASE_S3_ENDPOINT présent, disque read-only)")
+else:
+    USE_SUPABASE_STORAGE = _use_supabase_env
 
 if USE_SUPABASE_STORAGE:
     # Stockage persistant Supabase (S3-compatible) — Vercel et Render : les images ne sont pas perdues au déploiement.
@@ -456,6 +464,21 @@ else:
 # S'assurer que le dossier media existe (sauf sur Vercel/serverless, filesystem read-only)
 if MEDIA_ROOT and not VERCEL and not USE_SUPABASE_STORAGE:
     os.makedirs(MEDIA_ROOT, exist_ok=True)
+if VERCEL and not USE_SUPABASE_STORAGE:
+    logger.warning(
+        "Vercel : le disque est en lecture seule. Pour que les photos des annonces s'enregistrent, "
+        "configurez SUPABASE_S3_ENDPOINT (et SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY, "
+        "SUPABASE_STORAGE_BUCKET) — voir docs/MEDIA_STORAGE.md"
+    )
+# Diagnostic : quel storage sera utilisé (vérifier les logs Vercel en cas de problème)
+_storage_label = "S3/Supabase" if USE_SUPABASE_STORAGE else "FileSystem"
+logger.info(
+    "📁 Media storage: %s | USE_SUPABASE_STORAGE=%s | VERCEL=%s | SUPABASE_S3_ENDPOINT=%s",
+    _storage_label,
+    USE_SUPABASE_STORAGE,
+    VERCEL,
+    "set" if _supabase_endpoint else "not set",
+)
 logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 
 # Default primary key field type
