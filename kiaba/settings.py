@@ -447,7 +447,13 @@ if USE_SUPABASE_STORAGE:
         AWS_S3_CUSTOM_DOMAIN = os.environ.get("SUPABASE_STORAGE_PUBLIC_URL", "").replace("https://", "").replace("http://", "")
         MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STORAGE_BUCKET_NAME}/"
     else:
-        MEDIA_URL = os.environ.get("MEDIA_URL", f"{AWS_S3_ENDPOINT_URL or ''}/{AWS_STORAGE_BUCKET_NAME}/")
+        # Supabase sert les fichiers publics via /object/public/, pas via l'API S3. On dérive l'URL publique depuis l'endpoint S3.
+        _endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").rstrip("/")
+        if _endpoint and "/storage/v1/s3" in _endpoint:
+            _public_base = _endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+            MEDIA_URL = f"{_public_base}/{AWS_STORAGE_BUCKET_NAME}/"
+        else:
+            MEDIA_URL = os.environ.get("MEDIA_URL", f"{AWS_S3_ENDPOINT_URL or ''}/{AWS_STORAGE_BUCKET_NAME}/")
     MEDIA_ROOT = str(BASE_DIR / "media")
     logger.info("📁 Stockage média : Supabase (S3-compatible) — images persistantes")
 elif is_render and not DEBUG:

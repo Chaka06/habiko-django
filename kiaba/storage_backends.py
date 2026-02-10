@@ -47,11 +47,19 @@ class _ContentTypeWrapper:
 class SupabaseS3Storage(S3Boto3Storage):
     """
     S3Boto3Storage qui force un Content-Type accepté par Supabase (pas application/octet-stream).
-    Corrige l'erreur "mime type application/octet-stream is not supported" sur filigrane/thumbnail.
+    Les URLs générées pointent vers le format public Supabase (/object/public/) pour que les images s'affichent.
     """
 
     # Éviter le défaut application/octet-stream que Supabase rejette
     default_content_type = "image/jpeg"
+
+    def url(self, name):
+        """Retourne l'URL publique Supabase (object/public) pour que les images s'affichent sur le site."""
+        if not name:
+            return ""
+        from django.conf import settings
+        base = (getattr(settings, "MEDIA_URL", "") or "").rstrip("/")
+        return f"{base}/{name}" if base else name
 
     def _save(self, name, content):
         ct = get_content_type_for_name(name, content)
