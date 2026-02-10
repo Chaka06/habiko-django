@@ -27,7 +27,9 @@ SUPABASE_STORAGE_PUBLIC_URL=xxx.supabase.co
 
 4. Redéployer. Les nouvelles images seront enregistrées dans le bucket ; le **lien** (chemin) reste en base, le **fichier** est dans Supabase.
 
-**Vercel** : si `SUPABASE_S3_ENDPOINT` (et les autres variables Supabase S3) sont définis, le projet active automatiquement le stockage Supabase même sans `USE_SUPABASE_STORAGE=true`, car le disque est en lecture seule.
+**Vercel** : le stockage S3/Supabase est forcé (disque read-only). Définir les variables `SUPABASE_S3_*` pour que les photos s’enregistrent.
+
+**Django 5.1+** : le stockage des médias se configure via `STORAGES["default"]` (et non plus `DEFAULT_FILE_STORAGE`). Le projet définit le backend S3 dans `settings.py` lorsque Supabase est activé.
 
 ## Optimisation des images
 

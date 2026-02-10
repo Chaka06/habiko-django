@@ -441,6 +441,8 @@ if USE_SUPABASE_STORAGE:
     AWS_S3_REGION_NAME = os.environ.get("AWS_REGION", "auto")
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=31536000, public"}
     AWS_DEFAULT_ACL = "public-read"
+    # Supabase S3 exige souvent le path-style (pas le virtual-hosted)
+    AWS_S3_ADDRESSING_STYLE = "path"
     if os.environ.get("SUPABASE_STORAGE_PUBLIC_URL"):
         AWS_S3_CUSTOM_DOMAIN = os.environ.get("SUPABASE_STORAGE_PUBLIC_URL", "").replace("https://", "").replace("http://", "")
         MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STORAGE_BUCKET_NAME}/"
@@ -482,6 +484,19 @@ logger.info(
     "set" if _supabase_endpoint else "not set",
 )
 logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
+
+# Django 5.1+ : le stockage par défaut se configure via STORAGES (DEFAULT_FILE_STORAGE est ignoré).
+# Sans STORAGES["default"], Django utilise FileSystemStorage → erreur "Read-only file system" sur Vercel.
+if USE_SUPABASE_STORAGE:
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
