@@ -597,36 +597,29 @@
           </div>
         </a>
         <nav class="hidden md:flex items-center gap-3">
-          <a href="/ads" class="text-gray-700 hover:text-gray-900">Annonces</a>
+          <a href="/post/" class="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition font-medium inline-flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Publier+
+          </a>
           {% if user.is_authenticated %}
-          <a
-            href="/dashboard/"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            Mon compte
+          <a href="/dashboard/" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition" title="Mon compte" aria-label="Mon compte">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </a>
           {% else %}
-          <a
-            href="/auth/login/"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            Se connecter
-          </a>
+          <a href="/auth/login/" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Se connecter</a>
           {% endif %}
         </nav>
         <div class="md:hidden flex items-center gap-2">
+          <a href="/post/" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Publier+
+          </a>
           {% if user.is_authenticated %}
-          <a
-            href="/dashboard/"
-            class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
-            >Mon compte</a
-          >
+          <a href="/dashboard/" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Mon compte" aria-label="Mon compte">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          </a>
           {% else %}
-          <a
-            href="/auth/login/"
-            class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium"
-            >Se connecter</a
-          >
+          <a href="/auth/login/" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Se connecter</a>
           {% endif %}
         </div>
       </div>
