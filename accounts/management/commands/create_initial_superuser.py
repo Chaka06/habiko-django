@@ -6,8 +6,9 @@ from django.conf import settings
 
 class Command(BaseCommand):
     help = (
-        "Crée automatiquement un superutilisateur pour KIABA Rencontres si il n'existe pas. "
-        "Utilisateur: admin2. Mot de passe: variable d'environnement INITIAL_SUPERUSER_PASSWORD."
+        "Crée le superutilisateur admin2 si il n'existe pas. "
+        "Mot de passe: variable d'environnement INITIAL_SUPERUSER_PASSWORD. "
+        "Exemple: INITIAL_SUPERUSER_PASSWORD=MonMotDePasse python manage.py create_initial_superuser"
     )
 
     def handle(self, *args, **options):

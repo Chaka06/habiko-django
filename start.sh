@@ -59,6 +59,11 @@ except Exception as e:
     traceback.print_exc()
 PYTHON_EOF
 
+# Créer le superuser admin2 si INITIAL_SUPERUSER_PASSWORD est défini
+echo ""
+echo "Step 2b: Creating initial superuser (if configured)..."
+python manage.py create_initial_superuser || true
+
 # Vérifier que le dossier media existe et est accessible
 echo ""
 echo "Step 3: Checking media directory..."

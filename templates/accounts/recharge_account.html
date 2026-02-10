@@ -43,9 +43,15 @@
       </div>
 
       <div class="flex gap-3">
+        {% if cinetpay_configured %}
         <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
           Payer avec CinetPay
         </button>
+        {% else %}
+        <button type="button" disabled class="bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed font-medium">
+          Paiement en ligne non configuré
+        </button>
+        {% endif %}
         <a href="{% url 'accounts:account_balance' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium">
           Annuler
         </a>
@@ -58,8 +64,8 @@
     <h3 class="font-semibold text-pink-900 mb-2">💡 Comment ça marche ?</h3>
     <ul class="space-y-1 text-sm text-pink-800">
       <li>• Choisissez une formule de recharge</li>
-      <li>• Payez via CinetPay (Mobile Money, Carte bancaire)</li>
-      <li>• Vos crédits sont ajoutés automatiquement</li>
+      <li>• Paiement en ligne (CinetPay) si configuré par l'administrateur</li>
+      <li>• Vos crédits sont ajoutés automatiquement après paiement</li>
       <li>• Utilisez vos crédits pour poster et booster vos annonces</li>
     </ul>
   </section>

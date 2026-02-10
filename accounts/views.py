@@ -278,14 +278,20 @@ def recharge_account(request: HttpRequest) -> HttpResponse:
                 description=f"Recharge {package.name}",
             )
             
-            # Créer le lien de paiement CinetPay
+            # Créer le lien de paiement CinetPay (si configuré)
+            if not CinetPayService.is_configured():
+                transaction.delete()
+                messages.error(
+                    request,
+                    "Le paiement en ligne (CinetPay) n'est pas configuré. Contactez l'administrateur.",
+                )
+                return redirect("accounts:recharge_account")
             try:
                 payment_url = CinetPayService.create_payment_link(
                     transaction,
                     package.amount,
                     f"Recharge {package.name}"
                 )
-                # Rediriger vers CinetPay
                 return redirect(payment_url)
             except ValueError as e:
                 messages.error(request, f"Erreur de paiement: {str(e)}")
@@ -298,6 +304,7 @@ def recharge_account(request: HttpRequest) -> HttpResponse:
     return render(request, "accounts/recharge_account.html", {
         "form": form,
         "packages": packages,
+        "cinetpay_configured": CinetPayService.is_configured(),
     })
 
 

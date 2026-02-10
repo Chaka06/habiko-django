@@ -13,12 +13,21 @@ try:
     CINETPAY_SDK_AVAILABLE = True
 except ImportError:
     CINETPAY_SDK_AVAILABLE = False
-    logger.warning("CinetPay SDK non disponible. Installation: pip install -i https://test.pypi.org/simple/ cinetpay-sdk==0.1.1")
+    # CinetPay optionnel : pas de message au démarrage si le SDK n'est pas installé
 
 
 class CinetPayService:
-    """Service pour gérer les paiements via CinetPay en utilisant le SDK officiel"""
-    
+    """Service pour gérer les paiements via CinetPay (optionnel, désactivé si SDK ou clés absents)."""
+
+    @staticmethod
+    def is_configured():
+        """True si CinetPay est utilisable (SDK installé + clés configurées)."""
+        if not CINETPAY_SDK_AVAILABLE:
+            return False
+        api_key = getattr(settings, "CINETPAY_API_KEY", "") or ""
+        site_id = getattr(settings, "CINETPAY_SITE_ID", "") or ""
+        return bool(api_key.strip() and site_id.strip())
+
     @staticmethod
     def get_client():
         """Crée et retourne un client CinetPay en mode production"""
