@@ -97,7 +97,9 @@ class CsrfExemptPasswordResetFromKeyMiddleware:
 
     def __call__(self, request: HttpRequest):
         if _is_auth_form_post(request):
-            request.csrf_exempt = True
+            # Django n'utilise pas request.csrf_exempt mais getattr(callback, 'csrf_exempt').
+            # _dont_enforce_csrf_checks est reconnu par CsrfViewMiddleware (tests + notre cas).
+            request._dont_enforce_csrf_checks = True
         return self.get_response(request)
 
 
