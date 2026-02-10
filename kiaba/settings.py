@@ -394,7 +394,7 @@ if not os.path.isabs(_static_root):
 else:
     STATIC_ROOT = _static_root
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE défini plus bas (aligné sur STORAGES / Vercel)
 
 # WhiteNoise configuration for media files
 WHITENOISE_USE_FINDERS = True
@@ -487,16 +487,24 @@ logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 
 # Django 5.1+ : le stockage par défaut se configure via STORAGES (DEFAULT_FILE_STORAGE est ignoré).
 # Sans STORAGES["default"], Django utilise FileSystemStorage → erreur "Read-only file system" sur Vercel.
+# Sur Vercel : pas de manifest pour staticfiles (évite "Missing staticfiles manifest entry" si collectstatic diffère).
+_staticfiles_backend = (
+    "django.contrib.staticfiles.storage.StaticFilesStorage"
+    if VERCEL
+    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
 if USE_SUPABASE_STORAGE:
     STORAGES = {
         "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {"BACKEND": _staticfiles_backend},
     }
 else:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        "staticfiles": {"BACKEND": _staticfiles_backend},
     }
+# Aligner STATICFILES_STORAGE (Django 5.1 utilise STORAGES ; ceci pour collectstatic / rétrocompat)
+STATICFILES_STORAGE = _staticfiles_backend
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
