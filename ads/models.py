@@ -330,8 +330,10 @@ class AdMedia(models.Model):
                 logger.info(f"Filigrane appliqué et sauvegardé: {image_path}")
             else:
                 # Upload en mémoire ou stockage distant : sauver l'image optimisée dans le storage
-                # (le chemin sera enregistré en base, le fichier dans le bucket/dossier)
-                self.image.save(optimized_name, ContentFile(image_content), save=False)
+                # Supabase n'accepte pas application/octet-stream → préciser image/webp
+                main_file = ContentFile(image_content)
+                main_file.content_type = "image/webp"
+                self.image.save(optimized_name, main_file, save=False)
                 logger.info("Image optimisée enregistrée dans le storage: %s", optimized_name)
 
             output.close()
@@ -353,11 +355,9 @@ class AdMedia(models.Model):
             thumb_output.seek(0)
 
             thumb_name = os.path.splitext(self.image.name)[0] + "_thumb.webp"
-            self.thumbnail.save(
-                thumb_name,
-                ContentFile(thumb_output.read()),
-                save=False,
-            )
+            thumb_file = ContentFile(thumb_output.read())
+            thumb_file.content_type = "image/webp"
+            self.thumbnail.save(thumb_name, thumb_file, save=False)
             thumb_output.close()
 
             self._watermark_applied = True

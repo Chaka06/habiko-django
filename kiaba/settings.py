@@ -433,7 +433,7 @@ else:
 if USE_SUPABASE_STORAGE:
     # Stockage persistant Supabase (S3-compatible) — Vercel et Render : les images ne sont pas perdues au déploiement.
     # Le chemin est enregistré en base (ex. ads/xxx.webp), le fichier est dans le bucket.
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    DEFAULT_FILE_STORAGE = "kiaba.storage_backends.SupabaseS3Storage"
     AWS_ACCESS_KEY_ID = os.environ.get("SUPABASE_S3_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.environ.get("SUPABASE_S3_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
     AWS_STORAGE_BUCKET_NAME = os.environ.get("SUPABASE_STORAGE_BUCKET", "media")
@@ -495,7 +495,7 @@ _staticfiles_backend = (
 )
 if USE_SUPABASE_STORAGE:
     STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+        "default": {"BACKEND": "kiaba.storage_backends.SupabaseS3Storage"},
         "staticfiles": {"BACKEND": _staticfiles_backend},
     }
 else:
