@@ -165,6 +165,49 @@ def resend_password_change_code(request: HttpRequest) -> HttpResponse:
     return redirect("accounts:password_change_confirm")
 
 
+def resend_verification_email(request: HttpRequest) -> HttpResponse:
+    """
+    Renvoie l'email de confirmation depuis la page « Vérifiez votre adresse e-mail »
+    (après inscription). Utilise le login en attente dans la session (allauth),
+    sans exiger d'être connecté. Si la session a expiré, redirige vers la connexion.
+    """
+    if request.method != "POST":
+        return redirect("account_email_verification_sent")
+
+    try:
+        from allauth.account.internal.stagekit import unstash_login
+        from allauth.account.internal.flows.email_verification import (
+            get_address_for_login,
+            send_verification_email_to_address,
+        )
+    except ImportError:
+        messages.warning(request, "Impossible de renvoyer l'email. Réessayez plus tard.")
+        return redirect("account_login")
+
+    login = unstash_login(request, peek=True)
+    if not login or not getattr(login, "user", None) or not login.user:
+        messages.info(
+            request,
+            "Votre session a expiré. Connectez-vous ou inscrivez-vous à nouveau pour recevoir un nouvel email.",
+        )
+        return redirect("account_login")
+
+    address = get_address_for_login(login)
+    if not address or address.verified:
+        messages.info(request, "Cet email est déjà vérifié ou la session a expiré.")
+        return redirect("account_email_verification_sent")
+
+    sent = send_verification_email_to_address(request, address, signup=True)
+    if sent:
+        messages.success(request, "Un nouvel email de confirmation a été envoyé. Vérifiez votre boîte de réception.")
+    else:
+        messages.warning(
+            request,
+            "Envoi limité pour éviter le spam. Réessayez dans quelques minutes ou vérifiez vos spams.",
+        )
+    return redirect("account_email_verification_sent")
+
+
 def validate_profile(request: HttpRequest, profile_id: int) -> HttpResponse:
     """Valider un profil via email"""
     profile = get_object_or_404(Profile, id=profile_id)

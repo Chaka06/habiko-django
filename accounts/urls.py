@@ -4,6 +4,7 @@ from . import views
 app_name = "accounts"
 
 urlpatterns = [
+    path("resend-verification-email/", views.resend_verification_email, name="resend_verification_email"),
     path("profile/", views.profile_edit, name="profile_edit"),
     path("u/<str:username>/", views.public_profile, name="public_profile"),
     path("password/change/", views.password_change, name="password_change"),
