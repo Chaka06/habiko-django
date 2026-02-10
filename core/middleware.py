@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
+from django.middleware.csrf import get_token
 import gzip
 from io import BytesIO
 
@@ -69,6 +70,23 @@ class CloudflareMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class EnsureCsrfCookieForAuthMiddleware:
+    """
+    Force le dépôt du cookie CSRF lors d'un GET sur les pages d'auth (connexion,
+    inscription, réinitialisation mot de passe). Évite l'erreur « CSRF cookie not set »
+    quand l'utilisateur arrive depuis un lien (ex. email) ou un nouvel onglet.
+    """
+    AUTH_PREFIX = "/auth/"
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        if request.method == "GET" and request.path.startswith(self.AUTH_PREFIX):
+            get_token(request)
+        return self.get_response(request)
 
 
 class AgeGateMiddleware:

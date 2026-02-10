@@ -341,4 +341,6 @@ def report_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
     return render(request, "core/report.html", {"ad": ad, "submitted": False})
 
 
-# Create your views here.
+def csrf_failure(request: HttpRequest, reason: str = "") -> HttpResponse:
+    """Vue personnalisée pour l'erreur 403 CSRF : message clair et lien pour réessayer."""
+    return render(request, "core/403_csrf.html", status=403)

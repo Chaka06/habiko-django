@@ -209,6 +209,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "core.middleware.EnsureCsrfCookieForAuthMiddleware",  # Cookie CSRF sur GET /auth/*
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
@@ -520,6 +521,8 @@ try:
 except Exception:
     pass
 CSRF_TRUSTED_ORIGINS = _base_csrf + _dynamic_csrf
+# Page conviviale en français au lieu du 403 brut quand la vérification CSRF échoue
+CSRF_FAILURE_VIEW = "core.views.csrf_failure"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
