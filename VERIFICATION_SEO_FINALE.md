@@ -1,4 +1,6 @@
-# ✅ Vérification SEO Finale - HABIKO
+# ✅ Vérification SEO Finale - KIABA Rencontres
+
+Domaine actuel : **ci-habiko.com**. Migration vers ci-kiaba.com prévue plus tard.
 
 ## 📋 Checklist Complète avant Google Search Console
 
@@ -66,8 +68,8 @@
 - [x] og:url : URL complète
 - [x] og:title : Optimisé
 - [x] og:description : Optimisé
-- [x] og:image : Logo HABIKO
-- [x] og:site_name : `HABIKO`
+- [x] og:image : Logo KIABA Rencontres
+- [x] og:site_name : `KIABA Rencontres`
 - [x] og:locale : `fr_CI`
 
 #### Twitter Cards
@@ -86,12 +88,12 @@
 - [x] Structure hiérarchique claire sur toutes les pages
 
 #### Pages de liste
-- [x] H1 : "Annonces immobilières [ville/catégorie] · HABIKO"
+- [x] H1 : "Annonces adultes [ville/catégorie] · KIABA Rencontres"
 - [x] H2 : Sections descriptives
 
 #### Pages de détail
 - [x] H1 : Titre de l'annonce
-- [x] H2 : "Description du Bien Immobilier"
+- [x] H2 : "Description"
 - [x] H2 : "Profil de l'Annonceur"
 - [x] H2 : "Annonces Immobilières Similaires"
 

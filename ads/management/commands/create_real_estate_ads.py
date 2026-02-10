@@ -367,7 +367,7 @@ class Command(BaseCommand):
         profile, _ = Profile.objects.get_or_create(
             user=user,
             defaults={
-                "display_name": "HABIKO Immobilier",
+                "display_name": "KIABA Rencontres",
                 "whatsapp_e164": "+2250708091011",
                 "contact_prefs": ["sms", "whatsapp", "call"],
             }

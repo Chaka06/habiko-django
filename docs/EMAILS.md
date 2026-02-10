@@ -1,6 +1,6 @@
-# 📧 Système d'Emails HABIKO
+# 📧 Système d'Emails KIABA Rencontres
 
-Documentation complète du système d'envoi d'emails automatiques pour la plateforme HABIKO.
+Documentation complète du système d'envoi d'emails automatiques pour la plateforme KIABA Rencontres.
 
 ## 📋 Table des matières
 
@@ -16,7 +16,7 @@ Documentation complète du système d'envoi d'emails automatiques pour la platef
 
 ## 🎯 Vue d'ensemble
 
-Le système d'emails HABIKO utilise :
+Le système d'emails KIABA Rencontres utilise :
 - **EmailService** : Service centralisé pour l'envoi d'emails
 - **Celery** : Tâches asynchrones avec retry automatique
 - **Templates HTML/Texte** : Double format pour compatibilité maximale
@@ -26,7 +26,7 @@ Le système d'emails HABIKO utilise :
 
 ✅ Envoi asynchrone via Celery (retry automatique)  
 ✅ Templates HTML + Texte pour tous les emails  
-✅ Logo HABIKO dans chaque email  
+✅ Logo KIABA dans chaque email  
 ✅ Design responsive et professionnel  
 ✅ Variables dynamiques (site_url, logo_url, support_email)  
 ✅ Logging complet pour débogage  
@@ -204,7 +204,7 @@ Automatiquement ajoutées par `EmailService` :
 
 | Variable | Description | Exemple |
 |----------|-------------|---------|
-| `site_name` | Nom du site | "HABIKO" |
+| `site_name` | Nom du site | "KIABA Rencontres" |
 | `site_url` | URL du site | "https://ci-habiko.com" |
 | `support_email` | Email de support | "support@ci-habiko.com" |
 | `logo_url` | URL du logo | "https://ci-habiko.com/static/img/logo.png" |
@@ -259,8 +259,8 @@ EMAIL_HOST_USER=no-reply@ci-habiko.com
 EMAIL_HOST_PASSWORD=your-password
 
 # Expéditeur par défaut
-DEFAULT_FROM_EMAIL=HABIKO <no-reply@ci-habiko.com>
-SERVER_EMAIL=HABIKO Errors <errors@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-habiko.com>
+SERVER_EMAIL=KIABA Rencontres Errors <errors@ci-habiko.com>
 
 # Site URL (pour les liens dans les emails)
 SITE_URL=https://ci-habiko.com
@@ -274,17 +274,17 @@ EMAIL_TIMEOUT=10
 ```python
 # Email simple (console backend pour développement)
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="HABIKO <no-reply@ci-habiko.com>")
-SERVER_EMAIL = env("SERVER_EMAIL", default="HABIKO Errors <errors@ci-habiko.com>")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="KIABA Rencontres <no-reply@ci-habiko.com>")
+SERVER_EMAIL = env("SERVER_EMAIL", default="KIABA Rencontres Errors <errors@ci-habiko.com>")
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 
-# Assurer que le nom "HABIKO" apparaît dans les emails
-if not DEFAULT_FROM_EMAIL.startswith("HABIKO"):
+# Assurer que le nom "KIABA Rencontres" apparaît dans les emails
+if not DEFAULT_FROM_EMAIL.startswith("KIABA"):
     if "<" not in DEFAULT_FROM_EMAIL:
-        DEFAULT_FROM_EMAIL = f"HABIKO <{DEFAULT_FROM_EMAIL}>"
+        DEFAULT_FROM_EMAIL = f"KIABA Rencontres <{DEFAULT_FROM_EMAIL}>"
 
 EMAIL_USE_LOCALTIME = True
-EMAIL_SUBJECT_PREFIX = "[HABIKO] "
+EMAIL_SUBJECT_PREFIX = "[KIABA] "
 EMAIL_USE_8BIT = False
 EMAIL_CHARSET = "utf-8"
 ```
@@ -457,7 +457,7 @@ TEMPLATES = [
 
 ## 👨‍💻 Développeur
 
-Système d'emails développé pour **HABIKO** par Diarrassouba Issiaka Konateh.
+Système d'emails développé pour **KIABA Rencontres** par Diarrassouba Issiaka Konateh.
 
 📧 Contact : support@ci-habiko.com  
 🌐 Site : https://ci-habiko.com

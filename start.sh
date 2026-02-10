@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================="
-echo "Starting HABIKO application setup..."
+echo "Starting KIABA Rencontres application setup..."
 echo "=========================================="
 
 # Exécuter les migrations avec retry en cas d'erreur de connexion
@@ -45,12 +45,12 @@ try:
         id=settings.SITE_ID,
         defaults={
             "domain": "ci-habiko.com",
-            "name": "HABIKO",
+            "name": "KIABA Rencontres",
         }
     )
     if not created and site.domain != "ci-habiko.com":
         site.domain = "ci-habiko.com"
-        site.name = "HABIKO"
+        site.name = "KIABA Rencontres"
         site.save()
     print(f"✓ Site configured: {site.domain} (ID: {site.id})")
 except Exception as e:

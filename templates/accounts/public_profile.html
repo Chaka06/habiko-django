@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Profil de {{ profile.display_name|default:profile_user.username }} · HABIKO{% endblock %}
-{% block description %}Découvrez le profil de {{ profile.display_name|default:profile_user.username }} et toutes ses annonces immobilières sur HABIKO CI.{% endblock %}
+{% block title %}Profil de {{ profile.display_name|default:profile_user.username }} · KIABA Rencontres{% endblock %}
+{% block description %}Profil de {{ profile.display_name|default:profile_user.username }} et ses annonces sur KIABA Rencontres.{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
   <!-- Colonne profil -->
@@ -39,7 +39,7 @@
               {% if prefs %}
                 {% if 'whatsapp' in prefs and profile.whatsapp_e164 %}
                   <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm md:text-base font-medium"
-                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de HABIKO.'|urlencode }}"
+                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de KIABA Rencontres.'|urlencode }}"
                      target="_blank" rel="nofollow noopener">
                     <span>WhatsApp</span>
                   </a>
@@ -59,7 +59,7 @@
               {% else %}
                 {% if profile.whatsapp_e164 %}
                   <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm md:text-base font-medium"
-                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de HABIKO.'|urlencode }}"
+                     href="https://wa.me/{{ profile.whatsapp_e164|slice:'1:' }}?text={{ 'Bonjour, je viens de KIABA Rencontres.'|urlencode }}"
                      target="_blank" rel="nofollow noopener">
                     <span>WhatsApp</span>
                   </a>

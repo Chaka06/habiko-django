@@ -22,7 +22,7 @@ EMAIL_USE_TLS = True  ⚠️ IMPORTANT : True pour port 587
 EMAIL_USE_SSL = False  ⚠️ IMPORTANT : False pour port 587
 EMAIL_HOST_USER = no-replay@ci-habiko.com
 EMAIL_HOST_PASSWORD = <ton_mot_de_passe_lws>
-DEFAULT_FROM_EMAIL = HABIKO <no-replay@ci-habiko.com>
+DEFAULT_FROM_EMAIL = KIABA Rencontres <no-replay@ci-habiko.com>
 ```
 
 ### 2. Vérifier que LWS accepte le port 587

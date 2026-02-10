@@ -23,12 +23,12 @@ try:
         id=settings.SITE_ID,
         defaults={
             "domain": default_domain,
-            "name": "HABIKO",
+            "name": "KIABA Rencontres",
         },
     )
     if not created and site.domain != default_domain:
         site.domain = default_domain
-        site.name = "HABIKO"
+        site.name = "KIABA Rencontres"
         site.save()
     print(f"✓ Site configured: {site.domain} (ID: {site.id})")
 

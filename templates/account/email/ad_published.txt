@@ -1,6 +1,6 @@
 Bonjour {{ user.username }},
 
-Félicitations ! Votre annonce a été publiée avec succès sur HABIKO et est maintenant visible par tous les visiteurs.
+Félicitations ! Votre annonce a été publiée avec succès sur KIABA Rencontres et est maintenant visible par tous les visiteurs.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DÉTAILS DE VOTRE ANNONCE
@@ -25,5 +25,5 @@ Gérer toutes vos annonces :
 Si vous avez des questions ou besoin d'aide, contactez-nous à support@ci-habiko.com
 
 Cordialement,
-L'équipe HABIKO
+L'équipe KIABA Rencontres
 https://ci-habiko.com

@@ -1,8 +1,8 @@
-# Configuration Cloudflare pour HABIKO
+# Configuration Cloudflare pour KIABA Rencontres
 
 ## 🎯 Pourquoi Cloudflare ?
 
-Cloudflare apporte plusieurs avantages importants à HABIKO :
+Cloudflare apporte plusieurs avantages importants à KIABA Rencontres :
 
 1. **CDN (Content Delivery Network)** : Accélère le chargement des assets statiques
 2. **Protection DDoS** : Protège contre les attaques
@@ -166,7 +166,7 @@ Cloudflare fournit des analytics gratuits :
 
 ### 4. WebSockets
 - Si tu utilises WebSockets plus tard, configurer dans Cloudflare
-- Actuellement pas nécessaire pour HABIKO
+- Actuellement pas nécessaire pour KIABA Rencontres
 
 ## 🚀 Checklist de déploiement
 

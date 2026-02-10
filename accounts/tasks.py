@@ -26,7 +26,7 @@ def send_profile_validation_email(self, profile_id):
         # Créer le lien de validation du profil
         validation_url = f"{settings.SITE_URL}/accounts/validate-profile/{profile.id}/"
 
-        subject = "Validation / mise à jour de votre profil HABIKO"
+        subject = "Validation / mise à jour de votre profil KIABA Rencontres"
 
         # Utiliser le service d'email avec template HTML + texte
         EmailService.send_email(
@@ -83,12 +83,12 @@ def send_account_created_email(self, user_id):
         except Exception as e:
             logger.warning(f"Impossible de créer le lien de confirmation: {e}")
 
-        subject = "Compte créé avec succès sur HABIKO"
+        subject = "Compte créé avec succès sur KIABA Rencontres"
 
         # Message texte
         message = f"""Bonjour {user.username},
 
-Bienvenue sur HABIKO, la plateforme immobilière N°1 en Côte d'Ivoire !
+Bienvenue sur KIABA Rencontres, le site de rencontres adultes et annonces en Côte d'Ivoire.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVATION DE VOTRE COMPTE
@@ -108,10 +108,10 @@ Une fois votre compte activé, vous pourrez :
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️ Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
+⚠️ Si vous n'avez pas créé de compte sur KIABA Rencontres, veuillez ignorer cet email.
 
 Cordialement,
-L'équipe HABIKO
+L'équipe KIABA Rencontres
 {settings.SITE_URL}
         """
 
@@ -157,7 +157,7 @@ def send_ad_published_email(self, ad_id):
         context = {
             "user": user,
             "ad": ad,
-            "site_name": "HABIKO",
+            "site_name": "KIABA Rencontres",
             "site_url": settings.SITE_URL,
             "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
         }
@@ -189,7 +189,7 @@ def send_login_notification_email(user_id):
 
         context = {
             "user": user,
-            "site_name": "HABIKO",
+            "site_name": "KIABA Rencontres",
             "site_url": settings.SITE_URL,
         }
 
@@ -230,7 +230,7 @@ def send_password_change_email(self, user_id):
 
         context = {
             "user": user,
-            "site_name": "HABIKO",
+            "site_name": "KIABA Rencontres",
             "site_url": settings.SITE_URL,
         }
 
@@ -269,7 +269,7 @@ def send_ad_expiration_email(self, ad_id):
         context = {
             "user": user,
             "ad": ad,
-            "site_name": "HABIKO",
+            "site_name": "KIABA Rencontres",
             "site_url": settings.SITE_URL,
             "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
         }

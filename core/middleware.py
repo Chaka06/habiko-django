@@ -73,16 +73,15 @@ class CloudflareMiddleware:
 
 class AgeGateMiddleware:
     """
-    Middleware pour l'age-gate (désactivé pour HABIKO - site immobilier)
-    Peut être réactivé si nécessaire en changeant ENABLE_AGE_GATE dans settings
+    Middleware pour l'age-gate (réglable via ENABLE_AGE_GATE dans settings).
+    Peut être activé pour KIABA Rencontres (site 18+) si besoin.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest):
-        # Désactiver l'age-gate pour HABIKO (site immobilier, pas de restriction d'âge)
-        # Pour réactiver, ajouter ENABLE_AGE_GATE = True dans settings
+        # Age-gate désactivé par défaut. Pour activer (site 18+), mettre ENABLE_AGE_GATE = True dans settings.
         from django.conf import settings
 
         enable_age_gate = getattr(settings, "ENABLE_AGE_GATE", False)

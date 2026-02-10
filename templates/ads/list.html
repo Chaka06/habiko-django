@@ -12,8 +12,7 @@
 {
   "@context": "https://schema.org",
   "@type": "ItemList",
-    "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:"escorte"}}
- à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
+    "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:'escorte' }} à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
     "description": "{% if selected_city %}Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces adultes en Côte d'Ivoire{% endif %}",
   "url": "https://ci-habiko.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
   "numberOfItems": "{{ ads|length }}",
@@ -293,7 +292,7 @@
       </svg>
       Créer une annonce
     </a>
-    <p style="color: #ffffff; font-size: 0.875rem; margin-top: 0.75rem;">Publiez votre annonce gratuitement et trouvez vos acheteurs ou locataires</p>
+    <p style="color: #ffffff; font-size: 0.875rem; margin-top: 0.75rem;">Publiez votre annonce gratuitement sur KIABA Rencontres</p>
   </div>
 </section>
 

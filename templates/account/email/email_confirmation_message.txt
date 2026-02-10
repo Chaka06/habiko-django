@@ -1,6 +1,6 @@
 Bonjour {{ user.username }},
 
-Bienvenue sur HABIKO, la plateforme immobilière en Côte d'Ivoire !
+Bienvenue sur KIABA Rencontres, le site de rencontres adultes et annonces en Côte d'Ivoire.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTIVATION DE VOTRE COMPTE
@@ -20,8 +20,8 @@ Une fois votre compte activé, vous pourrez :
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚠️ Si vous n'avez pas créé de compte sur HABIKO, veuillez ignorer cet email.
+⚠️ Si vous n'avez pas créé de compte sur KIABA Rencontres, veuillez ignorer cet email.
 
 Cordialement,
-L'équipe HABIKO
+L'équipe KIABA Rencontres
 https://ci-habiko.com

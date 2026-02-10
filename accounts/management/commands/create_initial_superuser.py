@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 class Command(BaseCommand):
     help = (
-        "Crée automatiquement un superutilisateur pour HABIKO si il n'existe pas "
+        "Crée automatiquement un superutilisateur pour KIABA Rencontres si il n'existe pas."
         "(utilisateur: kaliadmin2)."
     )
 

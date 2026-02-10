@@ -1,4 +1,6 @@
-# ✅ Checklist Google Search Console - HABIKO
+# ✅ Checklist Google Search Console - KIABA Rencontres
+
+Domaine actuel : **ci-habiko.com** (à migrer vers ci-kiaba.com plus tard si besoin).
 
 ## 📋 Vérifications préalables
 

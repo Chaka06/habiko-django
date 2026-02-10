@@ -1,6 +1,6 @@
 Bonjour {{ user.username }},
 
-Votre annonce a expiré et n'est plus visible sur HABIKO.
+Votre annonce a expiré et n'est plus visible sur KIABA Rencontres.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ANNONCE EXPIRÉE
@@ -26,5 +26,5 @@ Conseil : Pour éviter l'expiration, pensez à renouveler vos annonces réguliè
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Cordialement,
-L'équipe HABIKO
+L'équipe KIABA Rencontres
 https://ci-habiko.com

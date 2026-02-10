@@ -36,23 +36,23 @@ class Command(BaseCommand):
         
         try:
             success = EmailService.send_email(
-                subject="Test Email - HABIKO",
+                subject="Test Email - KIABA Rencontres",
                 to_emails=[to_email],
                 text_content="""Bonjour,
 
-Ceci est un email de test pour vérifier la configuration email de HABIKO.
+Ceci est un email de test pour vérifier la configuration email de KIABA Rencontres.
 
 Si vous recevez cet email, la configuration email fonctionne correctement.
 
 Cordialement,
-L'équipe HABIKO""",
+L'équipe KIABA Rencontres""",
                 html_content="""<html>
 <body style="font-family: Arial, sans-serif; padding: 20px;">
-    <h2 style="color: #f97316;">Test Email - HABIKO</h2>
+    <h2 style="color: #f97316;">Test Email - KIABA Rencontres</h2>
     <p>Bonjour,</p>
-    <p>Ceci est un email de test pour vérifier la configuration email de HABIKO.</p>
+    <p>Ceci est un email de test pour vérifier la configuration email de KIABA Rencontres.</p>
     <p>Si vous recevez cet email, la configuration email fonctionne correctement.</p>
-    <p>Cordialement,<br><strong>L'équipe HABIKO</strong></p>
+    <p>Cordialement,<br><strong>L'équipe KIABA Rencontres</strong></p>
 </body>
 </html>""",
                 fail_silently=False,

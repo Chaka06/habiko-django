@@ -47,9 +47,9 @@ services:
       # - key: SENDGRID_API_KEY
       #   value: "your_sendgrid_api_key"
       # - key: DEFAULT_FROM_EMAIL
-      #   value: "HABIKO <no-reply@ci-habiko.com>"
+      #   value: "KIABA Rencontres <no-reply@ci-habiko.com>"
       # - key: SERVER_EMAIL
-      #   value: "HABIKO Errors <errors@ci-habiko.com>"
+      #   value: "KIABA Rencontres Errors <errors@ci-habiko.com>"
       # CinetPay configuration (configure these in Render dashboard, not here)
       # - key: CINETPAY_SITE_ID
       #   value: "your_site_id"

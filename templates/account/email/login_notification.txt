@@ -1,6 +1,6 @@
 Bonjour {{ user.username }},
 
-Une connexion à votre compte HABIKO a été détectée.
+Une connexion à votre compte KIABA Rencontres a été détectée.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DÉTAILS DE LA CONNEXION
@@ -24,5 +24,5 @@ Changer votre mot de passe :
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Cordialement,
-L'équipe HABIKO
+L'équipe KIABA Rencontres
 https://ci-habiko.com

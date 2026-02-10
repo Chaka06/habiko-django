@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         to_email = options["to_email"]
         send_mail(
-            subject="[HABIKO] Test Email",
+            subject="[KIABA Rencontres] Test Email",
             message="Ceci est un e-mail de test.",
             from_email=None,
             recipient_list=[to_email],

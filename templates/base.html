@@ -412,28 +412,28 @@
       }
 
       /* Bandeau KIABA (pub interne) */
-      .habiko-banner {
+      .kiaba-banner {
         background-color: #111827; /* gris très foncé, sobre */
         border-radius: 0.75rem;
         border: 1px solid rgba(249, 115, 22, 0.35); /* léger rappel orange */
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       }
-      .habiko-banner-text,
-      .habiko-banner-cta,
-      .habiko-banner-logo {
+      .kiaba-banner-text,
+      .kiaba-banner-cta,
+      .kiaba-banner-logo {
         font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       }
       /* Texte orange -> dégradé vert animé */
-      .habiko-banner-text {
+      .kiaba-banner-text {
         background: linear-gradient(90deg, #f97316, #22c55e);
         background-size: 200% 100%;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        animation: habikoTextShift 4s ease-in-out infinite;
+        animation: kiabaTextShift 4s ease-in-out infinite;
       }
-      @keyframes habikoTextShift {
+      @keyframes kiabaTextShift {
         0% {
           background-position: 0% 0%;
         }
@@ -445,11 +445,11 @@
         }
       }
       /* Logo qui tourne doucement */
-      .habiko-banner-logo img {
-        animation: habikoSpin 6s linear infinite;
+      .kiaba-banner-logo img {
+        animation: kiabaSpin 6s linear infinite;
         transform-origin: center center;
       }
-      @keyframes habikoSpin {
+      @keyframes kiabaSpin {
         from {
           transform: rotate(0deg);
         }
@@ -457,11 +457,11 @@
           transform: rotate(360deg);
         }
       }
-      .habiko-banner-cta {
+      .kiaba-banner-cta {
         background: linear-gradient(135deg, #f97316, #22c55e);
         color: #ffffff;
       }
-      .habiko-banner-cta:hover {
+      .kiaba-banner-cta:hover {
         background: linear-gradient(135deg, #ea580c, #16a34a);
       }
 
@@ -626,8 +626,8 @@
     <!-- CTA Publier après le header (uniforme sur toutes les pages) -->
     <section class="cta-section">
       <div class="cta-container">
-        <h2 class="cta-title">Vous êtes propriétaire ?</h2>
-        <p class="cta-text">Publiez votre annonce gratuitement et trouvez vos acheteurs ou locataires</p>
+        <h2 class="cta-title">Vous proposez des services ?</h2>
+        <p class="cta-text">Publiez votre annonce gratuitement sur KIABA Rencontres et augmentez votre visibilité</p>
         <a href="/post/" class="cta-button">
           <svg class="cta-icon" viewBox="0 0 24 24">
             <path d="M12 4v16m8-8H4"></path>

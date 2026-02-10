@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{{ ad.title }} · {{ ad.city.name }} · HABIKO{% endblock %}
-{% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:20|striptags }}. Annonce vérifiée sur HABIKO, le site immobilier de référence en Côte d'Ivoire. Contactez directement le propriétaire par WhatsApp, SMS ou appel direct.{% endblock %}
-{% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, habiko, habiko ci, habiko {{ ad.city.name|lower }}, habiko ci, habiko ci, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, immobilier {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
+{% block title %}{{ ad.title }} · {{ ad.city.name }} · KIABA Rencontres{% endblock %}
+{% block description %}{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. {{ ad.description_sanitized|truncatewords:20|striptags }}. Annonce vérifiée sur KIABA Rencontres. Contactez directement l'annonceur par WhatsApp, SMS ou appel direct.{% endblock %}
+{% block keywords %}{{ ad.title|lower }}, {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, kiaba, kiaba rencontres, annonces adultes {{ ad.city.name|lower }}, côte d'ivoire{% endblock %}
 {% block hreflang_fr_ci %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
 {% block hreflang_default %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
 {% block canonical_url %}https://ci-habiko.com/ads/{{ ad.slug }}{% endblock %}
@@ -18,7 +18,7 @@
   "category": "{{ ad.get_category_display|escapejs }}",
   "brand": {
     "@type": "Brand",
-    "name": "HABIKO"
+    "name": "KIABA Rencontres"
   },
   "offers": {
     "@type": "Offer",
@@ -34,7 +34,7 @@
     "url": "https://ci-habiko.com/ads/{{ ad.slug }}",
     "seller": {
       "@type": "Organization",
-      "name": "HABIKO"
+      "name": "KIABA Rencontres"
     },
     "hasMerchantReturnPolicy": {
       "@type": "MerchantReturnPolicy",
@@ -194,7 +194,7 @@
             id="mainImage"
             src="{{ first.image.url }}"
             onerror="this.onerror=null; this.src='{% static 'page-detail-annonce.PNG' %}';"
-            alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Découvrez cette annonce immobilière sur HABIKO, le site immobilier de référence en Côte d'Ivoire."
+            alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Annonce sur KIABA Rencontres."
             class="max-w-full max-h-96 md:max-h-[500px] object-contain"
             loading="eager"
             width="800"
@@ -205,7 +205,7 @@
         <img
           id="mainImage"
           src="{% static 'page-detail-annonce.PNG' %}"
-          alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - HABIKO Immobilier"
+          alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
           class="max-w-full max-h-96 md:max-h-[500px] object-contain"
           loading="eager"
           width="800"
@@ -291,7 +291,7 @@
 
         <!-- Message -->
         <p class="text-sm text-gray-600 mb-4">
-          Précisez-moi que vous avez trouvé mon annonce sur <strong>HABIKO</strong> Merci
+          Précisez-moi que vous avez trouvé mon annonce sur <strong>KIABA Rencontres</strong>. Merci
         </p>
 
         <!-- Numéro de téléphone -->
@@ -313,7 +313,7 @@
             {% with prefs=ad.user.profile.contact_prefs %}
               {% if prefs %}
                 {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
-                  {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                  {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}
                     <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
                         <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
@@ -340,7 +340,7 @@
                 {% endif %}
               {% else %}
                 {% if ad.user.profile.whatsapp_e164 %}
-                  {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                  {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}
                     <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
                         <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
@@ -463,14 +463,14 @@
   <!-- Annonces similaires -->
   {% if similar_ads %}
     <section class="mt-16 pt-8 border-t border-gray-200">
-      <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces Immobilières Similaires à {{ ad.city.name }}</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces similaires à {{ ad.city.name }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for similar_ad in similar_ads %}
           <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 h-40">
             <div class="flex h-full">
               <div class="w-40 flex-shrink-0 bg-slate-100">
                 {% if similar_ad.media.count %}
-                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur HABIKO." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
+                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur KIABA Rencontres." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
                 {% else %}
                   <div class="w-full h-full bg-slate-200 flex items-center justify-center">
                     <span class="text-slate-400 text-xs">Photo</span>
@@ -548,7 +548,7 @@
 
           <!-- Message -->
           <p class="text-sm text-gray-600 mb-4">
-            Précisez-moi que vous avez trouvé mon annonce sur <strong>HABIKO</strong>. Merci
+            Précisez-moi que vous avez trouvé mon annonce sur <strong>KIABA Rencontres</strong>. Merci
           </p>
 
           <!-- Numéro de téléphone -->
@@ -570,7 +570,7 @@
               {% with prefs=ad.user.profile.contact_prefs %}
                 {% if prefs %}
                   {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
-                    {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                    {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}
                       <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
                           <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />
@@ -597,7 +597,7 @@
                   {% endif %}
                 {% else %}
                   {% if ad.user.profile.whatsapp_e164 %}
-                    {% with msg="Bonjour, je viens de HABIKO: "|add:ad.title %}
+                    {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}
                       <a class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow text-sm font-medium" href="https://wa.me/{{ ad.user.profile.whatsapp_e164|slice:'1:' }}?text={{ msg|urlencode }}" rel="nofollow noopener" target="_blank">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
                           <path d="M12 2a10 10 0 0 0-8.94 14.5L2 22l5.65-1.02A10 10 0 1 0 12 2Zm0 2a8 8 0 0 1 6.86 12.24l-.26.4a1 1 0 0 1-.79.42h-.09A8 8 0 1 1 12 4Zm-3.09 4.5a.75.75 0 0 0-.7.46 4.7 4.7 0 0 0 .47 4.43 5.9 5.9 0 0 0 2.56 2.18 4.8 4.8 0 0 0 3.84.13 1 1 0 0 0 .24-1.67l-1-1a1 1 0 0 0-1.09-.2l-.83.33a.5.5 0 0 1-.47-.06 4.1 4.1 0 0 1-1.62-1.62.5.5 0 0 1-.06-.47l.33-.83a1 1 0 0 0-.2-1.09l-1-1a1 1 0 0 0-.71-.29Z" />

@@ -24,8 +24,8 @@ class Command(BaseCommand):
 
         try:
             send_mail(
-                subject="Test Email from HABIKO",
-                message="This is a test email from HABIKO production server.",
+                subject="Test Email from KIABA Rencontres",
+                message="This is a test email from KIABA Rencontres production server.",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[to_email],
                 fail_silently=False,

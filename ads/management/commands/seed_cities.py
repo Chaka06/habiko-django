@@ -28,7 +28,7 @@ DEFAULT_CITIES = [
 
 
 class Command(BaseCommand):
-    help = "Crée les villes de base pour HABIKO (Côte d'Ivoire) si elles n'existent pas."
+    help = "Crée les villes de base pour KIABA Rencontres (Côte d'Ivoire) si elles n'existent pas."
 
     def handle(self, *args, **options):
         created_count = 0

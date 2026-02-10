@@ -1,17 +1,17 @@
 {% extends "account/email/base_email.html" %}
 
-{% block email_title %}Bienvenue sur HABIKO{% endblock %}
+{% block email_title %}Bienvenue sur KIABA Rencontres{% endblock %}
 
 {% block email_content %}
 <h1 class="main-title"><i class="bx bx-party"></i> Bienvenue sur {{ site_name }} !</h1>
 
-<p>Bienvenue sur <strong>{{ site_name }}</strong>, la plateforme immobilière N°1 en Côte d'Ivoire !</p>
+<p>Bienvenue sur <strong>{{ site_name }}</strong>, le site de rencontres adultes et annonces en Côte d'Ivoire.</p>
 
 <p>Votre compte a été créé avec succès. Nous sommes ravis de vous compter parmi nos utilisateurs.</p>
 
 <div class="info-box">
     <h3><i class="bx bx-lock-alt"></i> Activation de votre compte</h3>
-    <p style="margin-bottom: 0;">Pour activer votre compte et commencer à publier vos annonces immobilières, cliquez sur le bouton ci-dessous.</p>
+    <p style="margin-bottom: 0;">Pour activer votre compte et commencer à publier vos annonces, cliquez sur le bouton ci-dessous.</p>
 </div>
 
 {% if confirmation_url %}
@@ -30,7 +30,7 @@
 <div class="details">
     <h3><i class="bx bx-star"></i> Une fois votre compte activé, vous pourrez :</h3>
     <ul>
-        <li><i class="bx bx-edit"></i> Publier des annonces immobilières gratuitement</li>
+        <li><i class="bx bx-edit"></i> Publier des annonces gratuitement</li>
         <li><i class="bx bx-home"></i> Gérer vos biens (maisons, villas, terrains, locations)</li>
         <li><i class="bx bx-user"></i> Personnaliser votre profil et vos préférences de contact</li>
         <li><i class="bx bx-bar-chart-alt-2"></i> Suivre les statistiques de vos annonces (vues, clics)</li>

@@ -1,12 +1,12 @@
-# 🏠 HABIKO - Plateforme Immobilière Côte d'Ivoire
+# KIABA Rencontres - Site de rencontres adultes & annonces (Côte d'Ivoire)
 
-Plateforme web de petites annonces immobilières pour la Côte d'Ivoire, développée avec Django/Python. Permet aux propriétaires de publier leurs annonces (maisons, villas, terrains, locations) et aux acheteurs/locataires de trouver facilement ce qu'ils cherchent.
+Plateforme web **KIABA Rencontres** : site de petites annonces adultes et rencontres en Côte d'Ivoire, développée avec Django/Python. Publication d'annonces, profils vérifiés, contact sécurisé. Domaine actuel : **ci-habiko.com** (migration vers ci-kiaba.com prévue).
 
 **Développé par** [Diarrassouba Issiaka Konateh](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
 
 ## ✨ Fonctionnalités principales
 
-- 🏘️ **Publication d'annonces** : Maisons, villas, terrains, locations avec champs dynamiques selon la catégorie
+- 📝 **Publication d'annonces** : Annonces par catégorie avec champs adaptés
 - 🔍 **Recherche avancée** : Filtrage par ville, catégorie et sous-catégories
 - 💳 **Système de paiement** : Intégration CinetPay pour les services premium
 - 👤 **Gestion des profils** : Système d'authentification avec vérification email
@@ -30,13 +30,13 @@ Plateforme web de petites annonces immobilières pour la Côte d'Ivoire, dévelo
 
 ![Liste des annonces](static/page-liste-annonce.PNG)
 
-Page principale affichant toutes les annonces immobilières disponibles avec filtres par ville et catégorie.
+Page principale affichant les annonces avec filtres par ville et catégorie.
 
 ### Page de détail d'annonce
 
 ![Détail d'annonce](static/page-detail-annonce.PNG)
 
-Page détaillée d'une annonce avec toutes les informations, photos, coordonnées du propriétaire et boutons de contact.
+Page détaillée d'une annonce avec toutes les informations, photos, coordonnées de l'annonceur et boutons de contact.
 
 ### Page de connexion
 
@@ -144,7 +144,7 @@ L'application sera accessible sur `http://localhost:8000`
 ## 📁 Structure du projet
 
 ```
-HABIKO/
+KIABA/  (ou racine du repo habiko-django)
 ├── accounts/          # Gestion des utilisateurs et profils
 ├── ads/               # Modèles et vues pour les annonces
 ├── core/              # Vues principales, middleware
@@ -270,6 +270,6 @@ Ce projet est open source et disponible sous licence MIT.
 
 ---
 
-**HABIKO** - Plateforme Immobilière Côte d'Ivoire © 2024
+**KIABA Rencontres** - Site de rencontres adultes & annonces · Côte d'Ivoire © 2025
 
 Développé par [Diarrassouba Issiaka Konateh](https://www.linkedin.com/in/diarrassouba-issiaka-b263062ba?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)

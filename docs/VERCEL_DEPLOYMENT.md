@@ -1,6 +1,6 @@
-# Déploiement HABIKO sur Vercel + Supabase
+# Déploiement KIABA Rencontres sur Vercel + Supabase
 
-Ce guide explique comment déployer le projet HABIKO sur Vercel avec Supabase (PostgreSQL + Storage).
+Ce guide explique comment déployer le projet **KIABA Rencontres** sur Vercel avec Supabase (PostgreSQL + Storage). Le domaine actuel est ci-habiko.com (à remplacer par ci-kiaba.com plus tard si besoin).
 
 ## Architecture
 
@@ -8,7 +8,7 @@ Ce guide explique comment déployer le projet HABIKO sur Vercel avec Supabase (P
 - **Hébergement** : Vercel (Python serverless)
 - **Base de données** : Supabase PostgreSQL
 - **Stockage des images** : Supabase Storage (S3-compatible)
-- **Domaine** : ci-habiko.com (via Cloudflare)
+- **Domaine** : ci-habiko.com (via Cloudflare), à migrer vers ci-kiaba.com plus tard
 
 ## Prérequis
 
@@ -66,11 +66,11 @@ SUPABASE_STORAGE_PUBLIC_URL=https://<project-ref>.supabase.co/storage/v1/object/
 # Emails - OBLIGATOIRE pour l'inscription (confirmation par email)
 # Option 1 - Resend (recommandé, simple, gratuit 3000/mois) : https://resend.com
 RESEND_API_KEY=re_xxxxxxxx
-DEFAULT_FROM_EMAIL=HABIKO <onboarding@resend.dev>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <onboarding@resend.dev>
 
 # Option 2 - SendGrid : https://sendgrid.com
 SENDGRID_API_KEY=SG.xxxxxxxx
-DEFAULT_FROM_EMAIL=HABIKO <no-reply@ci-habiko.com>
+DEFAULT_FROM_EMAIL=KIABA Rencontres <no-reply@ci-habiko.com>
 
 # Option 3 - SMTP (Brevo, LWS, etc.)
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend

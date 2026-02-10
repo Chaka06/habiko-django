@@ -45,7 +45,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
             static_url = getattr(settings, "STATIC_URL", "/static/")
 
             # Ajouter les valeurs par défaut au contexte si elles n'existent pas
-            context.setdefault("site_name", "HABIKO")
+            context.setdefault("site_name", "KIABA Rencontres")
             context.setdefault("site_url", site_url)
             context.setdefault("support_email", "support@ci-habiko.com")
             context.setdefault("logo_url", f"{site_url}{static_url}img/logo.png")
@@ -135,7 +135,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                     subject = " ".join(subject.split())
                 except Exception as e:
                     logger.warning(f"Erreur lors du rendu du sujet pour {template_prefix}: {e}")
-                    subject = context.get("subject", "Message de HABIKO")
+                    subject = context.get("subject", "Message de KIABA Rencontres")
 
                 # Rendre le contenu HTML et texte
                 try:
@@ -188,7 +188,7 @@ class NoRateLimitAccountAdapter(DefaultAccountAdapter):
                 try:
                     subject = render_to_string(f"{template_prefix}_subject.txt", context).strip()
                 except Exception:
-                    subject = context.get("subject", "Message de HABIKO")
+                    subject = context.get("subject", "Message de KIABA Rencontres")
 
                 # Rendre le contenu texte
                 try:
