@@ -215,6 +215,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "core.middleware.ConsumeMessagesAfterResponseMiddleware",  # Message affiché une seule fois
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -550,7 +551,7 @@ CSRF_COOKIE_DOMAIN = None
 SESSION_COOKIE_DOMAIN = None
 # Durée des sessions (14 jours)
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14
-SESSION_SAVE_EVERY_REQUEST = False
+SESSION_SAVE_EVERY_REQUEST = True  # Pour que les messages consommés soient bien retirés de la session
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Politique de referrer : strict-origin-when-cross-origin permet d'envoyer Referer/Origin
 # pour les requêtes cross-origin (nécessaire pour CSRF avec www/non-www et proxies)

@@ -13,12 +13,6 @@ from .tasks import (
 
 @receiver(user_logged_in)
 def on_user_logged_in(sender, user, request, **kwargs):  # pragma: no cover
-    # Ne pas afficher les messages de l'ancienne session / autre compte
-    try:
-        from django.contrib import messages
-        list(messages.get_messages(request))
-    except Exception:
-        pass
     try:
         # S'assurer que le profil existe
         from .models import Profile

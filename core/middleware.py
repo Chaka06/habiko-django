@@ -118,6 +118,27 @@ class EnsureCsrfCookieForAuthMiddleware:
         return self.get_response(request)
 
 
+class ConsumeMessagesAfterResponseMiddleware:
+    """
+    Après chaque réponse HTML (200), consomme les messages pour qu'ils ne
+    réapparaissent pas sur les pages suivantes. On ne touche pas aux messages
+    en cas de redirection (302) pour que « Connexion réussie » etc. s'affichent
+    une fois sur la page d'arrivée.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        response = self.get_response(request)
+        if response.status_code == 200:
+            try:
+                from django.contrib import messages
+                list(messages.get_messages(request))
+            except Exception:
+                pass
+        return response
+
+
 class AgeGateMiddleware:
     """
     Middleware pour l'age-gate (réglable via ENABLE_AGE_GATE dans settings).
