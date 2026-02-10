@@ -21,61 +21,8 @@
     {
       "@type": "ListItem",
       "position": {{ forloop.counter }},
-      "item": {
-        "@type": "Product",
-        "name": "{{ ad.title|escapejs }}",
-        "description": "{{ ad.description_sanitized|truncatewords:20|escapejs }}",
-        "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
-        "image": {% if ad.media.count %}"https://ci-kiaba.com{{ ad.media.first.image.url }}"{% else %}"https://ci-kiaba.com/static/img/logo.png?v=3"{% endif %},
-        "category": "{{ ad.get_category_display|escapejs }}",
-        "offers": {
-          "@type": "Offer",
-          "availability": "https://schema.org/InStock",
-          "priceCurrency": "XOF",
-          "price": "0",
-          "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
-          "hasMerchantReturnPolicy": {
-            "@type": "MerchantReturnPolicy",
-            "applicableCountry": "CI",
-            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-            "merchantReturnDays": 0,
-            "returnMethod": "https://schema.org/ReturnByMail",
-            "returnFees": "https://schema.org/FreeReturn"
-          },
-          "shippingDetails": {
-            "@type": "OfferShippingDetails",
-            "shippingRate": {
-              "@type": "MonetaryAmount",
-              "value": "0",
-              "currency": "XOF"
-            },
-            "shippingDestination": {
-              "@type": "DefinedRegion",
-              "addressCountry": "CI"
-            },
-            "deliveryTime": {
-              "@type": "ShippingDeliveryTime",
-              "handlingTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 0,
-                "maxValue": 0,
-                "unitCode": "DAY"
-              },
-              "transitTime": {
-                "@type": "QuantitativeValue",
-                "minValue": 0,
-                "maxValue": 0,
-                "unitCode": "DAY"
-              }
-            }
-          }
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "{{ ad.city.name }}",
-          "addressCountry": "CI"
-        }
-      }
+      "name": "{{ ad.title|escapejs }}",
+      "url": "https://ci-kiaba.com/ads/{{ ad.slug }}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
   ]

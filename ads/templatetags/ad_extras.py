@@ -4,6 +4,17 @@ from django.templatetags.static import static
 register = template.Library()
 
 
+@register.filter
+def schema_image_url(url):
+    """Retourne une URL d'image absolue. Si déjà complète (Supabase, S3), retourne telle quelle."""
+    if not url:
+        return "https://ci-kiaba.com/static/img/logo.png?v=3"
+    url = str(url).strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    return "https://ci-kiaba.com" + (url if url.startswith("/") else "/" + url)
+
+
 PLACEHOLDER_IMAGES = [
     "page-liste-annonce.PNG",
     "page-detail-annonce.PNG",

@@ -10,74 +10,10 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "{{ ad.title|escapejs }}",
+  "@type": "WebPage",
+  "name": "{{ ad.title|escapejs }} - {{ ad.get_category_display }} à {{ ad.city.name }}",
   "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
-  "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
-  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-kiaba.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-kiaba.com/static/img/logo.png?v=3"]{% endif %},
-  "category": "{{ ad.get_category_display|escapejs }}",
-  "brand": {
-    "@type": "Brand",
-    "name": "KIABA Rencontres"
-  },
-  "offers": {
-    "@type": "Offer",
-    "availability": "https://schema.org/InStock",
-    "priceCurrency": "XOF",
-    "price": "0",
-    "priceSpecification": {
-      "@type": "UnitPriceSpecification",
-      "price": "0",
-      "priceCurrency": "XOF",
-      "valueAddedTaxIncluded": false
-    },
-    "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
-    "seller": {
-      "@type": "Organization",
-      "name": "KIABA Rencontres"
-    },
-    "hasMerchantReturnPolicy": {
-      "@type": "MerchantReturnPolicy",
-      "applicableCountry": "CI",
-      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-      "merchantReturnDays": 0,
-      "returnMethod": "https://schema.org/ReturnByMail",
-      "returnFees": "https://schema.org/FreeReturn"
-    },
-    "shippingDetails": {
-      "@type": "OfferShippingDetails",
-      "shippingRate": {
-        "@type": "MonetaryAmount",
-        "value": "0",
-        "currency": "XOF"
-      },
-      "shippingDestination": {
-        "@type": "DefinedRegion",
-        "addressCountry": "CI"
-      },
-      "deliveryTime": {
-        "@type": "ShippingDeliveryTime",
-        "handlingTime": {
-          "@type": "QuantitativeValue",
-          "minValue": 0,
-          "maxValue": 0,
-          "unitCode": "DAY"
-        },
-        "transitTime": {
-          "@type": "QuantitativeValue",
-          "minValue": 0,
-          "maxValue": 0,
-          "unitCode": "DAY"
-        }
-      }
-    }
-  },
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "{{ ad.city.name }}",
-    "addressRegion": "{{ ad.city.region|default:'' }}",
-    "addressCountry": "CI"
-  }
+  "url": "https://ci-kiaba.com/ads/{{ ad.slug }}"
 }
 </script>
 <script type="application/ld+json">
