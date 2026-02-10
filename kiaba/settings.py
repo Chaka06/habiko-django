@@ -523,6 +523,10 @@ except Exception:
 CSRF_TRUSTED_ORIGINS = _base_csrf + _dynamic_csrf
 # Page conviviale en français au lieu du 403 brut quand la vérification CSRF échoue
 CSRF_FAILURE_VIEW = "core.views.csrf_failure"
+# Token CSRF dans la session au lieu d'un cookie séparé : plus fiable quand on arrive
+# depuis un lien email (réinitialisation mot de passe, etc.), le cookie CSRF pouvant
+# ne pas être posé ou envoyé dans ce contexte.
+CSRF_USE_SESSIONS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
