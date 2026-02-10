@@ -175,35 +175,41 @@ class AdMedia(models.Model):
         logger = logging.getLogger(__name__)
 
         try:
-            # Déterminer le chemin de l'image
+            # Déterminer le chemin de l'image (jamais utiliser .path avec S3/Supabase — lève "doesn't support absolute paths")
             image_path = None
             original_format = None
+            img = None
 
-            if hasattr(self.image, "path") and os.path.exists(self.image.path):
-                # Fichier sur le disque (image existante)
-                image_path = self.image.path
-                img = Image.open(image_path)
-                original_format = img.format
-                # Si le format n'est pas détecté, essayer depuis l'extension
-                if not original_format:
-                    ext = os.path.splitext(image_path)[1].lower()
-                    format_map = {
-                        ".jpg": "JPEG",
-                        ".jpeg": "JPEG",
-                        ".png": "PNG",
-                        ".webp": "WEBP",
-                    }
-                    original_format = format_map.get(ext, "JPEG")
-            elif hasattr(self.image, "file") and hasattr(self.image.file, "read"):
+            try:
+                if hasattr(self.image, "path"):
+                    _path = self.image.path
+                    if _path and os.path.exists(_path):
+                        image_path = _path
+                        img = Image.open(image_path)
+                        original_format = img.format
+            except (NotImplementedError, ValueError, OSError):
+                # Stockage distant (S3/Supabase) : pas de .path
+                pass
+
+            if img is None and image_path is None and hasattr(self.image, "file") and hasattr(self.image.file, "read"):
                 # Fichier en mémoire (nouveau upload)
                 self.image.file.seek(0)
                 img = Image.open(self.image.file)
                 original_format = img.format
-            else:
-                logger.warning(
-                    f"Impossible d'ouvrir l'image: {self.image.name if self.image else 'None'}"
-                )
+            elif img is None and image_path is None and self.image.name:
+                # Ouvrir depuis le storage (S3/Supabase)
+                with self.image.open("rb") as f:
+                    img = Image.open(f)
+                    img.load()
+                original_format = img.format
+
+            if img is None:
+                logger.warning("Impossible d'ouvrir l'image, abandon filigrane/thumbnail: %s", self.image.name)
                 return False
+            if not original_format:
+                ext = os.path.splitext(self.image.name or "")[1].lower()
+                format_map = {".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG", ".webp": "WEBP"}
+                original_format = format_map.get(ext, "JPEG")
 
             # OPTIMISATION : Redimensionner pour alléger (max 1000px, qualité réduite plus bas)
             MAX_WIDTH = 1000
@@ -330,12 +336,8 @@ class AdMedia(models.Model):
 
             output.close()
 
-            # Générer la miniature optimisée (par ex. 400x400 max)
-            try:
-                thumb_img = Image.open(self.image.path)
-            except Exception:
-                # Si on ne peut pas rouvrir depuis le disque, repartir de img_rgb/img
-                thumb_img = img.convert("RGB")
+            # Générer la miniature (toujours depuis l'image en mémoire — pas de .path avec S3/Supabase)
+            thumb_img = (img.convert("RGB") if img.mode != "RGB" else img.copy())
 
             THUMBNAIL_SIZE = (320, 320)
             thumb_img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
