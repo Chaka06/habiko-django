@@ -545,6 +545,36 @@
       </div>
     </div>
 
+    <!-- Modale 18+ : affichée à chaque nouvelle session (après fermeture du navigateur), jamais pour les connectés -->
+    {% if ENABLE_AGE_GATE and not user.is_authenticated %}
+    <div id="ageGateModal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="ageGateTitle">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8 text-center border border-gray-200">
+        <h2 id="ageGateTitle" class="text-xl md:text-2xl font-bold text-gray-900 mb-2">Accès réservé aux 18+</h2>
+        <p class="text-gray-600 text-sm md:text-base mb-6">En entrant, vous confirmez être majeur(e) et accepter notre politique de contenu (modération stricte).</p>
+        <div class="flex flex-col gap-3">
+          <button type="button" id="ageGateConfirm" class="w-full bg-pink-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-pink-700 transition">J'ai 18 ans ou plus</button>
+          <a href="/legal/content-policy" class="text-sm text-gray-500 hover:text-pink-600">Politique de contenu</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function() {
+        var modal = document.getElementById('ageGateModal');
+        if (!modal) return;
+        if (sessionStorage.getItem('age_gate_ok')) {
+          return;
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('ageGateConfirm').addEventListener('click', function() {
+          sessionStorage.setItem('age_gate_ok', '1');
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+      })();
+    </script>
+    {% endif %}
+
     {% block header %}
     <header class="sticky top-0 z-40 glass border-b">
       <div

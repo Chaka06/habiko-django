@@ -158,55 +158,14 @@ class AgeGateMiddleware:
         enable_age_gate = getattr(settings, "ENABLE_AGE_GATE", False)
 
         if not enable_age_gate:
-            # Age-gate désactivé, laisser passer toutes les requêtes
             return self.get_response(request)
 
-        # Code original de l'age-gate (conservé au cas où)
-        path = request.path
-        user_agent = request.META.get("HTTP_USER_AGENT", "").lower()
+        # Utilisateurs connectés : pas d'age gate (modale ni redirect)
+        if getattr(request, "user", None) and request.user.is_authenticated:
+            return self.get_response(request)
 
-        # Detect search engine crawlers and allow them to bypass age gate
-        is_search_engine = any(
-            bot in user_agent
-            for bot in [
-                "googlebot",
-                "google-inspectiontool",
-                "bingbot",
-                "slurp",
-                "duckduckbot",
-                "baiduspider",
-                "yandexbot",
-                "sogou",
-                "exabot",
-                "facebot",
-                "ia_archiver",
-                "ahrefsbot",
-                "semrushbot",
-                "mj12bot",
-            ]
-        )
-
-        client_ip = request.META.get("REMOTE_ADDR", "")
-        if (
-            client_ip.startswith("66.249.")
-            or client_ip.startswith("64.233.")
-            or client_ip.startswith("72.14.")
-        ):
-            is_search_engine = True
-
-        if not request.COOKIES.get("age_gate_accepted") and not is_search_engine:
-            allowed = (
-                path.startswith("/age-gate/")
-                or path.startswith("/admin/")
-                or path.startswith("/auth/")
-                or path.startswith("/static/")
-                or path.startswith("/media/")
-                or path == "/robots.txt"
-                or path == "/sitemap.xml"
-                or path.startswith("/google")
-            )
-            if not allowed:
-                return redirect("/age-gate/")
+        # Sinon la page se charge normalement ; la modale 18+ est gérée en JS (sessionStorage)
+        # dans base.html : réapparaît à chaque nouvelle session (après fermeture du navigateur).
         return self.get_response(request)
 
 

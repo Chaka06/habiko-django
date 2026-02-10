@@ -32,10 +32,13 @@ def site_metrics(request):
     adsense_publisher_id = getattr(settings, "ADSENSE_PUBLISHER_ID", None)
     adsense_enabled = getattr(settings, "ADSENSE_ENABLED", False)
     
+    enable_age_gate = getattr(settings, "ENABLE_AGE_GATE", False)
+
     return {
         "total_approved_ads": total_approved_ads,
         "GA_MEASUREMENT_ID": ga_measurement_id,
         "ADSENSE_PUBLISHER_ID": adsense_publisher_id,
         "ADSENSE_ENABLED": adsense_enabled,
         "popular_cities_footer": popular_cities,
+        "ENABLE_AGE_GATE": enable_age_gate,
     }

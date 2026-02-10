@@ -160,6 +160,10 @@ if RENDER_EXTERNAL_URL:
     except Exception:
         pass
 
+# Age gate 18+ : modale affichée à chaque nouvelle session (après fermeture du navigateur)
+# Ne s'affiche pas pour les utilisateurs connectés.
+ENABLE_AGE_GATE = True
+
 # Add Vercel host automatically if present
 VERCEL_URL = os.environ.get("VERCEL_URL")
 if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
