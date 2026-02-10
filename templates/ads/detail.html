@@ -14,7 +14,7 @@
   "name": "{{ ad.title|escapejs }}",
   "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
   "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
-  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-kiaba.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-kiaba.com/static/img/logo.png"]{% endif %},
+  "image": {% if ad.media.all %}[{% for m in ad.media.all %}"https://ci-kiaba.com{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}["https://ci-kiaba.com/static/img/logo.png?v=2"]{% endif %},
   "category": "{{ ad.get_category_display|escapejs }}",
   "brand": {
     "@type": "Brand",

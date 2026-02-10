@@ -39,7 +39,7 @@
     />
     <meta
       property="og:image"
-      content="{% block og_image %}https://ci-kiaba.com{% static 'img/logo.png' %}{% endblock %}"
+      content="{% block og_image %}https://ci-kiaba.com{% static 'img/logo.png' %}?v=2{% endblock %}"
     />
     <meta property="og:site_name" content="KIABA" />
     <meta property="og:locale" content="fr_CI" />
@@ -60,7 +60,7 @@
     />
     <meta
       property="twitter:image"
-      content="{% block twitter_image %}https://ci-kiaba.com{% static 'img/logo.png' %}{% endblock %}"
+      content="{% block twitter_image %}https://ci-kiaba.com{% static 'img/logo.png' %}?v=2{% endblock %}"
     />
 
     <!-- Canonical URL -->
@@ -174,11 +174,11 @@
           "url": "https://ci-kiaba.com",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://ci-kiaba.com/static/img/logo.png",
+            "url": "https://ci-kiaba.com/static/img/logo.png?v=2",
             "width": 200,
             "height": 60
           },
-          "image": "https://ci-kiaba.com/static/img/logo.png",
+          "image": "https://ci-kiaba.com/static/img/logo.png?v=2",
           "contactPoint": {
             "@type": "ContactPoint",
             "email": "support@ci-kiaba.com",
@@ -252,33 +252,33 @@
         ],
         "priceRange": "Gratuit",
         "openingHours": "Mo-Su 00:00-23:59",
-        "image": "https://ci-kiaba.com/static/img/logo.png",
+        "image": "https://ci-kiaba.com/static/img/logo.png?v=2",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://ci-kiaba.com/static/img/logo.png"
+          "url": "https://ci-kiaba.com/static/img/logo.png?v=2"
         }
       }
     </script>
 
     {% block structured_data %}{% endblock %}
 
-    <!-- Favicon - Configuration complète pour Google et tous les navigateurs -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon.png' %}" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}" />
-    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon.png' %}" />
-    <link rel="apple-touch-icon" href="{% static 'favicon.png' %}" />
+    <!-- Favicon - Configuration complète pour Google et tous les navigateurs (?v=2 cache-bust) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon.png' %}?v=2" />
+    <link rel="apple-touch-icon" href="{% static 'favicon.png' %}?v=2" />
     <!-- Meta tags pour le favicon -->
     <meta name="msapplication-TileColor" content="#f97316" />
-    <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}" />
+    <meta name="msapplication-TileImage" content="{% static 'favicon.png' %}?v=2" />
     <meta name="theme-color" content="#f97316" />
 
     <!-- Icônes Boxicons - Chargement asynchrone pour ne pas bloquer le rendu -->
@@ -575,7 +575,7 @@
         <a href="/" class="text-2xl font-semibold tracking-tight text-gray-900">
       <div class="logo-container">
             <img
-              src="{% static 'img/logo.png' %}"
+              src="{% static 'img/logo.png' %}?v=2"
               alt="KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire"
               class="h-12 md:h-16 w-auto"
               loading="eager"
