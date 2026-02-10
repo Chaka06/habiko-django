@@ -32,6 +32,8 @@ def approve_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         # Notification email
         send_moderation_notification.delay(ad.pk, True)
 
+    from core.context_processors import invalidate_site_metrics_cache
+    invalidate_site_metrics_cache()
     messages.success(request, f"Annonce '{ad.title}' approuvée avec succès.")
     return redirect("admin:ads_ad_changelist")
 
@@ -61,5 +63,7 @@ def reject_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         # Notification email
         send_moderation_notification.delay(ad.pk, False)
 
+    from core.context_processors import invalidate_site_metrics_cache
+    invalidate_site_metrics_cache()
     messages.success(request, f"Annonce '{ad.title}' rejetée.")
     return redirect("admin:ads_ad_changelist")

@@ -121,6 +121,8 @@ class AdAdmin(admin.ModelAdmin):
                 )
                 # Notification email
                 send_moderation_notification.delay(ad.pk, True)
+        from core.context_processors import invalidate_site_metrics_cache
+        invalidate_site_metrics_cache()
         self.message_user(request, f"{count} annonce(s) approuvée(s).")
 
     approve_ads.short_description = "Approuver les annonces sélectionnées"
@@ -142,6 +144,8 @@ class AdAdmin(admin.ModelAdmin):
                 )
                 # Notification email
                 send_moderation_notification.delay(ad.pk, False)
+        from core.context_processors import invalidate_site_metrics_cache
+        invalidate_site_metrics_cache()
         self.message_user(request, f"{count} annonce(s) rejetée(s).")
 
     reject_ads.short_description = "Rejeter les annonces sélectionnées"
@@ -161,6 +165,8 @@ class AdAdmin(admin.ModelAdmin):
                     entity_id=str(ad.pk),
                     metadata={"title": ad.title},
                 )
+        from core.context_processors import invalidate_site_metrics_cache
+        invalidate_site_metrics_cache()
         self.message_user(request, f"{count} annonce(s) archivée(s).")
 
     archive_ads.short_description = "Archiver les annonces sélectionnées"

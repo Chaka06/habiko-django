@@ -317,7 +317,8 @@ else:
         # Utiliser 'prefer' qui essaie SSL mais ne l'exige pas strictement
         # Cela évite les problèmes de validation de certificat
         DATABASES["default"]["OPTIONS"]["sslmode"] = "prefer"
-        DATABASES["default"]["CONN_MAX_AGE"] = 0
+        # Réutiliser les connexions DB en production (sauf Vercel serverless)
+        DATABASES["default"]["CONN_MAX_AGE"] = 0 if os.environ.get("VERCEL") == "1" else 60
         DATABASES["default"]["ATOMIC_REQUESTS"] = True
     else:
         # Fallback : utiliser les variables individuelles
@@ -349,7 +350,7 @@ else:
                 "HOST": postgres_host,
                 "PORT": env("POSTGRES_PORT"),
                 "OPTIONS": db_options,
-                "CONN_MAX_AGE": 0,  # Désactiver le pooling pour éviter les problèmes de connexion
+                "CONN_MAX_AGE": 0 if os.environ.get("VERCEL") == "1" else 60,
                 "ATOMIC_REQUESTS": True,
             }
         }
@@ -796,3 +797,6 @@ CINETPAY_NOTIFY_URL = env(
 CINETPAY_RETURN_URL = env(
     "CINETPAY_RETURN_URL", default="https://ci-kiaba.com/accounts/payment/cinetpay/return/"
 )
+
+# Superuser initial (créé par create_initial_superuser) : mot de passe via env uniquement
+INITIAL_SUPERUSER_PASSWORD = os.environ.get("INITIAL_SUPERUSER_PASSWORD", "").strip() or None

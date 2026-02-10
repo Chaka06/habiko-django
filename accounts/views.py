@@ -245,8 +245,9 @@ def public_profile(request: HttpRequest, username: str) -> HttpResponse:
 
     ads = (
         Ad.objects.filter(user=user, status=Ad.Status.APPROVED)
+        .select_related("city")
+        .prefetch_related("media")
         .order_by("-created_at")
-        .prefetch_related("media", "city")
     )
 
     return render(

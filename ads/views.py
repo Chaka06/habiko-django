@@ -52,10 +52,14 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     from django.core.cache import cache
     cities = cache.get("all_cities")
     if cities is None:
-        cities = City.objects.all()
-        cache.set("all_cities", cities, 3600)  # Cache 1 heure
+        cities = list(City.objects.all())
+        cache.set("all_cities", cities, 3600)  # 1 heure
 
-    total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
+    from core.context_processors import CACHE_KEY_TOTAL_ADS, CACHE_TTL
+    total_approved_ads = cache.get(CACHE_KEY_TOTAL_ADS)
+    if total_approved_ads is None:
+        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
+        cache.set(CACHE_KEY_TOTAL_ADS, total_approved_ads, CACHE_TTL)
     return render(
         request,
         "ads/list.html",
