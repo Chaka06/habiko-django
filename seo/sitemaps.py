@@ -3,14 +3,16 @@ from django.urls import reverse
 from django.conf import settings
 from ads.models import Ad, City
 
-# Forcer le domaine HTTPS pour le sitemap
-SITEMAP_DOMAIN = "https://ci-kiaba.com"
+# Domaine canonique : Django utilise le framework Sites par défaut (souvent example.com).
+# En fixant domain ici, les URLs du sitemap sont toujours en https://ci-kiaba.com/...
+SITEMAP_DOMAIN = "ci-kiaba.com"
 
 # Catégories réelles du modèle Ad (escorte, etc.)
 AD_CATEGORY_SLUGS = [c.value for c in Ad.Category]
 
 
 class StaticSitemap(Sitemap):
+    domain = SITEMAP_DOMAIN
     changefreq = "daily"
     priority = 1.0
     protocol = "https"
@@ -36,6 +38,7 @@ class StaticSitemap(Sitemap):
 
 
 class AdSitemap(Sitemap):
+    domain = SITEMAP_DOMAIN
     changefreq = "daily"
     priority = 0.9
     protocol = "https"
@@ -52,6 +55,7 @@ class AdSitemap(Sitemap):
 
 
 class CitySitemap(Sitemap):
+    domain = SITEMAP_DOMAIN
     changefreq = "weekly"
     priority = 0.7
     protocol = "https"
@@ -64,6 +68,7 @@ class CitySitemap(Sitemap):
 
 
 class CategorySitemap(Sitemap):
+    domain = SITEMAP_DOMAIN
     changefreq = "weekly"
     priority = 0.6
     protocol = "https"
@@ -77,6 +82,7 @@ class CategorySitemap(Sitemap):
 
 class CityCategorySitemap(Sitemap):
     """Villes × catégories : uniquement les combinaisons qui ont des annonces approuvées."""
+    domain = SITEMAP_DOMAIN
     changefreq = "weekly"
     priority = 0.8
     protocol = "https"
