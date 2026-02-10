@@ -417,10 +417,12 @@ VERCEL = os.environ.get("VERCEL") == "1"
 is_render = bool(RENDER_EXTERNAL_URL) or os.path.exists("/app/media")
 
 # Configuration Media selon la plateforme
+# USE_SUPABASE_STORAGE=true : images dans Supabase Storage (recommandé en prod pour ne pas perdre les images au déploiement)
 USE_SUPABASE_STORAGE = os.environ.get("USE_SUPABASE_STORAGE", "false").lower() in ("true", "1", "yes")
 
-if VERCEL and USE_SUPABASE_STORAGE:
-    # Vercel : stockage Supabase (S3-compatible, filesystem éphémère sur Vercel)
+if USE_SUPABASE_STORAGE:
+    # Stockage persistant Supabase (S3-compatible) — Vercel et Render : les images ne sont pas perdues au déploiement.
+    # Le chemin est enregistré en base (ex. ads/xxx.webp), le fichier est dans le bucket.
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_ACCESS_KEY_ID = os.environ.get("SUPABASE_S3_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.environ.get("SUPABASE_S3_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -435,7 +437,7 @@ if VERCEL and USE_SUPABASE_STORAGE:
     else:
         MEDIA_URL = os.environ.get("MEDIA_URL", f"{AWS_S3_ENDPOINT_URL or ''}/{AWS_STORAGE_BUCKET_NAME}/")
     MEDIA_ROOT = str(BASE_DIR / "media")
-    logger.info("📁 Stockage média : Supabase (S3-compatible)")
+    logger.info("📁 Stockage média : Supabase (S3-compatible) — images persistantes")
 elif is_render and not DEBUG:
     # Production sur Render : disque persistant
     MEDIA_ROOT = "/app/media"
@@ -621,8 +623,9 @@ elif EMAIL_HOST:
     # Si EMAIL_HOST est configuré, utiliser SMTP
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-# Storage
-DEFAULT_FILE_STORAGE = env("DEFAULT_FILE_STORAGE")
+# Storage (ne pas écraser si Supabase Storage déjà activé plus haut)
+if not USE_SUPABASE_STORAGE:
+    DEFAULT_FILE_STORAGE = env("DEFAULT_FILE_STORAGE")
 
 # Google Analytics
 GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default=None)

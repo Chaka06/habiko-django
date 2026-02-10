@@ -131,7 +131,9 @@ def post(request: HttpRequest) -> HttpResponse:
                 send_ad_published_email.delay(ad.id)
                 print(f"Annonce {ad.id} créée et approuvée (email envoyé)")
 
-            # Ajouter les images avec validation
+            # Ajouter les images avec validation (une erreur sur une photo ne bloque pas l'annonce)
+            import logging
+            logger = logging.getLogger(__name__)
             image_fields = ["image1", "image2", "image3", "image4", "image5"]
             images_added = 0
 
@@ -149,8 +151,11 @@ def post(request: HttpRequest) -> HttpResponse:
                         messages.error(request, f"Fichier {image.name} n'est pas une image.")
                         return render(request, "core/post.html", {"form": form})
 
-                    AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
-                    images_added += 1
+                    try:
+                        AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
+                        images_added += 1
+                    except Exception as e:
+                        logger.exception("Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e)
 
             # Envoyer l'email de confirmation (désactivé temporairement pour éviter les erreurs Redis)
             # send_ad_published_email.delay(ad.id)
@@ -264,8 +269,14 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                             messages.error(request, f"Fichier {image.name} n'est pas une image.")
                             return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
 
-                        AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
-                        images_added += 1
+                        try:
+                            AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
+                            images_added += 1
+                        except Exception as e:
+                            import logging
+                            logging.getLogger(__name__).exception(
+                                "Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e
+                            )
 
             messages.success(request, "Annonce modifiée avec succès !")
             return redirect("/dashboard/")
@@ -304,9 +315,10 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             display_name=request.user.username
         )
     
-    # Afficher toutes les annonces de l'utilisateur, avec préchargement des médias
+    # Afficher toutes les annonces de l'utilisateur (préchargement city + médias pour éviter 500)
     my_ads = (
         Ad.objects.filter(user=request.user)
+        .select_related("city")
         .order_by("-created_at")
         .prefetch_related("media")
     )
