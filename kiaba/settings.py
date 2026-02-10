@@ -208,6 +208,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "core.middleware.CsrfExemptPasswordResetFromKeyMiddleware",  # POST reset mot de passe (lien email) sans CSRF pour mobile
     "django.middleware.csrf.CsrfViewMiddleware",
     "core.middleware.EnsureCsrfCookieForAuthMiddleware",  # Cookie CSRF sur GET /auth/*
     "django.contrib.auth.middleware.AuthenticationMiddleware",

@@ -1,9 +1,14 @@
+import re
+
 from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.middleware.csrf import get_token
 import gzip
 from io import BytesIO
+
+# Chemin allauth « définir nouveau mot de passe » (lien avec clé unique)
+PASSWORD_RESET_FROM_KEY_PATH = re.compile(r"^/auth/password/reset/key/[0-9A-Za-z]+-.+")
 
 
 class RedirectMiddleware:
@@ -70,6 +75,22 @@ class CloudflareMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class CsrfExemptPasswordResetFromKeyMiddleware:
+    """
+    Exempte du CSRF uniquement la page « Définir un nouveau mot de passe » (lien email).
+    Sur iPhone/Chrome le cookie de session n'est parfois pas envoyé quand on ouvre le lien
+    depuis l'app Mail, ce qui provoque une erreur CSRF au submit. La sécurité reste
+    assurée par la clé unique dans l'URL (one-time use).
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest):
+        if request.method == "POST" and PASSWORD_RESET_FROM_KEY_PATH.match(request.path):
+            request.csrf_exempt = True
+        return self.get_response(request)
 
 
 class EnsureCsrfCookieForAuthMiddleware:
