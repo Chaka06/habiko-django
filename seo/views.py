@@ -4,8 +4,10 @@ from django.shortcuts import render
 
 def robots_txt(_: object) -> HttpResponse:
     lines = [
+        "# KIABA Rencontres - ci-kiaba.com",
         "User-agent: *",
         "Allow: /",
+        "Allow: /ads",
         "Allow: /ads/",
         "Allow: /legal/",
         "Allow: /static/",
@@ -17,12 +19,10 @@ def robots_txt(_: object) -> HttpResponse:
         "Disallow: /dashboard/",
         "Disallow: /age-gate/",
         "Disallow: /edit/",
+        "Disallow: /report/",
         "",
-        "# Sitemaps",
+        "# Sitemap (index principal ; les sections sont listées dedans)",
         "Sitemap: https://ci-kiaba.com/sitemap.xml",
-        "",
-        "# Crawl-delay (optionnel, pour éviter de surcharger le serveur)",
-        "Crawl-delay: 1",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain; charset=utf-8")
 
