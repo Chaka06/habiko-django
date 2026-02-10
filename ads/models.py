@@ -254,10 +254,10 @@ class AdMedia(models.Model):
                 if logo.mode != "RGBA":
                     logo = logo.convert("RGBA")
 
-                # Taille du logo (50% de la plus petite dimension de l'image)
+                # Taille du logo (25 % de la plus petite dimension)
                 img_width, img_height = img.size
                 min_dimension = min(img_width, img_height)
-                logo_size = int(min_dimension * 0.5)
+                logo_size = int(min_dimension * 0.25)
 
                 logo_ratio = logo.width / logo.height
                 if logo.width > logo.height:
@@ -268,6 +268,11 @@ class AdMedia(models.Model):
                     new_logo_width = int(logo_size * logo_ratio)
 
                 logo = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+
+                # Opacité 50 % : réduire le canal alpha
+                r, g, b, a = logo.split()
+                a = a.point(lambda x: int(x * 0.5))
+                logo = Image.merge("RGBA", (r, g, b, a))
 
                 # Position au centre
                 x = (img_width - new_logo_width) // 2

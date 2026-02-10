@@ -567,9 +567,13 @@
   </head>
   <body class="min-h-full bg-gradient-to-b from-pink-50 to-white">
     <!-- Modale de chargement (formulaires / navigation) -->
-    <div id="loadingModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+    <style>
+      @keyframes loading-spin { to { transform: rotate(360deg); } }
+      #loadingModal .loading-spinner { animation: loading-spin 0.8s linear infinite; }
+    </style>
+    <div id="loadingModal" class="fixed inset-0 z-[9999] hidden items-center justify-center" style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);" aria-hidden="true">
       <div class="bg-white rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center gap-4 min-w-[200px]">
-        <div class="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin" role="status" aria-label="Chargement"></div>
+        <div class="loading-spinner w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full" style="box-sizing: border-box;" role="status" aria-label="Chargement"></div>
         <p class="text-gray-700 font-medium">Chargement...</p>
       </div>
     </div>
@@ -629,58 +633,12 @@
     </header>
     {% endblock %}
 
-    {% block cta_section %}
-    <!-- CTA Publier après le header (uniforme sur toutes les pages) -->
-    <section class="cta-section">
-      <div class="cta-container">
-        <h2 class="cta-title">Vous proposez des services ?</h2>
-        <p class="cta-text">Publiez votre annonce gratuitement sur KIABA Rencontres et augmentez votre visibilité</p>
-        <a href="/post/" class="cta-button">
-          <svg class="cta-icon" viewBox="0 0 24 24">
-            <path d="M12 4v16m8-8H4"></path>
-          </svg>
-          Publier une annonce
-        </a>
-      </div>
-    </section>
-    {% endblock %} {% block counter_section %}
-    <!-- Compteur d'annonces -->
-    <section class="bg-white border-b">
-      <div
-        class="max-w-7xl mx-auto px-4 py-3 text-center text-sm text-gray-700"
-      >
-        <span
-          >Nombre total d'annonces en ligne :
-          <strong>{{ total_approved_ads }}</strong></span
-        >
-      </div>
-    </section>
-    {% endblock %}
+    {% block cta_section %}{% endblock %}
+    {% block counter_section %}{% endblock %}
 
     <main
       class="{% block main_class %}max-w-7xl mx-auto p-3 md:p-4{% endblock %}"
     >
-      {% if messages %}
-      <div class="max-w-3xl mx-auto mb-4 space-y-2" id="messagesContainer" data-messages-count="{{ messages|length }}">
-        {% for message in messages %}
-        <div
-          class="message-toast rounded-lg border px-4 py-3 text-sm opacity-0 transform translate-y-2 transition-all duration-300 {% if message.tags == 'success' %} bg-blue-50 border-blue-200 text-blue-800 {% endif %} {% if message.tags == 'info' %} bg-pink-50 border-pink-200 text-pink-800 {% endif %} {% if message.tags == 'warning' %} bg-yellow-50 border-yellow-200 text-yellow-800 {% endif %} {% if message.tags == 'error' %} bg-red-50 border-red-200 text-red-800 {% endif %}"
-          data-message-text="{{ message|escapejs }}"
-          data-message-timestamp="{{ forloop.counter }}"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <span>{{ message }}</span>
-            <button class="message-close text-gray-400 hover:text-gray-600 transition" aria-label="Fermer">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-
       <!-- Breadcrumbs -->
       {% block breadcrumbs %}{% endblock %} {% block content %}{% endblock %}
     </main>
@@ -784,93 +742,14 @@
       // Fonction pour afficher la modale de chargement
       function showLoadingModal(title, message) {
         const modal = document.getElementById('loadingModal');
-        const titleEl = document.getElementById('loadingTitle');
-        const messageEl = document.getElementById('loadingMessage');
-        
-        if (title) titleEl.textContent = title;
-        if (message) messageEl.textContent = message;
-        
-        modal.classList.add('active');
+        if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
       }
 
       // Fonction pour masquer la modale de chargement
       function hideLoadingModal() {
         const modal = document.getElementById('loadingModal');
-        modal.classList.remove('active');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
       }
-
-      // Gérer les messages toast (apparition/disparition automatique + éviter réaffichage)
-      document.addEventListener('DOMContentLoaded', function() {
-        const messages = document.querySelectorAll('.message-toast');
-        const messagesContainer = document.getElementById('messagesContainer');
-        
-        // Récupérer les messages déjà affichés depuis localStorage
-        const displayedMessages = JSON.parse(localStorage.getItem('displayed_messages') || '[]');
-        const currentTime = Date.now();
-        const MESSAGE_TTL = 60000; // 1 minute - les messages peuvent réapparaître après 1 minute
-        
-        // Nettoyer les anciens messages (plus de 1 minute)
-        const cleanedMessages = displayedMessages.filter(function(msg) {
-          return (currentTime - msg.timestamp) < MESSAGE_TTL;
-        });
-        localStorage.setItem('displayed_messages', JSON.stringify(cleanedMessages));
-        
-        messages.forEach(function(message, index) {
-          const messageText = message.getAttribute('data-message-text');
-          const messageHash = btoa(messageText).substring(0, 16); // Hash simple du message
-          
-          // Vérifier si ce message a déjà été affiché récemment
-          const alreadyDisplayed = cleanedMessages.some(function(msg) {
-            return msg.hash === messageHash && (currentTime - msg.timestamp) < MESSAGE_TTL;
-          });
-          
-          if (alreadyDisplayed) {
-            // Message déjà affiché récemment, le supprimer du DOM
-            message.remove();
-            return;
-          }
-          
-          // Marquer ce message comme affiché
-          cleanedMessages.push({
-            hash: messageHash,
-            timestamp: currentTime
-          });
-          localStorage.setItem('displayed_messages', JSON.stringify(cleanedMessages));
-          
-          // Animation d'apparition
-          setTimeout(function() {
-            message.classList.remove('opacity-0', 'translate-y-2');
-            message.classList.add('opacity-100', 'translate-y-0');
-          }, 100 * (index + 1)); // Délai progressif pour chaque message
-          
-          // Disparition automatique après 5 secondes
-          const autoHideTimeout = setTimeout(function() {
-            message.classList.add('opacity-0', 'translate-y-2');
-            setTimeout(function() {
-              message.remove();
-            }, 300); // Attendre la fin de l'animation
-          }, 5000); // 5 secondes
-          
-          // Bouton de fermeture manuelle
-          const closeBtn = message.querySelector('.message-close');
-          if (closeBtn) {
-            closeBtn.addEventListener('click', function() {
-              clearTimeout(autoHideTimeout);
-              message.classList.add('opacity-0', 'translate-y-2');
-              setTimeout(function() {
-                message.remove();
-              }, 300);
-            });
-          }
-        });
-        
-        // Si tous les messages ont été supprimés, supprimer le conteneur
-        setTimeout(function() {
-          if (messagesContainer && messagesContainer.querySelectorAll('.message-toast').length === 0) {
-            messagesContainer.remove();
-          }
-        }, 6000);
-      });
 
       // Gérer la soumission des formulaires
       document.addEventListener('DOMContentLoaded', function() {
