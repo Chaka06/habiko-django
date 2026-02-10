@@ -129,10 +129,7 @@
 
 
 {% block content %}
-{% static 'page-liste-annonce.PNG' as ph1 %}
-{% static 'page-detail-annonce.PNG' as ph2 %}
-{% static 'responsive-mobile-page-liste-annonce.PNG' as ph3 %}
-{% static 'responsive-mobile-page-detail-annonce.PNG' as ph4 %}
+{% static 'img/logo.png' as placeholder_img %}
 <div class="flex flex-col lg:flex-row gap-6">
   <!-- Contenu principal -->
   <div class="flex-1">
@@ -192,7 +189,7 @@
                 {% else %}
                   src="{{ media.image.url }}"
                 {% endif %}
-                data-placeholder="{% cycle ph1 ph2 ph3 ph4 %}"
+                data-placeholder="{{ placeholder_img }}"
                 onerror="this.onerror=null; this.src=this.dataset.placeholder;"
                 alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce adulte sur KIABA Rencontres."
                 decoding="async"
@@ -209,7 +206,7 @@
             {% endwith %}
           {% else %}
             <img
-              src="{% cycle ph1 ph2 ph3 ph4 %}"
+              src="{{ placeholder_img }}"
               alt="Annonce adulte {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
               class="w-full h-full object-cover"
               loading="lazy"

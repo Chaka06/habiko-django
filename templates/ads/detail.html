@@ -193,7 +193,7 @@
           <img
             id="mainImage"
             src="{{ first.image.url }}"
-            onerror="this.onerror=null; this.src='{% static 'page-detail-annonce.PNG' %}';"
+            onerror="this.onerror=null; this.src='{% static 'img/logo.png' %}';"
             alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Annonce sur KIABA Rencontres."
             class="max-w-full max-h-96 md:max-h-[500px] object-contain"
             loading="eager"
@@ -204,7 +204,7 @@
       {% else %}
         <img
           id="mainImage"
-          src="{% static 'page-detail-annonce.PNG' %}"
+          src="{% static 'img/logo.png' %}"
           alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
           class="max-w-full max-h-96 md:max-h-[500px] object-contain"
           loading="eager"
