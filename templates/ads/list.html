@@ -250,6 +250,14 @@
   </div>
 </section>
 
+<!-- Zone publicitaire Google AdSense (en bas de page) -->
+<section class="mt-8 flex justify-center">
+  <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 min-h-[280px] flex items-center justify-center w-full max-w-[336px] mx-auto">
+    {% load adsense_tags %}
+    {% adsense_ad ad_format="rectangle" class_name="adsense-container w-full" ad_style="display:block; min-height: 250px;" %}
+  </div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
