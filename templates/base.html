@@ -4,6 +4,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Google tag (gtag.js) -->
+    {% if GA_MEASUREMENT_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ GA_MEASUREMENT_ID }}');
+    </script>
+    {% endif %}
     <title>{% block title %}KIABA · Rencontres & Annonces Adultes{% endblock %}</title>
     <meta
       name="description"
@@ -956,10 +966,6 @@
             // Sauvegarder aussi dans localStorage pour éviter les rechargements
             localStorage.setItem('cookie_consent_saved', 'true');
             
-            // Charger GA immédiatement si l'utilisateur vient d'accepter (sans recharger la page)
-            if (consent.analytics && typeof window.loadGoogleAnalytics === 'function') {
-              window.loadGoogleAnalytics();
-            }
           })
           .catch(err => console.error('Erreur lors de la sauvegarde des préférences:', err));
         }
@@ -970,39 +976,6 @@
         }
       })();
     </script>
-
-    <!-- Google Analytics - Respect du consentement -->
-    {% if GA_MEASUREMENT_ID %}
-    <script>
-      (function() {
-        var GA_ID = "{{ GA_MEASUREMENT_ID|escapejs }}";
-        function getCookie(name) {
-          var value = "; " + document.cookie;
-          var parts = value.split("; " + name + "=");
-          if (parts.length === 2) return parts.pop().split(";").shift();
-          return null;
-        }
-        // Charger GA (appelé au load si cookie déjà accepté, ou au clic "Tout accepter")
-        window.loadGoogleAnalytics = function() {
-          if (window._gaLoaded) return;
-          window._gaLoaded = true;
-          var script = document.createElement("script");
-          script.async = true;
-          script.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
-          document.head.appendChild(script);
-          script.onload = function() {
-            window.dataLayer = window.dataLayer || [];
-            function gtag() { dataLayer.push(arguments); }
-            gtag("js", new Date());
-            gtag("config", GA_ID, { anonymize_ip: true, cookie_flags: "SameSite=None;Secure" });
-          };
-        };
-        if (getCookie("cookie_analytics") === "accepted") {
-          window.addEventListener("load", function() { window.loadGoogleAnalytics(); });
-        }
-      })();
-    </script>
-    {% endif %}
 
     <!-- Modale 18+ : en fin de body pour être au-dessus de tout (header, search, etc.) -->
     {% if ENABLE_AGE_GATE and not user.is_authenticated %}
