@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.db.models import Q
+from django.db.models import Q, F
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Ad, City
 
 
@@ -135,6 +137,31 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
         similar_ads = list(similar_ads) + list(additional_ads)
 
     return render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
+
+
+@require_POST
+@ensure_csrf_cookie
+def record_ad_view(request: HttpRequest, slug: str) -> JsonResponse:
+    """
+    Enregistre une vue pour l'annonce (appelé côté client après 5 secondes sur la page détail).
+    Une seule vue par annonce et par session pour éviter les doublons (rafraîchissement, etc.).
+    """
+    ad = get_object_or_404(
+        Ad.objects.filter(status=Ad.Status.APPROVED),
+        slug=slug,
+    )
+    # Ne pas compter si le visiteur est l'auteur de l'annonce
+    if request.user.is_authenticated and ad.user_id == request.user.id:
+        return JsonResponse({"ok": True, "recorded": False})
+
+    session_views = request.session.get("ad_views_recorded") or []
+    if ad.id in session_views:
+        return JsonResponse({"ok": True, "recorded": False})
+
+    Ad.objects.filter(pk=ad.id).update(views_count=F("views_count") + 1)
+    session_views = list(session_views) + [ad.id]
+    request.session["ad_views_recorded"] = session_views
+    return JsonResponse({"ok": True, "recorded": True})
 
 
 # Create your views here.

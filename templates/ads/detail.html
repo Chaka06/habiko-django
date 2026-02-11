@@ -85,6 +85,7 @@
 
 
 {% block content %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <div class="flex flex-col lg:flex-row gap-6">
   <!-- Contenu principal -->
   <div class="flex-1">
@@ -178,7 +179,7 @@
 
   <!-- Description -->
   <section class="prose max-w-none mt-6 text-gray-800">
-      <h2 class="text-xl font-bold text-gray-900 mb-3">Description du Bien Immobilier</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-3">Description</h2>
     <div class="text-gray-700 leading-relaxed">
       {{ ad.description_sanitized|linebreaksbr }}
     </div>
@@ -686,6 +687,31 @@
       toggleContent(contentDesktop, textDesktop, arrowDesktop);
     });
   }
+})();
+
+// Enregistrer une vue après 5 secondes de consultation (une fois par chargement)
+(function() {
+  var slug = '{{ ad.slug|escapejs }}';
+  var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') && document.querySelector('[name=csrfmiddlewaretoken]').value;
+  if (!csrfToken) {
+    var match = document.cookie.match(/csrftoken=([^;]+)/);
+    csrfToken = match ? match[1] : '';
+  }
+  var recorded = false;
+  var t = setTimeout(function() {
+    if (recorded) return;
+    recorded = true;
+    fetch('/ads/' + slug + '/record-view/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'same-origin',
+      body: '{}'
+    }).catch(function() {});
+  }, 5000);
 })();
 </script>
 {% endblock %}

@@ -117,10 +117,13 @@
                     <h3 class="font-medium text-gray-900 line-clamp-2 mb-1">{{ ad.title }}</h3>
                     <p class="text-sm text-gray-600">{{ ad.get_category_display }} • {{ ad.city.name }}</p>
                     <p class="text-xs text-gray-500 mt-1">
-                      Créée le {{ ad.created_at|date:"d/m/Y" }} • 
+                      Créée le {{ ad.created_at|date:"d/m/Y" }} •
                       <span class="font-medium {% if ad.status == 'approved' %}text-blue-600{% elif ad.status == 'pending' %}text-yellow-600{% elif ad.status == 'rejected' %}text-red-600{% endif %}">
                         {{ ad.get_status_display }}
                       </span>
+                      {% if ad.status == 'approved' %}
+                        · <span title="Vues (consultation ≥ 5 s)">{{ ad.views_count }} vue{{ ad.views_count|pluralize }}</span>
+                      {% endif %}
                     </p>
                   </div>
                   <!-- Boutons d'action - toujours visibles et bien espacés -->
