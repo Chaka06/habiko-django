@@ -150,9 +150,9 @@ def record_ad_view(request: HttpRequest, slug: str) -> JsonResponse:
         Ad.objects.filter(status=Ad.Status.APPROVED),
         slug=slug,
     )
-    # Ne pas compter si le visiteur est l'auteur de l'annonce
+    # Ne pas compter si le visiteur est l'auteur de l'annonce (évite d'inflater ses propres stats)
     if request.user.is_authenticated and ad.user_id == request.user.id:
-        return JsonResponse({"ok": True, "recorded": False})
+        return JsonResponse({"ok": True, "recorded": False, "reason": "owner"})
 
     session_views = request.session.get("ad_views_recorded") or []
     if ad.id in session_views:
