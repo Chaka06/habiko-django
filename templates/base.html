@@ -956,15 +956,10 @@
             // Sauvegarder aussi dans localStorage pour éviter les rechargements
             localStorage.setItem('cookie_consent_saved', 'true');
             
-            // Recharger Google Analytics si accepté
-            if (consent.analytics && typeof gtag !== 'undefined') {
-              gtag('consent', 'update', {
-                'analytics_storage': 'granted'
-              });
+            // Charger GA immédiatement si l'utilisateur vient d'accepter (sans recharger la page)
+            if (consent.analytics && typeof window.loadGoogleAnalytics === 'function') {
+              window.loadGoogleAnalytics();
             }
-            
-            // Ne pas recharger la page, juste masquer la bannière
-            // location.reload(); // Commenté pour éviter le rechargement
           })
           .catch(err => console.error('Erreur lors de la sauvegarde des préférences:', err));
         }
@@ -979,38 +974,33 @@
     <!-- Google Analytics - Respect du consentement -->
     {% if GA_MEASUREMENT_ID %}
     <script>
-      // Vérifier le consentement avant de charger GA
-      function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-      }
-
-      const analyticsConsent = getCookie('cookie_analytics');
-      
-      if (analyticsConsent === 'accepted') {
-        // Charger GA seulement si le consentement est donné
-        window.addEventListener("load", function () {
+      (function() {
+        var GA_ID = "{{ GA_MEASUREMENT_ID|escapejs }}";
+        function getCookie(name) {
+          var value = "; " + document.cookie;
+          var parts = value.split("; " + name + "=");
+          if (parts.length === 2) return parts.pop().split(";").shift();
+          return null;
+        }
+        // Charger GA (appelé au load si cookie déjà accepté, ou au clic "Tout accepter")
+        window.loadGoogleAnalytics = function() {
+          if (window._gaLoaded) return;
+          window._gaLoaded = true;
           var script = document.createElement("script");
           script.async = true;
-          script.src =
-            "https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}";
+          script.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
           document.head.appendChild(script);
-
-          script.onload = function () {
+          script.onload = function() {
             window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
+            function gtag() { dataLayer.push(arguments); }
             gtag("js", new Date());
-            gtag("config", "{{ GA_MEASUREMENT_ID }}", {
-              'anonymize_ip': true,
-              'cookie_flags': 'SameSite=None;Secure'
-            });
+            gtag("config", GA_ID, { anonymize_ip: true, cookie_flags: "SameSite=None;Secure" });
           };
-        });
-      }
+        };
+        if (getCookie("cookie_analytics") === "accepted") {
+          window.addEventListener("load", function() { window.loadGoogleAnalytics(); });
+        }
+      })();
     </script>
     {% endif %}
 
