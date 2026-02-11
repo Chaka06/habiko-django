@@ -59,6 +59,11 @@ except Exception as e:
     traceback.print_exc()
 PYTHON_EOF
 
+# Créer les villes/communes de base (idempotent)
+echo ""
+echo "Step 2a: Seeding cities..."
+python manage.py seed_cities || true
+
 # Créer le superuser admin2 si INITIAL_SUPERUSER_PASSWORD est défini
 echo ""
 echo "Step 2b: Creating initial superuser (if configured)..."
