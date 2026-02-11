@@ -135,7 +135,7 @@
 
 <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
   {% for ad in ads %}
-    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition h-40">
+    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-40">
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
