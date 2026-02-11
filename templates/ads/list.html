@@ -33,10 +33,10 @@
 {% block extra_head %}
   {% if is_paginated %}
     {% if page_obj.has_previous %}
-      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}">
+      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
     {% endif %}
     {% if page_obj.has_next %}
-      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}">
+      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
     {% endif %}
   {% endif %}
 {% endblock %}
@@ -93,10 +93,10 @@
   </p>
 </header>
 <section class="mb-4 md:mb-6">
-  <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3" method="get">
+  <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
     <div class="col-span-2 md:col-span-2 relative">
       <label for="searchInput" class="block text-xs font-medium text-gray-600 mb-1">Recherche</label>
-      <input id="searchInput" name="q" type="text" placeholder="Mots, catégorie, sous-catégorie…" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
+      <input id="searchInput" name="q" type="text" placeholder="Mots, catégorie…" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
       <div id="searchSuggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-auto hidden"></div>
     </div>
     <div>
@@ -114,15 +114,6 @@
         <option value="">Toutes</option>
         {% for value, label in category_choices %}
           <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div>
-      <label for="ads-filter-subcategory" class="block text-xs font-medium text-gray-600 mb-1">Sous-catégorie</label>
-      <select id="ads-filter-subcategory" name="subcategory" class="w-full border rounded-lg px-3 py-2">
-        <option value="">Toutes</option>
-        {% for sub in subcategory_choices %}
-          <option value="{{ sub }}" {% if selected_subcategory == sub %}selected{% endif %}>{{ sub }}</option>
         {% endfor %}
       </select>
     </div>
@@ -210,7 +201,7 @@
   <div class="mt-8 flex justify-center">
     <nav class="flex items-center space-x-2" aria-label="Pagination">
       {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
            class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
           ← Précédent
         </a>
@@ -225,7 +216,7 @@
         {% if page_obj.number == num %}
           <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
+          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
              class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
             {{ num }}
           </a>
@@ -233,7 +224,7 @@
       {% endfor %}
 
       {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.subcategory %}&subcategory={{ request.GET.subcategory|urlencode }}{% endif %}" 
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
            class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
           Suivant →
         </a>
@@ -308,9 +299,7 @@
         if (catSelect) catSelect.value = value;
         searchInput.value = '';
       } else if (type === 'subcategory') {
-        var subSelect = form.querySelector('select[name=subcategory]');
-        if (subSelect) subSelect.value = value;
-        searchInput.value = '';
+        searchInput.value = value;
       } else {
         searchInput.value = value;
       }

@@ -14,7 +14,6 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     )
     city = request.GET.get("city")
     category = request.GET.get("category")
-    subcategory = request.GET.get("subcategory", "").strip()
     provider = request.GET.get("provider")
     selected_city = None
     selected_category = None
@@ -28,8 +27,6 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     if category:
         selected_category = category
         qs = qs.filter(category=category)
-    if subcategory:
-        qs = qs.filter(subcategories__contains=[subcategory])
     if provider:
         if provider.isdigit():
             qs = qs.filter(user_id=int(provider))
@@ -70,8 +67,6 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "is_paginated": page_obj.has_other_pages(),
             "selected_city": selected_city,
             "selected_category": selected_category,
-            "selected_subcategory": subcategory or None,
-            "subcategory_choices": Ad.SUBCATEGORY_CHOICES,
             "category_choices": Ad.Category.choices,
             "total_approved_ads": total_approved_ads,
         },

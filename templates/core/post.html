@@ -40,6 +40,7 @@
           </label>
         {% endfor %}
       </div>
+      <script type="application/json" id="subcategory-choices-json">{{ subcategory_choices_json|safe }}</script>
       {% if form.subcategories.errors %}
         <div class="text-red-600 text-sm mt-1">{{ form.subcategories.errors.0 }}</div>
       {% endif %}
@@ -263,36 +264,34 @@
         const categorySelect = document.querySelector('select[id*="category"]');
         const subcategoriesContainer = document.getElementById('subcategories-container');
         
+        // Sous-catégories pour les catégories adultes (escorte_girl, escorte_boy, transgenre)
+        const escortSubcategories = (function() {
+            const el = document.getElementById('subcategory-choices-json');
+            if (el && el.textContent) {
+                try { return JSON.parse(el.textContent); } catch (e) { }
+            }
+            return ['Sex vaginal', 'Sex anal (sodomie)', 'Massage sexuel', 'Massage du corps'];
+        })();
+
         const subcategoryMapping = {
+            'escorte_girl': escortSubcategories,
+            'escorte_boy': escortSubcategories,
+            'transgenre': escortSubcategories,
             'maisons_appartements': [
-                'Maison à vendre',
-                'Appartement à vendre',
-                'Studio à vendre',
-                'Duplex à vendre',
-                'Villa à vendre',
-                'Maison meublée à vendre',
-                'Appartement meublé à vendre'
+                'Maison à vendre', 'Appartement à vendre', 'Studio à vendre', 'Duplex à vendre',
+                'Villa à vendre', 'Maison meublée à vendre', 'Appartement meublé à vendre'
             ],
             'villas_residences': [
-                'Villa de luxe',
-                'Résidence meublée',
-                'Résidence de standing',
-                'Villa avec piscine',
-                'Résidence sécurisée'
+                'Villa de luxe', 'Résidence meublée', 'Résidence de standing',
+                'Villa avec piscine', 'Résidence sécurisée'
             ],
             'terrains': [
-                'Terrain à vendre',
-                'Terrain constructible',
-                'Terrain viabilisé',
-                'Parcelle à vendre',
-                'Terrain commercial'
+                'Terrain à vendre', 'Terrain constructible', 'Terrain viabilisé',
+                'Parcelle à vendre', 'Terrain commercial'
             ],
             'locations': [
-                'Maison à louer',
-                'Appartement à louer',
-                'Studio à louer',
-                'Villa à louer',
-                'Résidence meublée à louer'
+                'Maison à louer', 'Appartement à louer', 'Studio à louer',
+                'Villa à louer', 'Résidence meublée à louer'
             ]
         };
         
@@ -306,18 +305,18 @@
             // Ajouter les nouvelles sous-catégories
             subcategories.forEach((subcategory, index) => {
                 const label = document.createElement('label');
-                label.className = 'flex items-center space-x-2 text-sm p-2 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer';
-                
+                label.className = 'flex items-center gap-2 text-sm p-3 border border-gray-300 rounded-lg hover:bg-white cursor-pointer';
+
                 const input = document.createElement('input');
                 input.type = 'checkbox';
                 input.name = 'subcategories';
                 input.value = subcategory;
                 input.id = `id_subcategories_${index}`;
-                input.className = 'mr-2';
-                
+                input.className = 'rounded border-gray-300 text-pink-600 focus:ring-pink-500';
+
                 const span = document.createElement('span');
                 span.textContent = subcategory;
-                
+
                 label.appendChild(input);
                 label.appendChild(span);
                 subcategoriesContainer.appendChild(label);

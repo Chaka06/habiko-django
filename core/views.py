@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -144,12 +145,12 @@ def post(request: HttpRequest) -> HttpResponse:
                     # Validation de la taille
                     if image.size > 5 * 1024 * 1024:  # 5MB max
                         messages.error(request, f"Photo {image.name} trop volumineuse (max 5MB).")
-                        return render(request, "core/post.html", {"form": form})
+                        return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
 
                     # Validation du type MIME
                     if not image.content_type.startswith("image/"):
                         messages.error(request, f"Fichier {image.name} n'est pas une image.")
-                        return render(request, "core/post.html", {"form": form})
+                        return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
 
                     try:
                         AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
@@ -196,7 +197,7 @@ def post(request: HttpRequest) -> HttpResponse:
         
         form = AdForm(initial=initial_data)
 
-    return render(request, "core/post.html", {"form": form})
+    return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
 
 
 @login_required
