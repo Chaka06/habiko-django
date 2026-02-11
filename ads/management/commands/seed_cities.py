@@ -3,32 +3,60 @@ from django.core.management.base import BaseCommand
 from ads.models import City
 
 
-DEFAULT_CITIES = [
-    # Principales villes de Côte d'Ivoire
-    ("Abidjan", "District Autonome d'Abidjan"),
-    ("Yamoussoukro", "District Autonome de Yamoussoukro"),
-    ("Bouaké", "Région de Gbêkê"),
-    ("Daloa", "Région du Haut-Sassandra"),
-    ("San-Pédro", "Région de San-Pédro"),
-    ("Korhogo", "Région du Poro"),
-    ("Man", "Région du Tonkpi"),
-    ("Gagnoa", "Région du Gôh"),
-    ("Abengourou", "Région de l'Indénié-Djuablin"),
-    ("Divo", "Région du Lôh-Djiboua"),
-    ("Anyama", "District Autonome d'Abidjan"),
-    ("Yopougon", "District Autonome d'Abidjan"),
-    ("Cocody", "District Autonome d'Abidjan"),
-    ("Marcory", "District Autonome d'Abidjan"),
-    ("Treichville", "District Autonome d'Abidjan"),
-    ("Plateau", "District Autonome d'Abidjan"),
-    ("Koumassi", "District Autonome d'Abidjan"),
-    ("Port-Bouët", "District Autonome d'Abidjan"),
+# Communes et quartiers d'Abidjan (District Autonome d'Abidjan)
+ABIDJAN_COMMUNES = [
+    ("Abobo", "District Autonome d'Abidjan"),
+    ("Adjamé", "District Autonome d'Abidjan"),
+    ("Angré", "District Autonome d'Abidjan"),
+    ("Anono", "District Autonome d'Abidjan"),
+    ("Anani", "District Autonome d'Abidjan"),
+    ("Attécoubé", "District Autonome d'Abidjan"),
     ("Bingerville", "District Autonome d'Abidjan"),
+    ("Blockhaus", "District Autonome d'Abidjan"),
+    ("Cocody", "District Autonome d'Abidjan"),
+    ("Djorobité", "District Autonome d'Abidjan"),
+    ("Faya", "District Autonome d'Abidjan"),
+    ("Gonzague", "District Autonome d'Abidjan"),
+    ("Koumassi", "District Autonome d'Abidjan"),
+    ("Mbadon", "District Autonome d'Abidjan"),
+    ("Marcory", "District Autonome d'Abidjan"),
+    ("Mpouto", "District Autonome d'Abidjan"),
+    ("Palmeraie", "District Autonome d'Abidjan"),
+    ("Plateau", "District Autonome d'Abidjan"),
+    ("Port-Bouët", "District Autonome d'Abidjan"),
+    ("Treichville", "District Autonome d'Abidjan"),
+    ("Yopougon", "District Autonome d'Abidjan"),
+    ("Anyama", "District Autonome d'Abidjan"),
 ]
+
+# Villes de l'intérieur et autres
+INTERIOR_CITIES = [
+    ("Abidjan", "Lagunes"),
+    ("Abengourou", "Indénié-Djuablin"),
+    ("Bouaké", "Vallée du Bandama"),
+    ("Daloa", "Haut-Sassandra"),
+    ("Issia", "Haut-Sassandra"),
+    ("Korhogo", "Poro"),
+    ("Man", "Tonkpi"),
+    ("San-Pédro", "Bas-Sassandra"),
+    ("Yamoussoukro", "District de Yamoussoukro"),
+    ("Gagnoa", "Gôh"),
+    ("Divo", "Lôh-Djiboua"),
+    ("Soubré", "Nawa"),
+    ("Bondoukou", "Gontougo"),
+    ("Odienné", "Kabadougou"),
+    ("Adzopé", "La Mé"),
+    ("Dabou", "Grands-Ponts"),
+    ("Sinfra", "Marahoué"),
+    ("Katiola", "Hambol"),
+    ("Dimbokro", "N'Zi"),
+]
+
+DEFAULT_CITIES = ABIDJAN_COMMUNES + INTERIOR_CITIES
 
 
 class Command(BaseCommand):
-    help = "Crée les villes de base pour KIABA Rencontres (Côte d'Ivoire) si elles n'existent pas."
+    help = "Crée les villes et communes de base pour KIABA Rencontres (Côte d'Ivoire) si elles n'existent pas."
 
     def handle(self, *args, **options):
         created_count = 0
@@ -41,7 +69,6 @@ class Command(BaseCommand):
                 created_count += 1
                 self.stdout.write(self.style.SUCCESS(f"Ville créée : {city.name}"))
             else:
-                # Mettre à jour la région si nécessaire
                 if city.region != region:
                     city.region = region
                     city.save(update_fields=["region"])
@@ -59,4 +86,3 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(f"{created_count} ville(s) créée(s) avec succès.")
             )
-
