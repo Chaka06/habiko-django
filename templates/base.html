@@ -246,31 +246,24 @@
     <meta name="msapplication-TileImage" content="/favicon.ico?v=4" />
     <meta name="theme-color" content="#ec4899" />
 
-    <!-- Icônes Boxicons - Chargement asynchrone pour ne pas bloquer le rendu -->
+    <!-- Icônes Boxicons - Chargement synchrone pour éviter CLS -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      media="print"
-      onload="this.media='all'"
     />
-    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"></noscript>
 
     {% block tailwind_css %}
-    <!-- Tailwind CSS - Chargement asynchrone pour ne pas bloquer le rendu -->
+    <!-- Tailwind CSS - Chargement synchrone pour éviter CLS (FOUC) -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      media="print"
-      onload="this.media='all'"
     />
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"></noscript>
     {% endblock %} {% block htmx_js %}
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
     {% endblock %}
 
     <!-- Google Fonts: optional = pas de blocage, preconnect déjà en tête -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet">
 
     <style>
       /* Styles critiques */
