@@ -4,19 +4,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Google tag (gtag.js) - config différée après load pour ne pas bloquer le rendu -->
+    <!-- Google tag (gtag.js) -->
     {% if GA_MEASUREMENT_ID %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      window.addEventListener('load', function(){ gtag('config', '{{ GA_MEASUREMENT_ID }}'); });
+      gtag('config', '{{ GA_MEASUREMENT_ID }}');
     </script>
     {% endif %}
-    <!-- Google AdSense - script en defer pour ne pas bloquer le premier rendu -->
+    <!-- Google AdSense -->
     {% if ADSENSE_PUBLISHER_ID %}
-    <script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID }}" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID }}" crossorigin="anonymous"></script>
     {% endif %}
     <title>{% block title %}KIABA · Rencontres & Annonces Adultes{% endblock %}</title>
     <meta
@@ -107,9 +107,6 @@
     {% if GA_MEASUREMENT_ID %}
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
-    {% endif %}
-    {% if ADSENSE_PUBLISHER_ID %}
-    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
     {% endif %}
 
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
@@ -268,10 +265,16 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
     <style>
-      /* Styles critiques - pas de masquage du body pour un meilleur LCP/FCP */
+      /* Styles critiques */
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      body:not(.loaded) {
+        visibility: hidden;
+      }
+      body.loaded {
+        visibility: visible !important;
       }
 
       .glass {
@@ -458,6 +461,15 @@
         50% { transform: rotate(5deg); }
       }
     </style>
+
+    <script>
+      (function() {
+        if (document.body) document.body.classList.add("loaded");
+        else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function() { document.body.classList.add("loaded"); });
+        else document.body && document.body.classList.add("loaded");
+        window.addEventListener("load", function() { document.body && document.body.classList.add("loaded"); });
+      })();
+    </script>
 
     {% block extra_head %}{% endblock %}
   </head>
