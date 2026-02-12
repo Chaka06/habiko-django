@@ -105,7 +105,7 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           {% for media in ad.media.all %}
             <div class="relative group">
-              <img src="{{ media.image.url }}" alt="Photo {{ forloop.counter }}" class="w-full h-24 object-cover rounded-lg">
+              <img src="{{ media.image.url }}" alt="Photo {{ forloop.counter }}" class="w-full h-24 object-cover rounded-lg" width="128" height="96">
               <span class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
                 {% if media.is_primary %}Principale{% else %}{{ forloop.counter }}{% endif %}
               </span>

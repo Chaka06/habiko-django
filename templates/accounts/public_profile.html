@@ -9,7 +9,7 @@
       <div class="flex flex-col items-center text-center">
         <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mb-3 ring-2 ring-pink-500/80">
           {% if profile and profile.avatar %}
-            <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name|default:profile_user.username }}" class="w-full h-full object-cover">
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name|default:profile_user.username }}" class="w-full h-full object-cover" width="80" height="80">
           {% else %}
             <span class="text-gray-500 text-3xl font-semibold">
               {{ profile.display_name|default:profile_user.username|first|upper }}
@@ -99,7 +99,7 @@
               <div class="flex h-full">
                 <div class="w-32 flex-shrink-0 bg-slate-100">
                   {% if ad.media.count %}
-                    <img src="{{ ad.media.first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy">
+                    <img src="{{ ad.media.first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
                   {% else %}
                     <div class="w-full h-full bg-slate-200 flex items-center justify-center">
                       <span class="text-slate-400 text-xs">Photo</span>

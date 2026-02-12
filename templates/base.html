@@ -4,19 +4,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Google tag (gtag.js) -->
-    {% if GA_MEASUREMENT_ID %}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}"></script>
+    <!-- GA et AdSense chargés après load pour ne pas bloquer LCP/TBT -->
+    {% if GA_MEASUREMENT_ID or ADSENSE_PUBLISHER_ID %}
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{{ GA_MEASUREMENT_ID }}');
+      (function(){
+        var gaId = "{{ GA_MEASUREMENT_ID|default:''|escapejs }}";
+        var adId = "{{ ADSENSE_PUBLISHER_ID|default:''|escapejs }}";
+        function loadThirdParty() {
+          if (gaId) {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', gaId);
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+            document.head.appendChild(s);
+          }
+          if (adId) {
+            var a = document.createElement('script');
+            a.async = true;
+            a.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + adId;
+            a.crossOrigin = 'anonymous';
+            document.head.appendChild(a);
+          }
+        }
+        if (document.readyState === 'complete') setTimeout(loadThirdParty, 1);
+        else window.addEventListener('load', function(){ setTimeout(loadThirdParty, 1); });
+      })();
     </script>
-    {% endif %}
-    <!-- Google AdSense -->
-    {% if ADSENSE_PUBLISHER_ID %}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID }}" crossorigin="anonymous"></script>
     {% endif %}
     <title>{% block title %}KIABA · Rencontres & Annonces Adultes{% endblock %}</title>
     <meta
@@ -101,16 +118,11 @@
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
 
-    <!-- Preconnect to external resources for faster loading -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="preconnect" href="https://unpkg.com" crossorigin />
-    {% if GA_MEASUREMENT_ID %}
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
-    {% endif %}
-
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <!-- Preconnect: 2 max (Lighthouse). Polices prioritaires pour LCP. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload LCP: logo header (visible above-the-fold sur toutes les pages) -->
+    <link rel="preload" href="{% static 'img/logo.png' %}?v=3" as="image" />
 
     <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
     <script type="application/ld+json">
@@ -159,8 +171,6 @@
           "query-input": "required name=search_term_string"
         }
       }
-    </script>
-    <script type="application/ld+json">
     </script>
     <script type="application/ld+json">
       {
@@ -258,11 +268,9 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
     {% endblock %}
 
-    <!-- Google Fonts - Optimisé avec preconnect et display=swap -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+    <!-- Google Fonts: optional = pas de blocage, preconnect déjà en tête -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet"></noscript>
 
     <style>
       /* Styles critiques */
@@ -501,29 +509,29 @@
           </div>
         </a>
         <nav class="hidden md:flex items-center gap-3">
-          <a href="/post/" class="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition font-medium inline-flex items-center gap-1.5">
+          <a href="/post/" class="inline-flex items-center justify-center min-h-[48px] bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition font-medium gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Publier+
           </a>
           {% if user.is_authenticated %}
-          <a href="/dashboard/" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition" title="Mon compte" aria-label="Mon compte">
+          <a href="/dashboard/" class="inline-flex items-center justify-center min-w-[48px] min-h-[48px] p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition" title="Mon compte" aria-label="Mon compte">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </a>
           {% else %}
-          <a href="/auth/login/" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Se connecter</a>
+          <a href="/auth/login/" class="inline-flex items-center justify-center min-h-[48px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Se connecter</a>
           {% endif %}
         </nav>
         <div class="md:hidden flex items-center gap-2">
-          <a href="/post/" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-1">
+          <a href="/post/" class="inline-flex items-center justify-center min-h-[48px] bg-pink-600 text-white px-3 py-2 rounded-lg text-sm font-medium gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Publier+
           </a>
           {% if user.is_authenticated %}
-          <a href="/dashboard/" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Mon compte" aria-label="Mon compte">
+          <a href="/dashboard/" class="inline-flex items-center justify-center min-w-[48px] min-h-[48px] p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Mon compte" aria-label="Mon compte">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </a>
           {% else %}
-          <a href="/auth/login/" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Se connecter</a>
+          <a href="/auth/login/" class="inline-flex items-center justify-center min-h-[48px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Se connecter</a>
           {% endif %}
         </div>
       </div>

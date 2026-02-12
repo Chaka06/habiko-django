@@ -3,15 +3,9 @@ from django.shortcuts import render
 
 
 def robots_txt(_: object) -> HttpResponse:
+    # Format standard (RFC 9309) : User-agent, Disallow, Sitemap. Pas de BOM.
     lines = [
-        "# KIABA Rencontres - ci-kiaba.com",
         "User-agent: *",
-        "Allow: /",
-        "Allow: /ads",
-        "Allow: /ads/",
-        "Allow: /legal/",
-        "Allow: /static/",
-        "Allow: /media/",
         "Disallow: /admin/",
         "Disallow: /auth/",
         "Disallow: /accounts/",
@@ -21,7 +15,6 @@ def robots_txt(_: object) -> HttpResponse:
         "Disallow: /edit/",
         "Disallow: /report/",
         "",
-        "# Sitemap (index principal ; les sections sont listées dedans)",
         "Sitemap: https://ci-kiaba.com/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain; charset=utf-8")
