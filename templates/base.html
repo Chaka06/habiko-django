@@ -259,7 +259,11 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
     />
     {% endblock %} {% block htmx_js %}
-    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    <script>
+      (function(){ function l(){ var s=document.createElement('script'); s.src='https://unpkg.com/htmx.org@1.9.12'; s.defer=true; document.head.appendChild(s); }
+      if (document.readyState==='complete') setTimeout(l,0); else window.addEventListener('load',l);
+      })();
+    </script>
     {% endblock %}
 
     <!-- Google Fonts: optional = pas de blocage, preconnect déjà en tête -->
@@ -272,6 +276,14 @@
           "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       }
       /* Pas de visibility hidden sur body : évite un gros CLS au « reveal » */
+      /* Modale de chargement : toujours au-dessus des champs (z-index max) */
+      #loadingModal { z-index: 2147483646 !important; }
+      #loadingModal.flex { background: rgba(0,0,0,0.15); pointer-events: auto; }
+      .loading-spinner {
+        width: 48px; height: 48px; border: 3px solid #e5e7eb; border-top-color: #ec4899;
+        border-radius: 50%; animation: loading-spin 0.8s linear infinite;
+      }
+      @keyframes loading-spin { to { transform: rotate(360deg); } }
 
       .glass {
         backdrop-filter: saturate(180%) blur(10px);
@@ -461,14 +473,6 @@
     {% block extra_head %}{% endblock %}
   </head>
   <body class="min-h-full bg-gradient-to-b from-pink-50 to-white">
-    <!-- Modale de chargement (formulaires / navigation) - pas de fond sombre -->
-    <div id="loadingModal" class="fixed inset-0 z-[99999] hidden items-center justify-center pointer-events-none" aria-hidden="true">
-      <div class="bg-white rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center gap-4 min-w-[200px] pointer-events-auto border border-gray-200">
-        <img src="https://cdn.prod.website-files.com/642c269c448892e2ab74e4ff/660ab184712a62506616fcdb_loading.gif" alt="Chargement" class="w-12 h-12" width="48" height="48" role="status" aria-label="Chargement" />
-        <p class="text-gray-700 font-medium">Chargement...</p>
-      </div>
-    </div>
-
     {% block header %}
     <header class="sticky top-0 z-40 glass border-b">
       <div
@@ -980,5 +984,13 @@
       })();
     </script>
     {% endif %}
+
+    <!-- Modale de chargement (en fin de body = au-dessus de tout, z-index via CSS) -->
+    <div id="loadingModal" class="fixed inset-0 hidden items-center justify-center" aria-hidden="true" aria-live="polite">
+      <div class="bg-white rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center gap-4 min-w-[200px] border border-gray-200">
+        <div class="loading-spinner" role="status" aria-label="Chargement"></div>
+        <p class="text-gray-700 font-medium">Chargement...</p>
+      </div>
+    </div>
   </body>
 </html>
