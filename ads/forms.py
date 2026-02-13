@@ -205,8 +205,8 @@ class AdForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        phone1 = cleaned_data.get("phone1")
-        phone2 = cleaned_data.get("phone2")
+        phone1 = (cleaned_data.get("phone1") or "").strip()
+        phone2 = (cleaned_data.get("phone2") or "").strip()
         contact_methods = cleaned_data.get("contact_methods")
 
         if not phone1 and not phone2:

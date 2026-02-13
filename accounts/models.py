@@ -43,6 +43,13 @@ class Profile(models.Model):
         blank=True,
         validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message=_("Enter a valid E.164 phone."))],
     )
+    phone2_e164 = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message=_("Enter a valid E.164 phone."))],
+        help_text=_("Second phone number for ads (optional). Shown with primary on ad contact."),
+    )
     telegram = models.CharField(max_length=64, null=True, blank=True)
     city = models.ForeignKey("ads.City", on_delete=models.SET_NULL, null=True, blank=True)
     country = models.CharField(max_length=2, default="CI")

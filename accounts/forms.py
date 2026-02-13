@@ -40,6 +40,17 @@ class ProfileEditForm(forms.ModelForm):
         label="WhatsApp",
         help_text="Format: +225XXXXXXXXXX",
     )
+    phone2_e164 = forms.CharField(
+        max_length=20,
+        required=False,
+        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message="Entrez un numéro au format E.164 (+225XXXXXXXXXX)")],
+        widget=forms.TextInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "placeholder": "+225XXXXXXXXXX (optionnel)"
+        }),
+        label="Téléphone 2 (optionnel)",
+        help_text="Deuxième numéro affiché sur vos annonces (appels, SMS).",
+    )
     contact_prefs = forms.MultipleChoiceField(
         choices=[
             ("sms", "SMS"),
@@ -69,9 +80,9 @@ class ProfileEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Pré-remplir whatsapp_e164 depuis le profil
         if self.instance and self.instance.pk:
             self.fields["whatsapp_e164"].initial = self.instance.whatsapp_e164
+            self.fields["phone2_e164"].initial = getattr(self.instance, "phone2_e164", None) or ""
             if self.instance.contact_prefs:
                 self.fields["contact_prefs"].initial = self.instance.contact_prefs
 

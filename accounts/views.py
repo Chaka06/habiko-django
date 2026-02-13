@@ -34,9 +34,11 @@ def profile_edit(request: HttpRequest) -> HttpResponse:
             profile = form.save(commit=False)
             # Gérer contact_prefs manuellement
             profile.contact_prefs = form.cleaned_data.get("contact_prefs", [])
-            # Sauvegarder WhatsApp dans le profil
+            # Sauvegarder WhatsApp et téléphone 2 dans le profil
             if form.cleaned_data.get("whatsapp_e164"):
                 profile.whatsapp_e164 = form.cleaned_data["whatsapp_e164"]
+            if "phone2_e164" in form.cleaned_data:
+                profile.phone2_e164 = form.cleaned_data["phone2_e164"] or None
             profile.save()
 
             # Sauvegarder le numéro de téléphone dans l'utilisateur

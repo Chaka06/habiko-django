@@ -8,10 +8,25 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.views.static import serve
+from django.contrib.auth import get_user_model
 from ads.models import Ad, AdMedia
 from ads.forms import AdForm
 from accounts.models import Profile
 from accounts.tasks import send_ad_published_email
+
+User = get_user_model()
+
+
+def _phone_used_by_other_account(phone: str, current_user) -> bool:
+    """True si ce numéro est déjà utilisé par un autre compte (user ou profil)."""
+    phone = (phone or "").strip()
+    if not phone:
+        return False
+    if User.objects.filter(phone_e164=phone).exclude(pk=current_user.pk).exists():
+        return True
+    if Profile.objects.filter(Q(phone2_e164=phone) | Q(whatsapp_e164=phone)).exclude(user=current_user).exists():
+        return True
+    return False
 
 
 def landing(request: HttpRequest) -> HttpResponse:
@@ -45,22 +60,30 @@ def post(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
-            # Créer/mettre à jour le profil utilisateur
+            phone1 = (form.cleaned_data.get("phone1") or "").strip()
+            phone2 = (form.cleaned_data.get("phone2") or "").strip()
+            if _phone_used_by_other_account(phone1, request.user):
+                form.add_error("phone1", "Ce numéro est déjà utilisé par un autre compte.")
+                return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
+            if phone2 and _phone_used_by_other_account(phone2, request.user):
+                form.add_error("phone2", "Ce numéro est déjà utilisé par un autre compte.")
+                return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
+
             profile, created = Profile.objects.get_or_create(
                 user=request.user,
                 defaults={
                     "display_name": request.user.username,
-                    "whatsapp_e164": form.cleaned_data["phone2"] or form.cleaned_data["phone1"],
+                    "whatsapp_e164": phone2 or phone1,
                     "contact_prefs": form.cleaned_data["contact_methods"],
                 },
             )
             if not created:
-                profile.whatsapp_e164 = form.cleaned_data["phone2"] or form.cleaned_data["phone1"]
+                profile.whatsapp_e164 = phone2 or phone1
+                profile.phone2_e164 = phone2 or None
                 profile.contact_prefs = form.cleaned_data["contact_methods"]
                 profile.save()
 
-            # Mettre à jour le numéro de téléphone dans l'utilisateur
-            request.user.phone_e164 = form.cleaned_data["phone1"]
+            request.user.phone_e164 = phone1
             request.user.save()
 
             # Déterminer le statut selon si le profil est validé
@@ -172,29 +195,22 @@ def post(request: HttpRequest) -> HttpResponse:
                 )
             return redirect("/dashboard/")
     else:
-        # Initialiser le formulaire avec les données de l'utilisateur si disponibles
         initial_data = {}
         try:
-            if hasattr(request.user, 'profile') and request.user.profile:
+            if hasattr(request.user, "profile") and request.user.profile:
                 initial_data = {
                     "phone1": request.user.phone_e164 or "",
-                    "phone2": request.user.profile.whatsapp_e164 or "",
+                    "phone2": getattr(request.user.profile, "phone2_e164", None) or request.user.profile.whatsapp_e164 or "",
                     "contact_methods": request.user.profile.contact_prefs or [],
                 }
-            elif request.user.is_authenticated:
+            else:
                 initial_data = {
                     "phone1": request.user.phone_e164 or "",
                     "phone2": "",
                     "contact_methods": [],
                 }
         except Exception:
-            # Si erreur, utiliser des valeurs par défaut
-            initial_data = {
-                "phone1": "",
-                "phone2": "",
-                "contact_methods": [],
-            }
-        
+            initial_data = {"phone1": "", "phone2": "", "contact_methods": []}
         form = AdForm(initial=initial_data)
 
     return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
@@ -212,7 +228,15 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
     if request.method == "POST":
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
-            # Mettre à jour l'annonce
+            phone1 = (form.cleaned_data.get("phone1") or "").strip()
+            phone2 = (form.cleaned_data.get("phone2") or "").strip()
+            if _phone_used_by_other_account(phone1, request.user):
+                form.add_error("phone1", "Ce numéro est déjà utilisé par un autre compte.")
+                return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
+            if phone2 and _phone_used_by_other_account(phone2, request.user):
+                form.add_error("phone2", "Ce numéro est déjà utilisé par un autre compte.")
+                return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
+
             ad.title = form.cleaned_data["title"]
             ad.description_sanitized = form.cleaned_data["description"]
             ad.category = form.cleaned_data["category"]
@@ -220,22 +244,22 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
             ad.city = form.cleaned_data["city"]
             ad.save()
 
-            # Mettre à jour le profil utilisateur
             profile, created = Profile.objects.get_or_create(
                 user=request.user,
                 defaults={
                     "display_name": request.user.username,
-                    "whatsapp_e164": form.cleaned_data["phone2"] or form.cleaned_data["phone1"],
+                    "whatsapp_e164": phone2 or phone1,
+                    "phone2_e164": phone2 or None,
                     "contact_prefs": form.cleaned_data["contact_methods"],
                 },
             )
             if not created:
-                profile.whatsapp_e164 = form.cleaned_data["phone2"] or form.cleaned_data["phone1"]
+                profile.whatsapp_e164 = phone2 or phone1
+                profile.phone2_e164 = phone2 or None
                 profile.contact_prefs = form.cleaned_data["contact_methods"]
                 profile.save()
 
-            # Mettre à jour le numéro de téléphone dans l'utilisateur
-            request.user.phone_e164 = form.cleaned_data["phone1"]
+            request.user.phone_e164 = phone1
             request.user.save()
 
             # Gérer les nouvelles images - remplacer toutes les images existantes
@@ -282,7 +306,6 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
             messages.success(request, "Annonce modifiée avec succès !")
             return redirect("/dashboard/")
     else:
-        # Pré-remplir le formulaire avec les données existantes
         form = AdForm(
             initial={
                 "title": ad.title,
@@ -290,9 +313,11 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                 "subcategories": ad.subcategories,
                 "description": ad.description_sanitized,
                 "city": ad.city,
-                "phone1": request.user.phone_e164,
+                "phone1": request.user.phone_e164 or "",
                 "phone2": (
-                    request.user.profile.whatsapp_e164 if hasattr(request.user, "profile") else ""
+                    getattr(request.user.profile, "phone2_e164", None) or request.user.profile.whatsapp_e164
+                    if hasattr(request.user, "profile") and request.user.profile
+                    else ""
                 ),
                 "contact_methods": (
                     request.user.profile.contact_prefs if hasattr(request.user, "profile") else []

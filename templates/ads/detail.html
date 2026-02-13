@@ -231,14 +231,20 @@
           Précisez-moi que vous avez trouvé mon annonce sur <strong>KIABA Rencontres</strong>. Merci
         </p>
 
-        <!-- Numéro de téléphone -->
+        <!-- Numéro(s) de téléphone (profil annonceur) -->
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
           <div class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-blue-600" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-blue-600 flex-shrink-0" fill="currentColor">
               <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
             </svg>
             <div class="flex-1">
-              <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+              {% if ad.user.phone_e164 %}
+                <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+                {% if ad.user.profile and ad.user.profile.phone2_e164 %}
+                  <span class="text-gray-400 mx-2">·</span>
+                  <a href="tel:{{ ad.user.profile.phone2_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.profile.phone2_e164 }}</a>
+                {% endif %}
+              {% endif %}
               <p class="text-sm text-gray-500 mt-1">Référence: CI-A{{ ad.id }}</p>
             </div>
           </div>
@@ -317,6 +323,13 @@
                 <span>Appel direct</span>
               </a>
             {% endif %}
+          {% endif %}
+          {% if ad.user.profile and ad.user.profile.phone2_e164 %}
+            <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100">
+              <span class="text-sm text-gray-500 w-full">Numéro 2 :</span>
+              <a class="inline-flex items-center gap-1 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-800" href="tel:{{ ad.user.profile.phone2_e164 }}" rel="nofollow">Appeler</a>
+              <a class="inline-flex items-center gap-1 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-800" href="sms:{{ ad.user.profile.phone2_e164 }}" rel="nofollow">SMS</a>
+            </div>
           {% endif %}
         </div>
 
@@ -488,14 +501,20 @@
             Précisez-moi que vous avez trouvé mon annonce sur <strong>KIABA Rencontres</strong>. Merci
           </p>
 
-          <!-- Numéro de téléphone -->
+          <!-- Numéro(s) de téléphone (profil annonceur) -->
           <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
             <div class="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-blue-600" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6 text-blue-600 flex-shrink-0" fill="currentColor">
                 <path d="M6.54 5.11 8.2 3.45a1.5 1.5 0 0 1 2.52.65l.7 3.01a1.5 1.5 0 0 1-.43 1.42l-1.1 1.1a9.5 9.5 0 0 0 4.24 4.24l1.1-1.1a1.5 1.5 0 0 1 1.42-.43l3.01.7a1.5 1.5 0 0 1 .65 2.52l-1.66 1.66a2.5 2.5 0 0 1-2.18.71 15.5 15.5 0 0 1-9.11-4.49A15.5 15.5 0 0 1 5.83 7.3a2.5 2.5 0 0 1 .71-2.18Z" />
               </svg>
               <div class="flex-1">
-                <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+                {% if ad.user.phone_e164 %}
+                  <a href="tel:{{ ad.user.phone_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.phone_e164 }}</a>
+                  {% if ad.user.profile and ad.user.profile.phone2_e164 %}
+                    <span class="text-gray-400 mx-2">·</span>
+                    <a href="tel:{{ ad.user.profile.phone2_e164 }}" class="text-xl font-bold text-gray-900 hover:text-pink-600" rel="nofollow">{{ ad.user.profile.phone2_e164 }}</a>
+                  {% endif %}
+                {% endif %}
                 <p class="text-sm text-gray-500 mt-1">Référence: CI-A{{ ad.id }}</p>
               </div>
             </div>
@@ -574,6 +593,13 @@
                   <span>Appel direct</span>
                 </a>
               {% endif %}
+            {% endif %}
+            {% if ad.user.profile and ad.user.profile.phone2_e164 %}
+              <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100">
+                <span class="text-sm text-gray-500 w-full">Numéro 2 :</span>
+                <a class="inline-flex items-center gap-1 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-800" href="tel:{{ ad.user.profile.phone2_e164 }}" rel="nofollow">Appeler</a>
+                <a class="inline-flex items-center gap-1 bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-800" href="sms:{{ ad.user.profile.phone2_e164 }}" rel="nofollow">SMS</a>
+              </div>
             {% endif %}
           </div>
 
