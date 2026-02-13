@@ -118,11 +118,14 @@
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
 
-    <!-- Preconnect: 2 max (Lighthouse). Polices prioritaires pour LCP. -->
+    <!-- Preconnect CDN (réduit latence requêtes blocantes: Tailwind, Boxicons, Fonts) -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Preload LCP: logo header (visible above-the-fold sur toutes les pages) -->
+    <!-- Preload ressources critiques (réduit blocage affichage) -->
     <link rel="preload" href="{% static 'img/logo.png' %}?v=3" as="image" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" />
 
     <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
     <script type="application/ld+json">
