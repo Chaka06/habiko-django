@@ -31,6 +31,13 @@
 {% endblock %}
 
 {% block extra_head %}
+  {% for ad in ads %}
+    {% if forloop.first and ad.media.count %}
+      {% with media=ad.media.first %}
+        <link rel="preload" href="{% if media.thumbnail %}{{ media.thumbnail.url }}{% else %}{{ media.image.url }}{% endif %}" as="image" />
+      {% endwith %}
+    {% endif %}
+  {% endfor %}
   {% if is_paginated %}
     {% if page_obj.has_previous %}
       <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
@@ -53,20 +60,26 @@
     </li>
     <li class="text-gray-400">/</li>
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <span itemprop="name" class="text-gray-900 font-medium">Annonces</span>
+      <a href="https://ci-kiaba.com/ads" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">Annonces</span>
+      </a>
       <meta itemprop="position" content="2" />
     </li>
     {% if selected_city %}
     <li class="text-gray-400">/</li>
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <span itemprop="name" class="text-gray-900 font-medium">{{ selected_city.name }}</span>
+      <a href="https://ci-kiaba.com/ads?city={{ selected_city.slug }}" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">{{ selected_city.name }}</span>
+      </a>
       <meta itemprop="position" content="3" />
     </li>
     {% endif %}
     {% if selected_category %}
     <li class="text-gray-400">/</li>
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <span itemprop="name" class="text-gray-900 font-medium">{{ selected_category|title }}</span>
+      <a href="https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}&amp;category={{ selected_category }}{% else %}?category={{ selected_category }}{% endif %}" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">{{ selected_category|title }}</span>
+      </a>
       <meta itemprop="position" content="{% if selected_city %}4{% else %}3{% endif %}" />
     </li>
     {% endif %}
