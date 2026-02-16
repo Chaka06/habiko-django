@@ -66,3 +66,7 @@ else:
     urlpatterns += [
         re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     ]
+
+# Handlers d'erreur pour une réponse propre (404/500) et une meilleure indexation
+handler404 = "core.views.page_not_found_view"
+handler500 = "core.views.server_error_view"

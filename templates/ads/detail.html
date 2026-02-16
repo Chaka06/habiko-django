@@ -254,7 +254,7 @@
         <!-- Boutons de contact -->
         <div class="flex flex-wrap gap-2 mb-4">
           {% if ad.user.profile %}
-            {% with prefs=ad.user.profile.contact_prefs %}
+            {% with prefs=ad.user.profile.contact_prefs|default:"" %}
               {% if prefs %}
                 {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
                   {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}
@@ -420,13 +420,13 @@
           <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 h-40">
             <div class="flex h-full">
               <div class="w-40 flex-shrink-0 bg-slate-100">
-                {% if similar_ad.media.count %}
-                  <img src="{{ similar_ad.media.first.image.url }}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur KIABA Rencontres." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
+                {% with first_media=similar_ad.media.first %}
+                {% if first_media and first_media.image %}
+                  <img src="{% if first_media.thumbnail %}{{ first_media.thumbnail.url }}{% else %}{{ first_media.image.url }}{% endif %}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur KIABA Rencontres." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
                 {% else %}
-                  <div class="w-full h-full bg-slate-200 flex items-center justify-center">
-                    <span class="text-slate-400 text-xs">Photo</span>
-                  </div>
+                  <div class="w-full h-full bg-slate-200 flex items-center justify-center"><span class="text-slate-400 text-xs">Photo</span></div>
                 {% endif %}
+                {% endwith %}
               </div>
               <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
                 <div class="min-w-0 flex-1">
@@ -524,7 +524,7 @@
           <!-- Boutons de contact -->
           <div class="flex flex-wrap gap-2 mb-4">
             {% if ad.user.profile %}
-              {% with prefs=ad.user.profile.contact_prefs %}
+              {% with prefs=ad.user.profile.contact_prefs|default:"" %}
                 {% if prefs %}
                   {% if 'whatsapp' in prefs and ad.user.profile.whatsapp_e164 %}
                     {% with msg="Bonjour, je viens de KIABA Rencontres: "|add:ad.title %}

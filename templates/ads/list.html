@@ -153,6 +153,7 @@
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
             {% with media=ad.media.first %}
+              {% if media.image %}
               <img
                 {% if media.thumbnail %}
                   src="{{ media.thumbnail.url }}"
@@ -173,6 +174,16 @@
                 width="160"
                 height="160"
               >
+              {% else %}
+            <img
+              src="{{ placeholder_img }}"
+              alt="Annonce adulte {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="160"
+              height="160"
+            >
+              {% endif %}
             {% endwith %}
           {% else %}
             <img

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Erreur serveur · KIABA Rencontres{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
 {% block content %}
 <section class="max-w-xl mx-auto text-center bg-white rounded-2xl p-6 border shadow-sm">
-  <h1 class="text-2xl font-semibold mb-2">Erreur 500</h1>
-  <p class="text-gray-600 mb-4">Une erreur est survenue. Réessayez plus tard.</p>
-  <a href="/" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Retour à l’accueil</a>
+  <h1 class="text-2xl font-semibold mb-2">Erreur technique</h1>
+  <p class="text-gray-600 mb-4">Un problème est survenu. Veuillez réessayer dans quelques instants.</p>
+  <a href="/" class="bg-pink-600 text-white px-4 py-2 rounded-lg inline-block">Retour à l'accueil</a>
 </section>
 {% endblock %}

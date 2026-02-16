@@ -388,3 +388,13 @@ def report_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 def csrf_failure(request: HttpRequest, reason: str = "") -> HttpResponse:
     """Vue personnalisée pour l'erreur 403 CSRF : message clair et lien pour réessayer."""
     return render(request, "core/403_csrf.html", status=403)
+
+
+def page_not_found_view(request: HttpRequest, exception: Exception) -> HttpResponse:
+    """Handler 404 global : page avec noindex pour que Google ne tente pas d'indexer les URLs mortes."""
+    return render(request, "core/404.html", status=404)
+
+
+def server_error_view(request: HttpRequest) -> HttpResponse:
+    """Handler 500 global : page d'erreur propre pour limiter l'impact sur l'indexation."""
+    return render(request, "core/500.html", status=500)
