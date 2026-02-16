@@ -51,7 +51,7 @@ class AdSitemap(KiabaSitemapBase):
     limit = 5000  # max URLs par section sitemap (Google recommande ≤ 50 000)
 
     def items(self):
-        return Ad.objects.filter(status=Ad.Status.APPROVED).select_related("city").order_by("-updated_at")
+        return Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).select_related("city").order_by("-updated_at")
 
     def location(self, obj: Ad):
         return f"/ads/{obj.slug}"
@@ -94,7 +94,7 @@ class CityCategorySitemap(KiabaSitemapBase):
     def items(self):
         from django.db.models import Count
         qs = (
-            City.objects.filter(ad__status=Ad.Status.APPROVED)
+            City.objects.filter(ad__status=Ad.Status.APPROVED, ad__image_processing_done=True)
             .annotate(n=Count("ad"))
             .filter(n__gt=0)
             .order_by("slug")

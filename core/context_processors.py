@@ -20,7 +20,7 @@ def site_metrics(request):
     total_approved_ads = cache.get(CACHE_KEY_TOTAL_ADS)
     if total_approved_ads is None:
         try:
-            total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
+            total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).count()
             cache.set(CACHE_KEY_TOTAL_ADS, total_approved_ads, CACHE_TTL)
         except Exception:
             total_approved_ads = 0
@@ -29,7 +29,7 @@ def site_metrics(request):
     if popular_cities is None:
         try:
             popular_cities = list(
-                City.objects.filter(ad__status=Ad.Status.APPROVED)
+                City.objects.filter(ad__status=Ad.Status.APPROVED, ad__image_processing_done=True)
                 .annotate(ad_count=models.Count("ad"))
                 .filter(ad_count__gt=0)
                 .order_by("-ad_count")[:6]

@@ -181,8 +181,10 @@ def post(request: HttpRequest) -> HttpResponse:
                     except Exception as e:
                         logger.exception("Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e)
 
-            # Envoyer l'email de confirmation (désactivé temporairement pour éviter les erreurs Redis)
-            # send_ad_published_email.delay(ad.id)
+            # En liste, l'annonce n'apparaît qu'une fois toutes les images traitées (filigrane + miniature)
+            if images_added and getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", False):
+                ad.image_processing_done = False
+                ad.save(update_fields=["image_processing_done"])
 
             if is_verified:
                 messages.success(
@@ -302,6 +304,10 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                             logging.getLogger(__name__).exception(
                                 "Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e
                             )
+
+                if images_added and getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", False):
+                    ad.image_processing_done = False
+                    ad.save(update_fields=["image_processing_done"])
 
             messages.success(request, "Annonce modifiée avec succès !")
             return redirect("/dashboard/")

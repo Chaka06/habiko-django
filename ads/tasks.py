@@ -1,8 +1,39 @@
 from celery import shared_task
 from django.utils import timezone
+from django.db import transaction
+from django.db.models import Q
 from django.core.mail import send_mail
 from .models import Ad, AdMedia
 from accounts.tasks import send_ad_published_email
+
+
+@shared_task(bind=True, max_retries=3)
+def process_ad_media_image(self, media_id: int):
+    """
+    Traitement asynchrone : filigrane + miniature pour une image d'annonce.
+    Une fois toutes les images de l'annonce traitées, l'annonce devient visible en liste (image_processing_done=True).
+    """
+    try:
+        media = AdMedia.objects.select_related("ad").get(pk=media_id)
+        if not media.image:
+            return f"AdMedia {media_id}: pas d'image"
+        if media._add_watermark_and_thumbnail():
+            media.save(update_fields=["image", "thumbnail"])
+        # L'annonce n'apparaît en liste que lorsque toutes les photos ont filigrane + miniature
+        ad = media.ad
+        pending = AdMedia.objects.filter(ad=ad).filter(Q(thumbnail="") | Q(thumbnail__isnull=True))
+        if not pending.exists():
+            ad.image_processing_done = True
+            ad.save(update_fields=["image_processing_done"])
+            from core.context_processors import invalidate_site_metrics_cache
+            invalidate_site_metrics_cache()
+        return f"AdMedia {media_id}: filigrane/thumbnail appliqués"
+    except AdMedia.DoesNotExist:
+        return f"AdMedia {media_id}: introuvable"
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("process_ad_media_image %s: %s", media_id, e)
+        raise self.retry(exc=e, countdown=60)
 
 
 @shared_task(bind=True, max_retries=3)

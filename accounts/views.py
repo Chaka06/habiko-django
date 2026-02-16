@@ -246,7 +246,7 @@ def public_profile(request: HttpRequest, username: str) -> HttpResponse:
         profile = None
 
     ads = (
-        Ad.objects.filter(user=user, status=Ad.Status.APPROVED)
+        Ad.objects.filter(user=user, status=Ad.Status.APPROVED, image_processing_done=True)
         .select_related("city")
         .prefetch_related("media")
         .order_by("-created_at")

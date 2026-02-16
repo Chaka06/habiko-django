@@ -718,6 +718,13 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+# Traitement des images (filigrane + miniature) en arrière-plan pour réponses rapides (post / edit annonce).
+# N'activer qu'avec un broker Redis : sans Redis, Celery tourne en eager et bloquerait quand même la requête.
+USE_ASYNC_IMAGE_PROCESSING = (
+    bool(REDIS_URL and REDIS_URL.strip())
+    and os.environ.get("USE_ASYNC_IMAGE_PROCESSING", "true").lower() in ("true", "1", "yes")
+)
+
 # Sitemaps
 SITEMAP_PROTOCOL = "https"
 

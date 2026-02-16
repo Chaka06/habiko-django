@@ -100,11 +100,20 @@ class Ad(models.Model):
 
     features = models.ManyToManyField(Feature, through="AdFeature", blank=True)
 
+    # False tant que le traitement async (filigrane + miniature) des photos n'est pas terminé
+    image_processing_done = models.BooleanField(
+        default=True,
+        help_text=_("True une fois toutes les images traitées (filigrane + miniature). Les annonces n'apparaissent en liste qu'une fois True."),
+    )
+
     class Meta:
         ordering = ["-is_premium", "-is_urgent", "-created_at"]
         indexes = [
             models.Index(
                 fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"
+            ),
+            models.Index(
+                fields=["status", "image_processing_done"], name="ad_list_ready_idx"
             ),
             models.Index(fields=["status", "category"], name="ad_category_idx"),
             models.Index(fields=["status", "city"], name="ad_city_idx"),
@@ -403,18 +412,22 @@ class AdMedia(models.Model):
                 # Nouvelle instance, l'image sera traitée
                 image_changed = bool(self.image)
 
-            # Sauvegarder d'abord pour obtenir le chemin du fichier
+            # Sauvegarder d'abord pour obtenir le chemin du fichier (upload brut = réponse rapide)
             super().save(*args, **kwargs)
 
-            # Appliquer le filigrane + générer la miniature après la sauvegarde (ne pas faire échouer la requête)
+            # Filigrane + miniature : en async (Celery) pour ne pas bloquer le dépôt d'annonce (15s → <2s)
             if image_changed and self.image:
-                try:
-                    processed = self._add_watermark_and_thumbnail()
-                    if processed:
-                        # Persister le nouveau chemin (ex. .webp) en base
-                        self.save(update_fields=["image", "thumbnail"])
-                except Exception as e:
-                    logger.warning("Filigrane/thumbnail non appliqué (image tout de même enregistrée): %s", e)
+                if getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", True):
+                    from django.db import transaction
+                    from ads.tasks import process_ad_media_image
+                    transaction.on_commit(lambda: process_ad_media_image.delay(self.pk))
+                else:
+                    try:
+                        processed = self._add_watermark_and_thumbnail()
+                        if processed:
+                            self.save(update_fields=["image", "thumbnail"])
+                    except Exception as e:
+                        logger.warning("Filigrane/thumbnail non appliqué (image tout de même enregistrée): %s", e)
 
             # Ensure only one primary
             if self.is_primary:

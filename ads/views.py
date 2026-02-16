@@ -1,15 +1,18 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.db.models import Q, F
+from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Ad, City
 
 
+@cache_page(60)  # 1 min par URL (/?city=…&category=…&page=…)
+@require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
     qs = (
-        Ad.objects.filter(status=Ad.Status.APPROVED)
+        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")
         .order_by("-is_premium", "-is_urgent", "-created_at")
@@ -57,7 +60,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     from core.context_processors import CACHE_KEY_TOTAL_ADS, CACHE_TTL
     total_approved_ads = cache.get(CACHE_KEY_TOTAL_ADS)
     if total_approved_ads is None:
-        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
+        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).count()
         cache.set(CACHE_KEY_TOTAL_ADS, total_approved_ads, CACHE_TTL)
     return render(
         request,
@@ -107,34 +110,24 @@ def search_suggestions(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"suggestions": suggestions[:15]})
 
 
+@cache_page(120)  # 2 min par annonce (contenu stable)
 def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
     ad = get_object_or_404(
-        Ad.objects.select_related("city", "user", "user__profile")
+        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+        .select_related("city", "user", "user__profile")
         .prefetch_related("media"),
         slug=slug,
-        status=Ad.Status.APPROVED
     )
 
-    # Annonces similaires : même catégorie et même ville, exclure l'annonce actuelle
+    # Annonces similaires : une seule requête (même catégorie, priorité même ville)
     similar_ads = (
-        Ad.objects.filter(status=Ad.Status.APPROVED, category=ad.category, city=ad.city)
+        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True, category=ad.category)
         .exclude(id=ad.id)
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")
-        .order_by("-created_at")[:5]
+        .annotate(same_city=Case(When(city_id=ad.city_id, then=Value(1)), default=Value(0), output_field=IntegerField()))
+        .order_by("-same_city", "-created_at")[:5]
     )
-
-    # Si pas assez d'annonces similaires, ajouter d'autres annonces de la même catégorie
-    if len(similar_ads) < 5:
-        additional_ads = (
-            Ad.objects.filter(status=Ad.Status.APPROVED, category=ad.category)
-            .exclude(id=ad.id)
-            .exclude(id__in=[a.id for a in similar_ads])
-            .select_related("city", "user", "user__profile")
-            .prefetch_related("media")
-            .order_by("-created_at")[: 5 - len(similar_ads)]
-        )
-        similar_ads = list(similar_ads) + list(additional_ads)
 
     return render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
 
