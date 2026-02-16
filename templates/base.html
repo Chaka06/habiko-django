@@ -639,9 +639,18 @@
         const postForm = document.getElementById('postAdForm');
         if (postForm) {
           postForm.addEventListener('submit', function(e) {
-            // Vérifier que le formulaire est valide avant d'afficher le loader
             if (this.checkValidity()) {
               showLoadingModal("Création de l'annonce", "Votre annonce est en cours de création, veuillez patienter...");
+            }
+          });
+        }
+
+        // Formulaire de modification d'annonce
+        const editAdForm = document.getElementById('editAdForm');
+        if (editAdForm) {
+          editAdForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal("Modification de l'annonce", "Votre annonce est en cours de modification, veuillez patienter...");
             }
           });
         }
