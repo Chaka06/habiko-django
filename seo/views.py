@@ -37,14 +37,15 @@ def google_verification(_: object) -> HttpResponse:
 def ads_txt(_: object) -> HttpResponse:
     """
     Fichier ads.txt pour Google AdSense (à la racine du domaine).
-    Requis pour la monétisation et évite le statut « Introuvable » côté AdSense.
+    Ligne exacte attendue par AdSense : google.com, pub-XXXXXXXXXX, DIRECT, f08c47fec0942fa0
     """
     pub_id = getattr(settings, "ADSENSE_PUBLISHER_ID", "").strip()
     if not pub_id:
         content = "# AdSense non configuré : définir ADSENSE_PUBLISHER_ID dans les variables d'environnement\n"
     else:
-        # Format : domain, publisher_id, DIRECT, certification_authority_id
-        content = f"google.com, {pub_id}, DIRECT, f08c47fec0942fa0\n"
+        # AdSense attend "pub-XXXXXXXXXX" dans ads.txt (sans le préfixe "ca-")
+        ads_txt_id = pub_id.replace("ca-pub-", "pub-", 1) if pub_id.startswith("ca-pub-") else pub_id
+        content = f"google.com, {ads_txt_id}, DIRECT, f08c47fec0942fa0\n"
     response = HttpResponse(content, content_type="text/plain; charset=utf-8")
     response["Cache-Control"] = "public, max-age=3600"
     return response
