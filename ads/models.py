@@ -418,7 +418,6 @@ class AdMedia(models.Model):
             # Filigrane + miniature : en async (Celery) pour ne pas bloquer le dépôt d'annonce (15s → <2s)
             if image_changed and self.image:
                 if getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", True):
-                    from django.db import transaction
                     from ads.tasks import process_ad_media_image
                     transaction.on_commit(lambda: process_ad_media_image.delay(self.pk))
                 else:
