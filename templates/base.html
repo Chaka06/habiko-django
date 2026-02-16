@@ -4,34 +4,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- GA et AdSense chargés après load pour ne pas bloquer LCP/TBT -->
-    {% if GA_MEASUREMENT_ID or ADSENSE_PUBLISHER_ID %}
+    <!-- GA chargé après load pour ne pas bloquer LCP/TBT (AdSense est dans le head pour validation propriété) -->
+    {% if GA_MEASUREMENT_ID %}
     <script>
       (function(){
         var gaId = "{{ GA_MEASUREMENT_ID|default:''|escapejs }}";
-        var adId = "{{ ADSENSE_PUBLISHER_ID|default:''|escapejs }}";
-        function loadThirdParty() {
-          if (gaId) {
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', gaId);
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
-            document.head.appendChild(s);
-          }
-          if (adId) {
-            var a = document.createElement('script');
-            a.async = true;
-            a.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + adId;
-            a.crossOrigin = 'anonymous';
-            document.head.appendChild(a);
-          }
+        function loadGA() {
+          if (!gaId) return;
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', gaId);
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          document.head.appendChild(s);
         }
-        if (document.readyState === 'complete') setTimeout(loadThirdParty, 1);
-        else window.addEventListener('load', function(){ setTimeout(loadThirdParty, 1); });
+        if (document.readyState === 'complete') setTimeout(loadGA, 1);
+        else window.addEventListener('load', function(){ setTimeout(loadGA, 1); });
       })();
     </script>
     {% endif %}
@@ -117,6 +108,11 @@
       name="google-site-verification"
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
+    <!-- AdSense : script dans le head pour la validation propriété (le robot ne voit pas le JS injecté après load) -->
+    {% if ADSENSE_PUBLISHER_ID %}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID|escapejs }}"
+         crossorigin="anonymous"></script>
+    {% endif %}
 
     <!-- Preconnect CDN (réduit latence requêtes blocantes: Tailwind, Boxicons, Fonts) -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
