@@ -115,14 +115,18 @@
          crossorigin="anonymous"></script>
     {% endif %}
 
-    <!-- Preconnect CDN (réduit latence requêtes blocantes: Tailwind, Boxicons, Fonts) -->
+    <!-- Preconnect CDN -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Preload ressources critiques (réduit blocage affichage) -->
+    <!-- Preload image LCP critique -->
     <link rel="preload" href="{% static 'img/logo.png' %}?v=3" as="image" />
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" />
+    <!-- Tailwind + Boxicons : chargement non-bloquant (évite blocage rendu = TBT/LCP) -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"></noscript>
+    <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"></noscript>
 
     <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
     <script type="application/ld+json">
@@ -246,19 +250,7 @@
     <meta name="msapplication-TileImage" content="/favicon.ico?v=4" />
     <meta name="theme-color" content="#ec4899" />
 
-    <!-- Icônes Boxicons - Chargement synchrone pour éviter CLS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-    />
-
-    {% block tailwind_css %}
-    <!-- Tailwind CSS - Chargement synchrone pour éviter CLS (FOUC) -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-    />
-    {% endblock %} {% block htmx_js %}
+    {% block tailwind_css %}{% endblock %} {% block htmx_js %}
     <script>
       (function(){ function l(){ var s=document.createElement('script'); s.src='https://unpkg.com/htmx.org@1.9.12'; s.defer=true; document.head.appendChild(s); }
       if (document.readyState==='complete') setTimeout(l,0); else window.addEventListener('load',l);
@@ -266,8 +258,8 @@
     </script>
     {% endblock %}
 
-    <!-- Google Fonts: optional = pas de blocage, preconnect déjà en tête -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=optional" rel="stylesheet">
+    <!-- Google Fonts: swap = texte visible immédiatement, police chargée ensuite (évite FOIT/CLS) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
       /* Styles critiques */

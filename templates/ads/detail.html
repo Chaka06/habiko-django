@@ -145,13 +145,16 @@
         {% with first=ad.media.all.0 %}
           <img
             id="mainImage"
-            src="{{ first.image.url }}"
+            src="{% if first.thumbnail %}{{ first.thumbnail.url }}{% else %}{{ first.image.url }}{% endif %}"
+            data-full="{{ first.image.url }}"
             onerror="this.onerror=null; this.src='{% static 'img/logo.png' %}';"
             alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Annonce sur KIABA Rencontres."
             class="max-w-full max-h-96 md:max-h-[500px] object-contain"
             loading="eager"
-            width="800"
-            height="600"
+            fetchpriority="high"
+            decoding="async"
+            width="600"
+            height="450"
           >
         {% endwith %}
       {% else %}
@@ -176,7 +179,7 @@
   <!-- Miniatures -->
   <section class="mt-2 md:mt-3 flex gap-2 overflow-x-auto">
     {% for m in ad.media.all %}
-      <img data-idx="{{ forloop.counter0 }}" src="{{ m.image.url }}" alt="{{ ad.title }} - Photo {{ forloop.counter }}" class="thumb w-16 h-16 md:w-20 md:h-20 object-cover rounded-md border cursor-pointer hover:ring-2 hover:ring-pink-500 flex-shrink-0" loading="lazy" width="80" height="80">
+      <img data-idx="{{ forloop.counter0 }}" data-full="{{ m.image.url }}" src="{% if m.thumbnail %}{{ m.thumbnail.url }}{% else %}{{ m.image.url }}{% endif %}" alt="{{ ad.title }} - Photo {{ forloop.counter }}" class="thumb w-16 h-16 md:w-20 md:h-20 object-cover rounded-md border cursor-pointer hover:ring-2 hover:ring-pink-500 flex-shrink-0" loading="lazy" decoding="async" width="64" height="64">
     {% endfor %}
   </section>
   {% endif %}
@@ -660,16 +663,20 @@
 {% block extra_js %}
 <script>
 (function(){
-  const images = [
-    {% for m in ad.media.all %}"{{ m.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}
-  ];
-  if (!images.length) return;
+  // Utilise data-full (pleine résolution) pour la navigation carousel
+  // Le premier affichage utilise déjà le thumbnail (LCP plus rapide)
+  const thumbs = document.querySelectorAll('.thumb');
+  if (!thumbs.length) return;
   let idx = 0;
   const main = document.getElementById('mainImage');
   function show(i){
-    idx = (i + images.length) % images.length;
-    if (main) main.src = images[idx];
-    document.querySelectorAll('.thumb').forEach((el)=>{
+    idx = (i + thumbs.length) % thumbs.length;
+    if (main) {
+      // Passe à la pleine résolution quand l'utilisateur navigue
+      const fullSrc = thumbs[idx] ? thumbs[idx].getAttribute('data-full') : null;
+      if (fullSrc) main.src = fullSrc;
+    }
+    thumbs.forEach((el)=>{
       const active = Number(el.getAttribute('data-idx')) === idx;
       el.classList.toggle('ring-2', active);
       el.classList.toggle('ring-pink-500', active);
@@ -679,13 +686,15 @@
   const next = document.getElementById('btnNext');
   if (prev) prev.addEventListener('click', ()=>show(idx-1));
   if (next) next.addEventListener('click', ()=>show(idx+1));
-  document.querySelectorAll('.thumb').forEach((el)=>{
+  thumbs.forEach((el)=>{
     el.addEventListener('click', ()=>{
-      const i = Number(el.getAttribute('data-idx'))||0;
-      show(i);
+      show(Number(el.getAttribute('data-idx'))||0);
     });
   });
-  show(0);
+  // Marquer la première miniature comme active sans changer l'image principale
+  if (thumbs[0]) {
+    thumbs[0].classList.add('ring-2','ring-pink-500');
+  }
 })();
 
 // Gestion du déroulant de contact
