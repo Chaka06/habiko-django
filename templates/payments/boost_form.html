@@ -50,10 +50,10 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Opérateur</label>
-          <div class="flex gap-3">
+          <div class="grid grid-cols-2 gap-2">
             {% for code, label in correspondents.items %}
-            <label class="flex-1 flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 border-gray-200 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition">
-              <input type="radio" name="pay_correspondent" value="{{ code }}" {% if forloop.first %}checked{% endif %} class="accent-yellow-500">
+            <label class="flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 border-gray-200 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition">
+              <input type="radio" name="pay_correspondent" value="{{ code }}" {% if forloop.first %}checked{% endif %} class="accent-yellow-500 shrink-0">
               <span class="text-sm font-medium text-gray-800">{{ label }}</span>
             </label>
             {% endfor %}
