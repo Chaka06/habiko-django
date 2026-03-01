@@ -165,19 +165,20 @@ def post(request: HttpRequest) -> HttpResponse:
             )
 
             # Si l'annonce est en attente, programmer l'approbation automatique après 10 secondes
-            if not is_verified:
-                from ads.tasks import auto_approve_ad
-
-                auto_approve_ad.apply_async(args=[ad.id], countdown=10)
-                logger.info("Annonce %s créée en attente (approbation automatique programmée)", ad.id)
-            else:
-                # Si l'utilisateur est vérifié, envoyer l'email de confirmation immédiatement
-                send_ad_published_email.delay(ad.id)
-                logger.info("Annonce %s créée et approuvée (email envoyé)", ad.id)
+            try:
+                if not is_verified:
+                    from ads.tasks import auto_approve_ad
+                    auto_approve_ad.apply_async(args=[ad.id], countdown=10)
+                    logger.info("Annonce %s créée en attente (approbation automatique programmée)", ad.id)
+                else:
+                    # Si l'utilisateur est vérifié, envoyer l'email de confirmation immédiatement
+                    send_ad_published_email.delay(ad.id)
+                    logger.info("Annonce %s créée et approuvée (email envoyé)", ad.id)
+            except Exception as e:
+                # Le broker Celery (Redis) est indisponible : l'annonce est créée, la tâche sera ignorée.
+                logger.exception("Impossible de dispatcher la tâche Celery pour annonce %s : %s", ad.id, e)
 
             # Ajouter les images avec validation (une erreur sur une photo ne bloque pas l'annonce)
-            import logging
-            logger = logging.getLogger(__name__)
             image_fields = ["image1", "image2", "image3", "image4", "image5"]
             images_added = 0
 
@@ -320,8 +321,7 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                             AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
                             images_added += 1
                         except Exception as e:
-                            import logging
-                            logging.getLogger(__name__).exception(
+                            logger.exception(
                                 "Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e
                             )
 

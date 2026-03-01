@@ -277,6 +277,10 @@ class GZipCompressionMiddleware:
                 if header.lower() != "content-length":
                     compressed_response[header] = value
 
+            # Copier les cookies (Set-Cookie) — response.items() ne les inclut pas
+            for cookie_name, cookie_morsel in response.cookies.items():
+                compressed_response.cookies[cookie_name] = cookie_morsel
+
             # Ajouter le header Content-Encoding
             compressed_response["Content-Encoding"] = "gzip"
             compressed_response["Content-Length"] = str(len(compressed_response.content))
