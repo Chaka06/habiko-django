@@ -88,6 +88,9 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
             "correspondents": pawapay_svc.CORRESPONDENTS,
         })
 
+    # URLs de retour pour les opérateurs REDIRECT_AUTH (Wave)
+    is_redirect = correspondent in pawapay_svc.REDIRECT_AUTH_PROVIDERS
+
     # 1re passe : paiement STANDARD
     std_payment = Payment.objects.create(
         user=request.user,
@@ -98,12 +101,18 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
         correspondent=correspondent,
     )
     try:
+        from django.urls import reverse
+        waiting_url = request.build_absolute_uri(
+            reverse("payments:waiting", kwargs={"deposit_id": str(std_payment.deposit_id)})
+        )
         resp = pawapay_svc.initiate_deposit(
             deposit_id=str(std_payment.deposit_id),
             amount=PRICE_STANDARD,
             phone=phone,
             correspondent=correspondent,
             description="KIABA annonce",
+            successful_url=waiting_url if is_redirect else None,
+            failed_url=request.build_absolute_uri(reverse("dashboard")) if is_redirect else None,
         )
         std_payment.pawapay_response = resp
         std_payment.save(update_fields=["pawapay_response"])
@@ -169,6 +178,7 @@ def payment_status(request: HttpRequest, deposit_id) -> JsonResponse:
     """Renvoie le statut du paiement (consulte PawaPay si encore PENDING)."""
     payment = get_object_or_404(Payment, deposit_id=deposit_id, user=request.user)
 
+    auth_url = None
     if payment.status == Payment.Status.PENDING:
         try:
             data = pawapay_svc.check_deposit(str(deposit_id))
@@ -178,12 +188,15 @@ def payment_status(request: HttpRequest, deposit_id) -> JsonResponse:
             elif remote_status == "FAILED":
                 payment.status = Payment.Status.FAILED
                 payment.save(update_fields=["status"])
+            # Pour Wave (REDIRECT_AUTH) : récupérer l'URL d'autorisation
+            auth_url = data.get("authorizationUrl")
         except Exception as exc:
             logger.warning("PawaPay check_deposit error for %s: %s", deposit_id, exc)
 
     return JsonResponse({
         "status": payment.status,
         "ad_slug": payment.ad.slug if payment.ad else None,
+        "auth_url": auth_url,
     })
 
 

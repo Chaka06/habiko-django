@@ -10,7 +10,9 @@
     <!-- Icône animée -->
     <div id="icon-pending" class="mb-6">
       <div class="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto animate-pulse">
-        <span class="text-4xl">📱</span>
+        <span class="text-4xl">
+          {% if payment.correspondent == "WAVE_CIV" %}🌊{% else %}📱{% endif %}
+        </span>
       </div>
     </div>
     <div id="icon-success" class="mb-6 hidden">
@@ -24,15 +26,52 @@
       </div>
     </div>
 
-    <!-- Titre -->
-    <h1 id="status-title" class="text-2xl font-bold text-gray-900 mb-2">
-      Vérifiez votre téléphone
-    </h1>
-    <p id="status-msg" class="text-gray-500 text-sm mb-8">
-      Une notification push a été envoyée sur le numéro
-      <strong class="text-gray-800">+225 {{ payment.phone }}</strong>.<br>
-      Confirmez le paiement de <strong>{{ payment.amount }} FCFA</strong> sur votre téléphone.
-    </p>
+    <!-- Titre & message selon opérateur -->
+    {% if payment.correspondent == "WAVE_CIV" %}
+      <h1 id="status-title" class="text-2xl font-bold text-gray-900 mb-2">
+        Redirection vers Wave…
+      </h1>
+      <p id="status-msg" class="text-gray-500 text-sm mb-6">
+        Vous allez être redirigé vers l'interface Wave pour confirmer le paiement de
+        <strong class="text-gray-800">{{ payment.amount }} FCFA</strong>.
+      </p>
+      <div id="wave-spinner" class="mb-6">
+        <div class="flex items-center justify-center gap-2 text-sm text-blue-600">
+          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+          Récupération du lien Wave en cours…
+        </div>
+      </div>
+    {% else %}
+      <h1 id="status-title" class="text-2xl font-bold text-gray-900 mb-2">
+        Vérifiez votre téléphone
+      </h1>
+      <p id="status-msg" class="text-gray-500 text-sm mb-5">
+        Une demande de paiement a été envoyée sur le numéro
+        <strong class="text-gray-800">+225 {{ payment.phone }}</strong>.
+        Confirmez le paiement de <strong>{{ payment.amount }} FCFA</strong>.
+      </p>
+
+      <!-- Instructions spécifiques à l'opérateur -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left text-sm text-blue-900">
+        {% if payment.correspondent == "MTN_MOMO_CIV" %}
+          <p class="font-semibold mb-1">📲 MTN Mobile Money</p>
+          <p>Une notification USSD va s'afficher automatiquement sur votre téléphone.</p>
+          <p class="mt-1">Si rien ne s'affiche, composez <strong class="font-mono">*133#</strong> → <em>Approbation de paiement</em>.</p>
+        {% elif payment.correspondent == "ORANGE_CIV" %}
+          <p class="font-semibold mb-1">📲 Orange Money</p>
+          <p>Une notification USSD va s'afficher automatiquement sur votre téléphone.</p>
+          <p class="mt-1">Si rien ne s'affiche, composez <strong class="font-mono">#144#</strong> → <em>Approuver transaction</em>.</p>
+        {% elif payment.correspondent == "MOOV_MONEY_CIV" %}
+          <p class="font-semibold mb-1">📲 Moov Money</p>
+          <p>Une notification USSD va s'afficher automatiquement sur votre téléphone.</p>
+          <p class="mt-1">Si rien ne s'affiche, composez <strong class="font-mono">*555#</strong> → <em>Approbation</em>.</p>
+        {% endif %}
+        <p class="mt-2 text-xs text-blue-700">Entrez votre code PIN pour valider. Ne fermez pas cet écran.</p>
+      </div>
+    {% endif %}
 
     <!-- Barre de progression -->
     <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2 mb-6">
@@ -42,13 +81,15 @@
     <!-- Compteur de tentatives -->
     <p id="retry-msg" class="text-xs text-gray-400 mb-6">Vérification automatique en cours…</p>
 
-    <!-- Boutons -->
+    <!-- Boutons état en attente -->
     <div id="btn-pending" class="space-y-3">
-      <a href="{% url 'payments:status' payment.deposit_id %}"
+      {% if payment.correspondent != "WAVE_CIV" %}
+      <button onclick="checkNow()"
          id="btn-check"
          class="block w-full border border-gray-300 text-gray-700 font-medium py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">
         Vérifier maintenant
-      </a>
+      </button>
+      {% endif %}
       <a href="{% url 'dashboard' %}" class="block text-xs text-gray-400 hover:text-gray-600">
         Revenir au tableau de bord
       </a>
@@ -74,11 +115,12 @@
 
 <script>
 (function () {
-  var depositId = "{{ payment.deposit_id }}";
   var statusUrl = "{% url 'payments:status' payment.deposit_id %}";
+  var isWave = {{ payment.correspondent == "WAVE_CIV"|yesno:"true,false" }};
   var attempts = 0;
   var maxAttempts = 36; // 3 minutes (5s × 36)
   var interval = null;
+  var waveRedirected = false;
 
   function setProgress(pct) {
     document.getElementById("progress-fill").style.width = pct + "%";
@@ -93,10 +135,15 @@
     document.getElementById("btn-success").classList.remove("hidden");
     document.getElementById("progress-bar").classList.add("hidden");
     document.getElementById("retry-msg").classList.add("hidden");
+    var waveSpinner = document.getElementById("wave-spinner");
+    if (waveSpinner) waveSpinner.classList.add("hidden");
     if (adSlug) {
       document.getElementById("ad-link").href = "/ads/" + adSlug + "/";
     }
     setProgress(100);
+    setTimeout(function () {
+      window.location.href = adSlug ? "/ads/" + adSlug + "/" : "/dashboard/";
+    }, 3000);
   }
 
   function showFailed() {
@@ -108,6 +155,8 @@
     document.getElementById("btn-failed").classList.remove("hidden");
     document.getElementById("progress-bar").classList.add("hidden");
     document.getElementById("retry-msg").classList.add("hidden");
+    var waveSpinner = document.getElementById("wave-spinner");
+    if (waveSpinner) waveSpinner.classList.add("hidden");
   }
 
   function check() {
@@ -120,13 +169,17 @@
     fetch(statusUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        // Wave : rediriger dès que l'URL d'autorisation est disponible
+        if (isWave && data.auth_url && !waveRedirected) {
+          waveRedirected = true;
+          clearInterval(interval);
+          window.location.href = data.auth_url;
+          return;
+        }
+
         if (data.status === "completed") {
           clearInterval(interval);
           showSuccess(data.ad_slug);
-          // Redirection automatique après 3 secondes
-          setTimeout(function () {
-            window.location.href = data.ad_slug ? "/ads/" + data.ad_slug + "/" : "/dashboard/";
-          }, 3000);
         } else if (data.status === "failed") {
           clearInterval(interval);
           showFailed();
@@ -141,8 +194,12 @@
       });
   }
 
+  // Exposer la fonction pour le bouton manuel (opérateurs USSD)
+  window.checkNow = function () { check(); };
+
   // Lancer la première vérification après 5 secondes
-  interval = setInterval(check, 5000);
+  // Pour Wave : vérifier plus vite (2s) car on attend juste l'URL
+  interval = setInterval(check, isWave ? 2000 : 5000);
 })();
 </script>
 {% endblock %}

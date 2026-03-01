@@ -27,6 +27,9 @@ CORRESPONDENTS = {
     "MOOV_MONEY_CIV": "Moov Money",
 }
 
+# Providers qui utilisent un redirect web au lieu d'un push USSD
+REDIRECT_AUTH_PROVIDERS = {"WAVE_CIV"}
+
 
 def _base_url() -> str:
     if getattr(settings, "PAWAPAY_SANDBOX", True):
@@ -42,7 +45,8 @@ def _headers() -> dict:
     }
 
 
-def initiate_deposit(deposit_id: str, amount: int, phone: str, correspondent: str, description: str) -> dict:
+def initiate_deposit(deposit_id: str, amount: int, phone: str, correspondent: str, description: str,
+                     successful_url: str = None, failed_url: str = None) -> dict:
     """
     Lance un dépôt PawaPay v2 (le client reçoit une notification push sur son téléphone).
 
@@ -71,6 +75,12 @@ def initiate_deposit(deposit_id: str, amount: int, phone: str, correspondent: st
         },
         "customerMessage": safe_desc,
     }
+
+    # Wave (REDIRECT_AUTH) exige des URLs de retour pour rediriger l'utilisateur
+    if successful_url:
+        payload["successfulUrl"] = successful_url
+    if failed_url:
+        payload["failedUrl"] = failed_url
 
     logger.info("PawaPay initiate_deposit %s — %s FCFA via %s", deposit_id, amount, correspondent)
 
