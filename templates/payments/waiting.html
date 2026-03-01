@@ -116,7 +116,7 @@
 <script>
 (function () {
   var statusUrl = "{% url 'payments:status' payment.deposit_id %}";
-  var isWave = {{ payment.correspondent == "WAVE_CIV"|yesno:"true,false" }};
+  var isWave = {% if payment.correspondent == "WAVE_CIV" %}true{% else %}false{% endif %};
   var attempts = 0;
   var maxAttempts = 36; // 3 minutes (5s × 36)
   var interval = null;
