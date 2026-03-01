@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmation de paiement en cours · KIABA{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+  <div class="max-w-md w-full text-center">
+
+    <!-- Icône animée -->
+    <div id="icon-pending" class="mb-6">
+      <div class="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto animate-pulse">
+        <span class="text-4xl">📱</span>
+      </div>
+    </div>
+    <div id="icon-success" class="mb-6 hidden">
+      <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+        <span class="text-4xl">✅</span>
+      </div>
+    </div>
+    <div id="icon-failed" class="mb-6 hidden">
+      <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+        <span class="text-4xl">❌</span>
+      </div>
+    </div>
+
+    <!-- Titre -->
+    <h1 id="status-title" class="text-2xl font-bold text-gray-900 mb-2">
+      Vérifiez votre téléphone
+    </h1>
+    <p id="status-msg" class="text-gray-500 text-sm mb-8">
+      Une notification push a été envoyée sur le numéro
+      <strong class="text-gray-800">+225 {{ payment.phone }}</strong>.<br>
+      Confirmez le paiement de <strong>{{ payment.amount }} FCFA</strong> sur votre téléphone.
+    </p>
+
+    <!-- Barre de progression -->
+    <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2 mb-6">
+      <div id="progress-fill" class="bg-pink-500 h-2 rounded-full transition-all duration-1000" style="width:5%"></div>
+    </div>
+
+    <!-- Compteur de tentatives -->
+    <p id="retry-msg" class="text-xs text-gray-400 mb-6">Vérification automatique en cours…</p>
+
+    <!-- Boutons -->
+    <div id="btn-pending" class="space-y-3">
+      <a href="{% url 'payments:status' payment.deposit_id %}"
+         id="btn-check"
+         class="block w-full border border-gray-300 text-gray-700 font-medium py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">
+        Vérifier maintenant
+      </a>
+      <a href="{% url 'dashboard' %}" class="block text-xs text-gray-400 hover:text-gray-600">
+        Revenir au tableau de bord
+      </a>
+    </div>
+
+    <div id="btn-success" class="hidden">
+      <a id="ad-link" href="/dashboard/"
+         class="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition">
+        Voir mon annonce
+      </a>
+    </div>
+
+    <div id="btn-failed" class="hidden space-y-3">
+      <a href="{% url 'dashboard' %}"
+         class="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition">
+        Retour au tableau de bord
+      </a>
+      <p class="text-xs text-gray-400">Votre annonce reste en brouillon. Vous pouvez relancer le paiement depuis votre tableau de bord.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var depositId = "{{ payment.deposit_id }}";
+  var statusUrl = "{% url 'payments:status' payment.deposit_id %}";
+  var attempts = 0;
+  var maxAttempts = 36; // 3 minutes (5s × 36)
+  var interval = null;
+
+  function setProgress(pct) {
+    document.getElementById("progress-fill").style.width = pct + "%";
+  }
+
+  function showSuccess(adSlug) {
+    document.getElementById("icon-pending").classList.add("hidden");
+    document.getElementById("icon-success").classList.remove("hidden");
+    document.getElementById("status-title").textContent = "Paiement confirmé !";
+    document.getElementById("status-msg").textContent = "Votre annonce est en cours de publication.";
+    document.getElementById("btn-pending").classList.add("hidden");
+    document.getElementById("btn-success").classList.remove("hidden");
+    document.getElementById("progress-bar").classList.add("hidden");
+    document.getElementById("retry-msg").classList.add("hidden");
+    if (adSlug) {
+      document.getElementById("ad-link").href = "/ads/" + adSlug + "/";
+    }
+    setProgress(100);
+  }
+
+  function showFailed() {
+    document.getElementById("icon-pending").classList.add("hidden");
+    document.getElementById("icon-failed").classList.remove("hidden");
+    document.getElementById("status-title").textContent = "Paiement échoué";
+    document.getElementById("status-msg").textContent = "Le paiement n'a pas pu être complété. Votre annonce reste en brouillon.";
+    document.getElementById("btn-pending").classList.add("hidden");
+    document.getElementById("btn-failed").classList.remove("hidden");
+    document.getElementById("progress-bar").classList.add("hidden");
+    document.getElementById("retry-msg").classList.add("hidden");
+  }
+
+  function check() {
+    attempts++;
+    var pct = Math.min(5 + (attempts / maxAttempts) * 90, 95);
+    setProgress(pct);
+    document.getElementById("retry-msg").textContent =
+      "Vérification " + attempts + "/" + maxAttempts + " – Patientez…";
+
+    fetch(statusUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.status === "completed") {
+          clearInterval(interval);
+          showSuccess(data.ad_slug);
+          // Redirection automatique après 3 secondes
+          setTimeout(function () {
+            window.location.href = data.ad_slug ? "/ads/" + data.ad_slug + "/" : "/dashboard/";
+          }, 3000);
+        } else if (data.status === "failed") {
+          clearInterval(interval);
+          showFailed();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          document.getElementById("retry-msg").textContent =
+            "Délai dépassé. Vérifiez manuellement ou revenez plus tard.";
+        }
+      })
+      .catch(function () {
+        // Silencieux — réessaiera au prochain intervalle
+      });
+  }
+
+  // Lancer la première vérification après 5 secondes
+  interval = setInterval(check, 5000);
+})();
+</script>
+{% endblock %}

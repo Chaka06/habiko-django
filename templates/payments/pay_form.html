@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Publier votre annonce – Paiement Mobile Money · KIABA{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-lg mx-auto">
+
+    <!-- Titre -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Publier votre annonce</h1>
+      <p class="text-gray-500 mt-1 text-sm">Paiement sécurisé par Mobile Money (MTN ou Orange)</p>
+    </div>
+
+    <!-- Résumé de l'annonce -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+      <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Annonce</p>
+      <p class="font-semibold text-gray-900">{{ ad.title }}</p>
+      <p class="text-sm text-gray-500">{{ ad.city }}</p>
+    </div>
+
+    {% if error %}
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 mb-4 text-sm">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Formulaire de paiement -->
+    <form method="post" action="{% url 'payments:initiate' %}" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Choix du forfait -->
+      <div class="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+        <p class="font-semibold text-gray-800 mb-1">Choisissez votre forfait</p>
+
+        <!-- Standard -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg border-2 border-transparent has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50 transition">
+          <input type="radio" name="want_boost" value="0" checked class="mt-1 accent-pink-500 shrink-0">
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-gray-900">Standard</span>
+              <span class="font-bold text-pink-600">{{ price_standard }} FCFA</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-0.5">Annonce visible pendant <strong>5 jours</strong></p>
+          </div>
+        </label>
+
+        <!-- Standard + Boost -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg border-2 border-transparent has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition">
+          <input type="radio" name="want_boost" value="1" class="mt-1 accent-yellow-500 shrink-0">
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-gray-900">Standard + Boost ⚡</span>
+              <span class="font-bold text-yellow-600">{{ price_total_boost }} FCFA</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-0.5">
+              Annonce visible <strong>7 jours</strong> · Remontée en tête de liste <strong>2h / jour</strong>
+            </p>
+          </div>
+        </label>
+
+        <p class="text-xs text-gray-400 pt-1">
+          Le boost sera débité en <strong>deux transactions</strong> séparées ({{ price_standard }} FCFA + {{ price_boost }} FCFA).
+        </p>
+      </div>
+
+      <!-- Numéro Mobile Money -->
+      <div class="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
+        <p class="font-semibold text-gray-800">Coordonnées Mobile Money</p>
+
+        <!-- Opérateur -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Opérateur</label>
+          <div class="flex gap-3">
+            {% for code, label in correspondents.items %}
+            <label class="flex-1 flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 border-gray-200 has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50 transition">
+              <input type="radio" name="pay_correspondent" value="{{ code }}" {% if forloop.first %}checked{% endif %} class="accent-pink-500">
+              <span class="text-sm font-medium text-gray-800">{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Numéro -->
+        <div>
+          <label for="pay_phone" class="block text-sm font-medium text-gray-700 mb-1">
+            Numéro de téléphone
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🇨🇮 +225</span>
+            <input
+              type="tel"
+              id="pay_phone"
+              name="pay_phone"
+              placeholder="0700000000"
+              required
+              maxlength="15"
+              pattern="[0-9]{8,13}"
+              class="w-full pl-20 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm"
+            >
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Entrez votre numéro sans le +225 (ex : 0700000000)</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button
+        type="submit"
+        class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3.5 rounded-xl transition text-base"
+      >
+        Payer et publier l'annonce
+      </button>
+
+      <p class="text-center text-xs text-gray-400">
+        Vous recevrez une notification push sur votre téléphone pour confirmer le paiement.
+        L'annonce sera publiée automatiquement après confirmation.
+      </p>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

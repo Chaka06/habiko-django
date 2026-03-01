@@ -36,41 +36,65 @@ def process_ad_media_image(self, media_id: int):
         raise self.retry(exc=e, countdown=60)
 
 
-@shared_task(bind=True, max_retries=3)
-def expire_ads(self):
+@shared_task
+def expire_ads():
     """
-    Supprime automatiquement les annonces expirées après 2 semaines.
-    Supprime aussi les médias (images) associés pour éviter les fichiers orphelins.
-    Envoie un email de notification à l'utilisateur.
+    Archive les annonces dont la date d'expiration est dépassée.
+    (Remplace l'ancienne suppression — les annonces payées restent consultables.)
     """
     from accounts.tasks import send_ad_expiration_email
-    
+
     now = timezone.now()
     expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED)
     count = 0
-    
+
     for ad in expired:
-        # Envoyer l'email d'expiration AVANT de supprimer l'annonce
         try:
             send_ad_expiration_email.delay(ad.id)
         except Exception as e:
-            # Logger mais ne pas bloquer la suppression
             import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Erreur envoi email expiration pour annonce {ad.id}: {e}")
-        
-        # Supprimer les médias (images) associés
-        media_list = AdMedia.objects.filter(ad=ad)
-        for media in media_list:
-            if media.image:
-                media.image.delete(save=False)  # Supprimer le fichier
-            media.delete()  # Supprimer l'enregistrement
-        
-        # Supprimer l'annonce elle-même
-        ad.delete()
+            logging.getLogger(__name__).warning("Email expiration annonce %s: %s", ad.id, e)
+
+        ad.status = Ad.Status.ARCHIVED
+        ad.save(update_fields=["status"])
         count += 1
-    
-    return f"{count} annonces expirées supprimées"
+
+    return f"{count} annonces archivées"
+
+
+@shared_task
+def promote_boosted_ads():
+    """
+    Remet en tête de liste (is_premium=True) toutes les annonces boostées actives.
+    À planifier quotidiennement (ex. minuit heure CI = UTC).
+    La remontée dure 2 heures (premium_until = now + 2h).
+    """
+    now = timezone.now()
+    updated = Ad.objects.filter(
+        is_boosted=True,
+        boost_expires_at__gt=now,
+        status=Ad.Status.APPROVED,
+    ).update(
+        is_premium=True,
+        premium_until=now + timezone.timedelta(hours=2),
+    )
+    import logging
+    logging.getLogger(__name__).info("promote_boosted_ads: %d annonces remontées", updated)
+    return f"{updated} annonces boostées remontées en tête de liste"
+
+
+@shared_task
+def expire_premium_ads():
+    """
+    Remet is_premium=False pour les annonces dont le créneau premium est terminé.
+    À planifier toutes les 15 minutes pour que la fenêtre 2h soit respectée.
+    """
+    now = timezone.now()
+    updated = Ad.objects.filter(
+        is_premium=True,
+        premium_until__lt=now,
+    ).update(is_premium=False)
+    return f"{updated} annonces sorties du premium"
 
 
 @shared_task(bind=True, max_retries=3)

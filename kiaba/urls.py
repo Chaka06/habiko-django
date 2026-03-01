@@ -51,6 +51,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("", include("core.urls")),
     path("ads/", include("ads.urls")),
+    path("pay/", include("payments.urls", namespace="payments")),
     path("", include("seo.urls")),
     path(
         "sitemap.xml",

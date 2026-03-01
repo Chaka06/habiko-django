@@ -174,7 +174,7 @@ def post(request: HttpRequest) -> HttpResponse:
                 if form.cleaned_data.get("nombre_chambres"):
                     additional_data["nombre_chambres"] = int(form.cleaned_data["nombre_chambres"])
 
-            # Créer l'annonce
+            # Créer l'annonce en DRAFT (en attente de paiement)
             ad = Ad.objects.create(
                 user=request.user,
                 title=form.cleaned_data["title"],
@@ -183,23 +183,10 @@ def post(request: HttpRequest) -> HttpResponse:
                 subcategories=form.cleaned_data["subcategories"],
                 city=form.cleaned_data["city"],
                 additional_data=additional_data,
-                status=Ad.Status.APPROVED if is_verified else Ad.Status.PENDING,
-                expires_at=timezone.now() + timezone.timedelta(days=14),
+                status=Ad.Status.DRAFT,
+                # expires_at sera fixé après paiement (5 ou 7 jours)
+                expires_at=timezone.now() + timezone.timedelta(days=5),
             )
-
-            # Si l'annonce est en attente, programmer l'approbation automatique après 10 secondes
-            try:
-                if not is_verified:
-                    from ads.tasks import auto_approve_ad
-                    auto_approve_ad.apply_async(args=[ad.id], countdown=10)
-                    logger.info("Annonce %s créée en attente (approbation automatique programmée)", ad.id)
-                else:
-                    # Si l'utilisateur est vérifié, envoyer l'email de confirmation immédiatement
-                    send_ad_published_email.delay(ad.id)
-                    logger.info("Annonce %s créée et approuvée (email envoyé)", ad.id)
-            except Exception as e:
-                # Le broker Celery (Redis) est indisponible : l'annonce est créée, la tâche sera ignorée.
-                logger.exception("Impossible de dispatcher la tâche Celery pour annonce %s : %s", ad.id, e)
 
             # Enregistrer les images (déjà validées avant la création de l'annonce)
             images_added = 0
@@ -215,16 +202,9 @@ def post(request: HttpRequest) -> HttpResponse:
                 ad.image_processing_done = False
                 ad.save(update_fields=["image_processing_done"])
 
-            if is_verified:
-                messages.success(
-                    request, "Annonce créée avec succès ! Elle est maintenant visible."
-                )
-            else:
-                messages.success(
-                    request,
-                    "Annonce créée avec succès ! Elle sera visible après validation de votre profil par email.",
-                )
-            return redirect("/dashboard/")
+            # Rediriger vers le formulaire de paiement (PawaPay)
+            request.session["pending_ad_id"] = ad.id
+            return redirect("payments:pay_form")
     else:
         initial_data = {}
         try:

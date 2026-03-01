@@ -206,6 +206,7 @@ INSTALLED_APPS = [
     "core",
     "moderation",
     "seo",
+    "payments.apps.PaymentsConfig",
 ]
 
 MIDDLEWARE = [
@@ -735,10 +736,21 @@ CELERY_TASK_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULE = {
+    # Archive les annonces dont expires_at est dépassé — tous les jours à minuit CI
     "expire-ads-daily": {
         "task": "ads.tasks.expire_ads",
-        "schedule": 60 * 60 * 24,  # quotidien
-    }
+        "schedule": 60 * 60 * 24,  # toutes les 24h
+    },
+    # Remet les annonces boostées en tête de liste pour 2h — tous les jours à minuit UTC
+    "promote-boosted-ads-daily": {
+        "task": "ads.tasks.promote_boosted_ads",
+        "schedule": 60 * 60 * 24,  # toutes les 24h
+    },
+    # Retire le badge premium quand premium_until est dépassé — toutes les 15 minutes
+    "expire-premium-ads-15min": {
+        "task": "ads.tasks.expire_premium_ads",
+        "schedule": 60 * 15,  # toutes les 15 minutes
+    },
 }
 
 # Traitement des images (filigrane + miniature) en arrière-plan pour réponses rapides (post / edit annonce).
@@ -827,6 +839,14 @@ CINETPAY_NOTIFY_URL = env(
 CINETPAY_RETURN_URL = env(
     "CINETPAY_RETURN_URL", default="https://ci-kiaba.com/accounts/payment/cinetpay/return/"
 )
+
+# ─── PawaPay configuration ───────────────────────────────────────────────────
+# Obtenir le token sur https://dashboard.sandbox.pawapay.cloud (sandbox)
+# ou https://dashboard.pawapay.io (production)
+PAWAPAY_API_TOKEN = os.environ.get("PAWAPAY_API_TOKEN", "").strip()
+# True → pointe sur sandbox.pawapay.cloud ; False → api.pawapay.io
+_pawapay_sandbox = os.environ.get("PAWAPAY_SANDBOX", "true").strip().lower()
+PAWAPAY_SANDBOX = _pawapay_sandbox not in ("false", "0", "no", "off")
 
 # Superuser initial (créé par create_initial_superuser) : mot de passe via env uniquement
 INITIAL_SUPERUSER_PASSWORD = os.environ.get("INITIAL_SUPERUSER_PASSWORD", "").strip() or None
