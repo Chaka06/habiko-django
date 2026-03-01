@@ -39,7 +39,14 @@ def landing(request: HttpRequest) -> HttpResponse:
 def age_gate(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         response = redirect("/")
-        response.set_cookie("age_gate_accepted", "1", max_age=60 * 60 * 24 * 365)
+        response.set_cookie(
+            "age_gate_accepted",
+            "1",
+            max_age=60 * 60 * 24 * 365,
+            secure=not settings.DEBUG,  # HTTPS uniquement en production
+            httponly=False,             # Le JS doit pouvoir lire ce cookie
+            samesite="Lax",
+        )
         return response
     return render(request, "core/age_gate.html")
 

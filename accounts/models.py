@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils import timezone
+from .validators import E164_VALIDATOR
 import random
 
 
@@ -23,7 +23,8 @@ class CustomUser(AbstractUser):
         max_length=20,
         null=True,
         blank=True,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message=_("Enter a valid E.164 phone."))],
+        db_index=True,
+        validators=[E164_VALIDATOR],
         help_text=_("Phone number in E.164 format, e.g., +2250700000000"),
     )
     is_verified = models.BooleanField(default=False)
@@ -41,13 +42,15 @@ class Profile(models.Model):
         max_length=20,
         null=True,
         blank=True,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message=_("Enter a valid E.164 phone."))],
+        db_index=True,
+        validators=[E164_VALIDATOR],
     )
     phone2_e164 = models.CharField(
         max_length=20,
         null=True,
         blank=True,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message=_("Enter a valid E.164 phone."))],
+        db_index=True,
+        validators=[E164_VALIDATOR],
         help_text=_("Second phone number for ads (optional). Shown with primary on ad contact."),
     )
     telegram = models.CharField(max_length=64, null=True, blank=True)
@@ -299,6 +302,10 @@ class Transaction(models.Model):
         ordering = ["-created_at"]
         verbose_name = _("Transaction")
         verbose_name_plural = _("Transactions")
+        indexes = [
+            models.Index(fields=["user", "status"], name="transaction_user_status_idx"),
+            models.Index(fields=["status", "created_at"], name="transaction_status_date_idx"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.get_transaction_type_display()} - {self.amount} FCFA - {self.get_status_display()}"

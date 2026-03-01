@@ -617,10 +617,11 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # pour les requêtes cross-origin (nécessaire pour CSRF avec www/non-www et proxies)
 # "same-origin" était trop stricte et bloquait la vérification CSRF dans certains cas
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-# Désactiver complètement HSTS en développement pour éviter les redirections HTTPS forcées
-SECURE_HSTS_SECONDS = 0  # Toujours 0 pour permettre HTTP en local
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
+# HSTS : activé en production uniquement (0 en local pour éviter les redirections HTTPS forcées)
+# En production : 1 an (31536000s) + inclure sous-domaines + préchargement HSTS
+SECURE_HSTS_SECONDS = 0 if DEBUG else 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 # Configuration HTTPS pour les proxies (Render, etc.)
 # Render passe le header X-Forwarded-Proto pour indiquer HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -749,7 +750,7 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/dashboard/"
 # Rate limiting allauth pour limiter les tentatives de bruteforce & abus
 # (utilise le cache Django ; ici LocMem en production sans Redis)
 ACCOUNT_RATE_LIMITS = {
-    "login_failed": "5/5m",  # max 5 échecs de login / 5 minutes par IP+user
+    "login_failed": "3/5m",  # max 3 échecs de login / 5 minutes par IP+user (anti brute-force)
     "signup": "3/h",  # max 3 inscriptions / heure
     "reset_password": "3/h",  # max 3 demandes de reset / heure
 }

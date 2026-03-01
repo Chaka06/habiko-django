@@ -1,3 +1,4 @@
+import ipaddress
 import re
 
 from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponse
@@ -6,6 +7,54 @@ from django.conf import settings
 from django.middleware.csrf import get_token
 import gzip
 from io import BytesIO
+
+# Plages IP officielles Cloudflare (source : https://www.cloudflare.com/ips/)
+# Mises à jour : octobre 2024
+_CLOUDFLARE_IP_RANGES = [
+    # IPv4
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+    "103.31.4.0/22",
+    "104.16.0.0/13",
+    "104.24.0.0/14",
+    "108.162.192.0/18",
+    "131.0.72.0/22",
+    "141.101.64.0/18",
+    "162.158.0.0/15",
+    "172.64.0.0/13",
+    "173.245.48.0/20",
+    "188.114.96.0/20",
+    "190.93.240.0/20",
+    "197.234.240.0/22",
+    "198.41.128.0/17",
+    # IPv6
+    "2400:cb00::/32",
+    "2606:4700::/32",
+    "2803:f800::/32",
+    "2405:b500::/32",
+    "2405:8100::/32",
+    "2a06:98c0::/29",
+    "2c0f:f248::/32",
+]
+
+# Réseau compilés une seule fois au démarrage (évite le parsing répété)
+_CF_NETWORKS: list | None = None
+
+
+def _get_cf_networks():
+    global _CF_NETWORKS
+    if _CF_NETWORKS is None:
+        _CF_NETWORKS = [ipaddress.ip_network(r) for r in _CLOUDFLARE_IP_RANGES]
+    return _CF_NETWORKS
+
+
+def _is_cloudflare_ip(ip_str: str) -> bool:
+    """Retourne True si l'IP appartient aux plages officielles Cloudflare."""
+    try:
+        ip = ipaddress.ip_address(ip_str)
+        return any(ip in net for net in _get_cf_networks())
+    except ValueError:
+        return False
 
 # Chemins allauth : exemption CSRF pour tous les formulaires d’auth
 AUTH_CSRF_EXEMPT_PATHS = ("/auth/login/", "/auth/signup/", "/auth/password/reset/")
@@ -74,12 +123,14 @@ class CloudflareMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Cloudflare envoie l'IP réelle dans ce header
+        # Cloudflare envoie l'IP réelle dans ce header.
+        # On ne fait confiance à ce header QUE si la requête vient d'une IP Cloudflare connue
+        # pour éviter l'usurpation d'IP par un attaquant passant directement au serveur.
         cf_connecting_ip = request.META.get("HTTP_CF_CONNECTING_IP")
-        if cf_connecting_ip:
-            # Remplacer REMOTE_ADDR par l'IP réelle du client
-            request.META["REMOTE_ADDR"] = cf_connecting_ip
-            # Garder aussi l'IP originale dans un header personnalisé
+        remote_addr = request.META.get("REMOTE_ADDR", "")
+
+        if cf_connecting_ip and _is_cloudflare_ip(remote_addr):
+            request.META["REMOTE_ADDR"] = cf_connecting_ip.strip()
             request.META["HTTP_X_FORWARDED_FOR_ORIGINAL"] = request.META.get(
                 "HTTP_X_FORWARDED_FOR", ""
             )

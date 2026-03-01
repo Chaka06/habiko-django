@@ -1,7 +1,37 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 import bleach
 from .models import Ad, City
+from accounts.validators import E164_VALIDATOR
+
+# Extensions et types MIME autorisés pour les photos d'annonces
+_ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
+_ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
+_MAX_IMAGE_SIZE_MB = 10
+
+
+def _validate_image_file(file):
+    """Valide l'extension et le type MIME réel d'un fichier image uploadé."""
+    if not file:
+        return
+    # Vérification de la taille (10 Mo max)
+    if file.size > _MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise ValidationError(
+            f"La taille de l'image ne doit pas dépasser {_MAX_IMAGE_SIZE_MB} Mo."
+        )
+    # Vérification du type MIME via les premiers octets (magic bytes)
+    file.seek(0)
+    header = file.read(12)
+    file.seek(0)
+    # Signatures connues : JPEG, PNG, WebP
+    is_jpeg = header[:3] == b"\xff\xd8\xff"
+    is_png = header[:8] == b"\x89PNG\r\n\x1a\n"
+    is_webp = header[:4] == b"RIFF" and header[8:12] == b"WEBP"
+    if not (is_jpeg or is_png or is_webp):
+        raise ValidationError(
+            "Format d'image non supporté. Utilisez JPG, PNG ou WebP."
+        )
 
 
 class AdForm(forms.Form):
@@ -108,6 +138,7 @@ class AdForm(forms.Form):
 
     phone1 = forms.CharField(
         max_length=20,
+        validators=[E164_VALIDATOR],
         widget=forms.TextInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
@@ -121,6 +152,7 @@ class AdForm(forms.Form):
     phone2 = forms.CharField(
         max_length=20,
         required=False,
+        validators=[E164_VALIDATOR],
         widget=forms.TextInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
@@ -147,9 +179,10 @@ class AdForm(forms.Form):
         widget=forms.ClearableFileInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": "image/*",
+                "accept": ".jpg,.jpeg,.png,.webp",
             }
         ),
+        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
         label="Photo 1",
     )
 
@@ -158,9 +191,10 @@ class AdForm(forms.Form):
         widget=forms.ClearableFileInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": "image/*",
+                "accept": ".jpg,.jpeg,.png,.webp",
             }
         ),
+        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
         label="Photo 2",
     )
 
@@ -169,9 +203,10 @@ class AdForm(forms.Form):
         widget=forms.ClearableFileInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": "image/*",
+                "accept": ".jpg,.jpeg,.png,.webp",
             }
         ),
+        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
         label="Photo 3",
     )
 
@@ -180,9 +215,10 @@ class AdForm(forms.Form):
         widget=forms.ClearableFileInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": "image/*",
+                "accept": ".jpg,.jpeg,.png,.webp",
             }
         ),
+        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
         label="Photo 4",
     )
 
@@ -191,9 +227,10 @@ class AdForm(forms.Form):
         widget=forms.ClearableFileInput(
             attrs={
                 "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": "image/*",
+                "accept": ".jpg,.jpeg,.png,.webp",
             }
         ),
+        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
         label="Photo 5",
     )
 

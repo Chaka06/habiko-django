@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
-from django.core.validators import RegexValidator
 from allauth.account.forms import LoginForm, SignupForm
 from .models import Profile, RechargePackage, BoostOption, EmailOTP
+from .validators import E164_VALIDATOR
 from ads.models import City
 
 
@@ -21,7 +21,7 @@ class ProfileEditForm(forms.ModelForm):
     phone_e164 = forms.CharField(
         max_length=20,
         required=False,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message="Entrez un numéro au format E.164 (+225XXXXXXXXXX)")],
+        validators=[E164_VALIDATOR],
         widget=forms.TextInput(attrs={
             "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
             "placeholder": "+225XXXXXXXXXX"
@@ -32,7 +32,7 @@ class ProfileEditForm(forms.ModelForm):
     whatsapp_e164 = forms.CharField(
         max_length=20,
         required=False,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message="Entrez un numéro au format E.164 (+225XXXXXXXXXX)")],
+        validators=[E164_VALIDATOR],
         widget=forms.TextInput(attrs={
             "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
             "placeholder": "+225XXXXXXXXXX"
@@ -43,7 +43,7 @@ class ProfileEditForm(forms.ModelForm):
     phone2_e164 = forms.CharField(
         max_length=20,
         required=False,
-        validators=[RegexValidator(r"^\+[1-9]\d{1,14}$", message="Entrez un numéro au format E.164 (+225XXXXXXXXXX)")],
+        validators=[E164_VALIDATOR],
         widget=forms.TextInput(attrs={
             "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
             "placeholder": "+225XXXXXXXXXX (optionnel)"

@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from django.core import signing
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from .decorators import admin_required
 from .models import Profile, Account, RechargePackage, BoostOption, Transaction, CustomUser
 from .forms import (
     ProfileEditForm,
@@ -17,6 +19,9 @@ from .tasks import send_profile_validation_email, send_password_change_email
 from .models import EmailOTP
 from ads.models import Ad
 from django.core.exceptions import ValidationError
+
+_PWD_CHANGE_SALT = "kiaba_pwd_change_otp"
+_PWD_CHANGE_TTL = 600  # 10 minutes
 
 
 @login_required
@@ -68,11 +73,13 @@ def password_change(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = CustomPasswordChangeForm(request.user, request.POST)
         if form.is_valid():
-            # Stocker le nouveau mot de passe en session (temporaire) et envoyer OTP
+            # Stocker le nouveau mot de passe via token signé (non plaintext en session)
             cleaned = form.cleaned_data
-            request.session["pending_pwd_change"] = {
-                "new_password1": cleaned.get("new_password1"),
-            }
+            token = signing.dumps(
+                {"new_password1": cleaned.get("new_password1"), "uid": request.user.pk},
+                salt=_PWD_CHANGE_SALT,
+            )
+            request.session["pending_pwd_change_token"] = token
 
             req_form = PasswordChangeOTPRequestForm(user=request.user)
             otp = req_form.save()
@@ -108,13 +115,32 @@ def password_change(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def password_change_confirm(request: HttpRequest) -> HttpResponse:
-    if not request.session.get("pending_pwd_change"):
+    if not request.session.get("pending_pwd_change_token"):
         messages.warning(request, "Session expirée. Recommencez la modification du mot de passe.")
         return redirect("accounts:password_change")
 
     if request.method == "POST":
         code = (request.POST.get("code") or "").strip()
-        pending = request.session.get("pending_pwd_change")
+        token = request.session.get("pending_pwd_change_token")
+
+        # Vérifier et décoder le token signé (expire après 10 minutes)
+        try:
+            data = signing.loads(token, salt=_PWD_CHANGE_SALT, max_age=_PWD_CHANGE_TTL)
+        except signing.SignatureExpired:
+            request.session.pop("pending_pwd_change_token", None)
+            messages.error(request, "Le token a expiré. Recommencez le changement de mot de passe.")
+            return redirect("accounts:password_change")
+        except signing.BadSignature:
+            request.session.pop("pending_pwd_change_token", None)
+            messages.error(request, "Token invalide. Recommencez le changement de mot de passe.")
+            return redirect("accounts:password_change")
+
+        # Vérifier que le token appartient bien à cet utilisateur
+        if data.get("uid") != request.user.pk:
+            request.session.pop("pending_pwd_change_token", None)
+            messages.error(request, "Erreur de sécurité. Recommencez le changement de mot de passe.")
+            return redirect("accounts:password_change")
+
         otp = (
             EmailOTP.objects.filter(
                 user=request.user,
@@ -128,12 +154,12 @@ def password_change_confirm(request: HttpRequest) -> HttpResponse:
             messages.error(request, "Code OTP incorrect ou expiré")
             return render(request, "accounts/password_change_confirm.html")
 
-        new_password = pending.get("new_password1")
+        new_password = data.get("new_password1")
         request.user.set_password(new_password)
         request.user.save()
         otp.is_used = True
         otp.save(update_fields=["is_used"])
-        request.session.pop("pending_pwd_change", None)
+        request.session.pop("pending_pwd_change_token", None)
 
         update_session_auth_hash(request, request.user)
         send_password_change_email.delay(request.user.id)
@@ -210,11 +236,11 @@ def resend_verification_email(request: HttpRequest) -> HttpResponse:
     return redirect("account_email_verification_sent")
 
 
+@admin_required
 def validate_profile(request: HttpRequest, profile_id: int) -> HttpResponse:
-    """Valider un profil via email"""
+    """Valider un profil via email — réservé aux administrateurs."""
     profile = get_object_or_404(Profile, id=profile_id)
 
-    # Marquer le profil comme validé
     profile.is_verified = True
     profile.save()
 
@@ -391,10 +417,14 @@ def cinetpay_notify(request: HttpRequest) -> HttpResponse:
         
         if not transaction:
             return JsonResponse({"status": "error", "message": "Transaction introuvable"}, status=404)
-        
+
+        # Idempotence anti-rejeu : si la transaction est déjà traitée, répondre 200 sans retraiter
+        if transaction.status == Transaction.Status.COMPLETED:
+            return JsonResponse({"status": "ok"})
+
         # Vérifier le statut du paiement
         payment_status = data.get("cpm_result", "")
-        
+
         if payment_status == "00":  # Paiement réussi
             # Appliquer la recharge
             try:
