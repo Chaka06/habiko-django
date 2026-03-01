@@ -4,84 +4,104 @@
 {% block title %}Booster mon annonce – Paiement Mobile Money · KIABA{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8 px-4">
-  <div class="max-w-lg mx-auto">
+<div class="bg-gray-50 py-6 px-4">
+  <div class="max-w-md mx-auto space-y-4">
 
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Booster mon annonce ⚡</h1>
-      <p class="text-gray-500 mt-1 text-sm">Remontez votre annonce en tête de liste 2h par jour pendant 7 jours</p>
+    <!-- En-tête -->
+    <div class="text-center">
+      <h1 class="text-xl font-bold text-gray-900">Booster mon annonce ⚡</h1>
+      <p class="text-gray-500 mt-1 text-sm">Remontée en tête de liste 2h / jour pendant 7 jours</p>
     </div>
 
     <!-- Résumé de l'annonce -->
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-      <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Annonce à booster</p>
-      <p class="font-semibold text-gray-900">{{ ad.title }}</p>
-      <p class="text-sm text-gray-500">{{ ad.city }}</p>
+    <div class="bg-white rounded-2xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase font-semibold tracking-wide mb-1">Annonce à booster</p>
+      <p class="font-semibold text-gray-900 leading-snug">{{ ad.title }}</p>
+      <p class="text-sm text-gray-500 mt-0.5">{{ ad.city }}</p>
     </div>
 
     <!-- Détails du boost -->
-    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+    <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
       <div class="flex items-center gap-3 mb-2">
         <span class="text-2xl">⚡</span>
         <div>
-          <p class="font-bold text-yellow-800">Boost Premium — {{ price_boost }} FCFA</p>
-          <p class="text-sm text-yellow-700">Durée : 7 jours · Remontée : 2h / jour</p>
+          <p class="font-bold text-yellow-800 text-sm">Boost Premium — {{ price_boost }} FCFA</p>
+          <p class="text-xs text-yellow-700">Durée : 7 jours · Remontée : 2h / jour</p>
         </div>
       </div>
-      <ul class="text-sm text-yellow-700 list-disc list-inside space-y-1 mt-2">
-        <li>Votre annonce apparaît <strong>en tête de liste</strong> chaque jour pendant 2 heures</li>
-        <li>Durée de vie de l'annonce prolongée à <strong>7 jours</strong></li>
+      <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
+        <li>Annonce en <strong>tête de liste</strong> chaque jour pendant 2 heures</li>
+        <li>Durée de vie prolongée à <strong>7 jours</strong></li>
         <li>Visibilité maximale auprès des visiteurs</li>
       </ul>
     </div>
 
     {% if error %}
-    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 mb-4 text-sm">
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
       {{ error }}
     </div>
     {% endif %}
 
-    <!-- Formulaire -->
-    <form method="post" class="space-y-5">
+    <form method="post" class="space-y-4">
       {% csrf_token %}
 
-      <div class="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
-        <p class="font-semibold text-gray-800">Coordonnées Mobile Money</p>
+      <!-- Opérateur Mobile Money -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-4">
+        <p class="text-sm font-semibold text-gray-800 mb-3">Opérateur Mobile Money</p>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Opérateur</label>
-          <div class="grid grid-cols-2 gap-2">
-            {% for code, label in correspondents.items %}
-            <label class="flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 border-gray-200 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition">
-              <input type="radio" name="pay_correspondent" value="{{ code }}" {% if forloop.first %}checked{% endif %} class="accent-yellow-500 shrink-0">
-              <span class="text-sm font-medium text-gray-800">{{ label }}</span>
-            </label>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div>
-          <label for="pay_phone" class="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🇨🇮 +225</span>
-            <input
-              type="tel"
-              id="pay_phone"
-              name="pay_phone"
-              placeholder="0700000000"
-              required
-              maxlength="15"
-              pattern="[0-9]{8,13}"
-              class="w-full pl-20 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm"
-            >
-          </div>
-          <p class="text-xs text-gray-400 mt-1">Entrez votre numéro sans le +225</p>
+        <div class="grid grid-cols-2 gap-2">
+          {% for code, label in correspondents.items %}
+          <label class="relative flex flex-col items-center justify-center gap-2 cursor-pointer py-3 px-2 rounded-xl border-2 border-gray-100 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition hover:border-gray-300 min-h-[80px]">
+            <input type="radio" name="pay_correspondent" value="{{ code }}" {% if forloop.first %}checked{% endif %} class="sr-only">
+            <div class="h-9 flex items-center justify-center">
+              {% if code == "MTN_MOMO_CIV" %}
+                <img src="https://www.greenpayci.com/img/logo/mtn-momo.png"
+                     alt="MTN Mobile Money" class="h-8 w-auto max-w-[80px] object-contain" loading="lazy">
+              {% elif code == "ORANGE_CIV" %}
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMJp_FzxYLHHFQVbNcO38mNyppZL8MruSmwA&s"
+                     alt="Orange Money" class="h-8 w-auto max-w-[80px] object-contain" loading="lazy">
+              {% elif code == "MOOV_MONEY_CIV" %}
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s"
+                     alt="Moov Money" class="h-8 w-auto max-w-[80px] object-contain" loading="lazy">
+              {% elif code == "WAVE_CIV" %}
+                <img src="https://www.finextra.com/finextra-images/top_pics/xl/81c5cb874171f3560810f9dc12ecdc5e8f85193d.png"
+                     alt="Wave" class="h-8 w-auto max-w-[80px] object-contain" loading="lazy">
+              {% endif %}
+            </div>
+            <span class="text-xs font-medium text-gray-600 text-center leading-tight">{{ label }}</span>
+          </label>
+          {% endfor %}
         </div>
       </div>
 
+      <!-- Numéro de téléphone -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-4">
+        <label for="pay_phone" class="block text-sm font-semibold text-gray-800 mb-3">
+          Numéro Mobile Money
+        </label>
+        <div class="flex items-stretch border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-yellow-500 focus-within:border-yellow-500">
+          <div class="flex items-center gap-1.5 px-3 bg-gray-50 border-r border-gray-300 text-gray-600 text-sm font-medium shrink-0">
+            🇨🇮 +225
+          </div>
+          <input
+            type="tel"
+            id="pay_phone"
+            name="pay_phone"
+            placeholder="07 00 00 00 00"
+            required
+            maxlength="13"
+            pattern="[0-9]{8,13}"
+            autocomplete="tel-national"
+            class="flex-1 px-3 py-3 text-base text-gray-900 bg-white outline-none placeholder-gray-400"
+          >
+        </div>
+        <p class="text-xs text-gray-400 mt-1.5">Sans le +225 · ex : 0700000000</p>
+      </div>
+
+      <!-- Bouton CTA -->
       <button
         type="submit"
-        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3.5 rounded-xl transition text-base"
+        class="w-full bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white font-semibold py-4 rounded-2xl transition text-base shadow-sm"
       >
         Payer {{ price_boost }} FCFA et booster l'annonce
       </button>
