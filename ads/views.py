@@ -1,22 +1,22 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.db.models import Q, F, Case, When, Value, IntegerField, Prefetch
+from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import ensure_csrf_cookie
-from .models import Ad, AdMedia, City
+from .models import Ad, City
 
 
 @cache_page(900)  # 15 min par URL (/?city=…&category=…&page=…)
 @require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
-    # Prefetch uniquement la photo principale : réduit les requêtes (10 ads × 5 photos → 10 ads × 1 photo)
-    primary_media_qs = AdMedia.objects.filter(is_primary=True)
+    # prefetch_related("media") complet : certaines annonces créées avant la refonte
+    # n'ont pas is_primary=True, un Prefetch filtré les rendrait invisibles (LCP = lazy image = 5s+)
     qs = (
         Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
         .select_related("city", "user", "user__profile")
-        .prefetch_related(Prefetch("media", queryset=primary_media_qs))
+        .prefetch_related("media")
         .order_by("-is_premium", "-is_urgent", "-created_at")
     )
     city = request.GET.get("city")

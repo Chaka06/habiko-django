@@ -184,9 +184,9 @@
                 alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce adulte sur KIABA Rencontres."
                 decoding="async"
                 class="w-full h-full object-cover"
-                {% if forloop.first %}
+                {% if forloop.counter <= 3 %}
                 loading="eager"
-                fetchpriority="high"
+                {% if forloop.first %}fetchpriority="high"{% endif %}
                 {% else %}
                 loading="lazy"
                 {% endif %}

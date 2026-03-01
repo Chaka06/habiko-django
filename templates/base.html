@@ -122,11 +122,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Preload image LCP critique -->
     <link rel="preload" href="{% static 'img/logo.png' %}?v=3" as="image" />
-    <!-- Tailwind + Boxicons : chargement non-bloquant (évite blocage rendu = TBT/LCP) -->
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"></noscript>
-    <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"></noscript>
+    <!-- Tailwind : preload (téléchargement anticipé) + link synchrone
+         IMPORTANT : async CSS (onload trick) → body reflow complet → CLS 1.000 catastrophique.
+         On garde le chargement synchrone pour CLS = 0. -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <!-- Boxicons CSS : synchrone (icônes dans le header = above-fold) -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
 
     <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
     <script type="application/ld+json">
@@ -258,8 +260,11 @@
     </script>
     {% endblock %}
 
-    <!-- Google Fonts: swap = texte visible immédiatement, police chargée ensuite (évite FOIT/CLS) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts : non-bloquant (1.3KB CSS bloquait 750ms le rendu).
+         display=swap → texte en police système pendant le chargement, pas de FOIT.
+         Le swap de police (changement typographique seul) ne génère pas de CLS layout. -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
 
     <style>
       /* Styles critiques */
