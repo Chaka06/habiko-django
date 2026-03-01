@@ -174,7 +174,7 @@ def post(request: HttpRequest) -> HttpResponse:
                 if form.cleaned_data.get("nombre_chambres"):
                     additional_data["nombre_chambres"] = int(form.cleaned_data["nombre_chambres"])
 
-            # Créer l'annonce en DRAFT (en attente de paiement)
+            # Créer l'annonce directement en PENDING (gratuit — paiement désactivé)
             ad = Ad.objects.create(
                 user=request.user,
                 title=form.cleaned_data["title"],
@@ -183,9 +183,8 @@ def post(request: HttpRequest) -> HttpResponse:
                 subcategories=form.cleaned_data["subcategories"],
                 city=form.cleaned_data["city"],
                 additional_data=additional_data,
-                status=Ad.Status.DRAFT,
-                # expires_at sera fixé après paiement (5 ou 7 jours)
-                expires_at=timezone.now() + timezone.timedelta(days=5),
+                status=Ad.Status.PENDING,
+                expires_at=timezone.now() + timezone.timedelta(days=30),
             )
 
             # Enregistrer les images (déjà validées avant la création de l'annonce)
@@ -202,9 +201,16 @@ def post(request: HttpRequest) -> HttpResponse:
                 ad.image_processing_done = False
                 ad.save(update_fields=["image_processing_done"])
 
-            # Rediriger vers le formulaire de paiement (PawaPay)
-            request.session["pending_ad_id"] = ad.id
-            return redirect("payments:pay_form")
+            # Déclencher l'approbation automatique (10 secondes de délai)
+            try:
+                from ads.tasks import auto_approve_ad
+                auto_approve_ad.apply_async(args=[ad.id], countdown=10)
+            except Exception as exc:
+                logger.warning("auto_approve_ad task failed: %s", exc)
+
+            from django.contrib import messages
+            messages.success(request, "Votre annonce a été publiée avec succès !")
+            return redirect("dashboard")
     else:
         initial_data = {}
         try:
