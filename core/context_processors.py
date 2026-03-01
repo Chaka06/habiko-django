@@ -30,7 +30,7 @@ def site_metrics(request):
         try:
             popular_cities = list(
                 City.objects.filter(ad__status=Ad.Status.APPROVED, ad__image_processing_done=True)
-                .annotate(ad_count=models.Count("ad"))
+                .annotate(ad_count=models.Count("ad", distinct=True))
                 .filter(ad_count__gt=0)
                 .order_by("-ad_count")[:6]
             )

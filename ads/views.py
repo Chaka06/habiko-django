@@ -8,7 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Ad, City
 
 
-@cache_page(60)  # 1 min par URL (/?city=…&category=…&page=…)
+@cache_page(300)  # 5 min par URL (/?city=…&category=…&page=…)
 @require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
     qs = (
@@ -55,7 +55,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     cities = cache.get("all_cities")
     if cities is None:
         cities = list(City.objects.all())
-        cache.set("all_cities", cities, 3600)  # 1 heure
+        cache.set("all_cities", cities, 86400)  # 24h — les villes changent très rarement
 
     from core.context_processors import CACHE_KEY_TOTAL_ADS, CACHE_TTL
     total_approved_ads = cache.get(CACHE_KEY_TOTAL_ADS)

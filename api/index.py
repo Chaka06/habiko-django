@@ -15,10 +15,5 @@ from django.core.wsgi import get_wsgi_application
 
 app = get_wsgi_application()
 
-# Appliquer les migrations au cold start (le build Vercel n'a pas toujours accès à la DB).
-# Évite l'erreur "socialaccount_socialapp does not exist" sur /auth/login/
-try:
-    from django.core.management import call_command
-    call_command("migrate", "--noinput")
-except Exception:
-    pass
+# Les migrations sont appliquées pendant le build Vercel (voir vercel.json → buildCommand).
+# Ne PAS les relancer ici : ça ajoute 3-5 secondes à chaque cold start pour rien.

@@ -109,12 +109,23 @@ class Ad(models.Model):
     class Meta:
         ordering = ["-is_premium", "-is_urgent", "-created_at"]
         indexes = [
+            # Index couvrant la requête principale (status+image_done → ordre premium/urgent/date)
             models.Index(
-                fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"
+                fields=["status", "image_processing_done", "is_premium", "is_urgent", "created_at"],
+                name="ad_main_list_idx",
             ),
+            # Index pour filtre ville + état (liste filtrée par ville)
             models.Index(
-                fields=["status", "image_processing_done"], name="ad_list_ready_idx"
+                fields=["status", "image_processing_done", "city", "created_at"],
+                name="ad_city_list_idx",
             ),
+            # Index pour filtre catégorie + état (liste filtrée par catégorie)
+            models.Index(
+                fields=["status", "image_processing_done", "category", "created_at"],
+                name="ad_category_list_idx",
+            ),
+            models.Index(fields=["status", "is_premium", "is_urgent", "created_at"], name="ad_list_idx"),
+            models.Index(fields=["status", "image_processing_done"], name="ad_list_ready_idx"),
             models.Index(fields=["status", "category"], name="ad_category_idx"),
             models.Index(fields=["status", "city"], name="ad_city_idx"),
             models.Index(fields=["slug"], name="ad_slug_idx"),
