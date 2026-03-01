@@ -18,4 +18,6 @@ urlpatterns = [
     path("api/cookie-consent/", cookie_consent, name="cookie_consent"),
     # Favicon à la racine pour Google
     path("favicon.ico", views.favicon, name="favicon"),
+    # Health check pour Vercel, Docker et les outils de monitoring
+    path("health/", views.health_check, name="health_check"),
 ]

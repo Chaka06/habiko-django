@@ -37,7 +37,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-kiaba}
       POSTGRES_USER: ${POSTGRES_USER:-kiaba}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kiaba}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est requis dans .env}
     ports:
       - "5432:5432"
     volumes:

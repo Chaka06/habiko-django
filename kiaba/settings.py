@@ -142,6 +142,13 @@ if isinstance(debug_val, str):
 else:
     DEBUG = bool(debug_val)
 
+# Empêcher le démarrage en production avec des valeurs par défaut dangereuses
+if not DEBUG:
+    if SECRET_KEY == "change-me":
+        raise RuntimeError(
+            "SECRET_KEY non configurée. Définissez la variable d'environnement SECRET_KEY."
+        )
+
 ALLOWED_HOSTS = [h.strip() for h in env("ALLOWED_HOSTS").split(",") if h.strip()]
 
 # Add www version and Render external host automatically (uniquement en production)
@@ -529,13 +536,22 @@ if DEBUG:
 else:
     SITE_URL = env("SITE_URL", default="https://ci-kiaba.com")
 
-# Caches (Forcer le cache local pour éviter les erreurs Redis)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "unique-snowflake",
+# Cache : Redis si REDIS_URL disponible (partagé entre workers), sinon LocMem
+_cache_redis_url = os.environ.get("REDIS_URL", "").strip()
+if _cache_redis_url:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": _cache_redis_url,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 
 # DRF (prepare throttling for rate limiting contact clicks)
 REST_FRAMEWORK = {
@@ -636,6 +652,12 @@ Email configuration - SMTP
 - En dev : backend console par défaut (ou SMTP si configuré)
 - En prod : SMTP configuré via variables d'environnement (LWS, Brevo, SendGrid, etc.)
 """
+
+# Destinataires des emails d'erreurs 500 (Django envoie automatiquement si DEBUG=False)
+_admin_email = env("ADMIN_EMAIL", default="")
+if _admin_email:
+    ADMINS = [("Admin KIABA", _admin_email)]
+    MANAGERS = ADMINS
 
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",

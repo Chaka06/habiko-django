@@ -1,6 +1,7 @@
 import json
+import logging
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
@@ -14,6 +15,7 @@ from ads.forms import AdForm
 from accounts.models import Profile
 from accounts.tasks import send_ad_published_email
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -52,13 +54,24 @@ def age_gate(request: HttpRequest) -> HttpResponse:
 
 
 def favicon(request: HttpRequest) -> HttpResponse:
-    """Servir le favicon à la racine pour Google et les navigateurs"""
+    """Servir le favicon — 204 No Content si le fichier n'existe pas (browsers l'acceptent)."""
     import os
-    favicon_path = os.path.join(settings.STATICFILES_DIRS[0], 'favicon.png')
+    favicon_path = os.path.join(settings.STATICFILES_DIRS[0], "favicon.png")
     if os.path.exists(favicon_path):
-        return serve(request, 'favicon.png', document_root=settings.STATICFILES_DIRS[0])
-    # Fallback si le fichier n'existe pas
-    return HttpResponse(status=404)
+        return serve(request, "favicon.png", document_root=settings.STATICFILES_DIRS[0])
+    return HttpResponse(status=204)
+
+
+def health_check(request: HttpRequest) -> JsonResponse:
+    """Endpoint de santé pour Vercel, Docker et les outils de monitoring."""
+    from django.db import connection
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except Exception:
+        db_ok = False
+    status = 200 if db_ok else 503
+    return JsonResponse({"status": "ok" if db_ok else "degraded", "db": db_ok}, status=status)
 
 
 @login_required
@@ -156,11 +169,11 @@ def post(request: HttpRequest) -> HttpResponse:
                 from ads.tasks import auto_approve_ad
 
                 auto_approve_ad.apply_async(args=[ad.id], countdown=10)
-                print(f"Annonce {ad.id} créée en attente (approbation automatique programmée)")
+                logger.info("Annonce %s créée en attente (approbation automatique programmée)", ad.id)
             else:
                 # Si l'utilisateur est vérifié, envoyer l'email de confirmation immédiatement
                 send_ad_published_email.delay(ad.id)
-                print(f"Annonce {ad.id} créée et approuvée (email envoyé)")
+                logger.info("Annonce %s créée et approuvée (email envoyé)", ad.id)
 
             # Ajouter les images avec validation (une erreur sur une photo ne bloque pas l'annonce)
             import logging

@@ -101,8 +101,6 @@ def password_change(request: HttpRequest) -> HttpResponse:
                 },
                 fail_silently=False,
             )
-            # Log dev
-            print(f"[OTP] Password change code for user {request.user.id}: {otp.code}")
             messages.info(
                 request, "Code envoyé par email. Saisissez-le pour confirmer le changement."
             )
