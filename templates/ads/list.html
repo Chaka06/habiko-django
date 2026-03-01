@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{% if selected_city %}{{ selected_city.name }} · {% endif %}Annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} · KIABA Rencontres{% endblock %}
-{% block description %}{% if selected_city %}Découvrez les meilleures annonces adultes{% if selected_category %} {{ selected_category|title }}{% endif %} à {{ selected_city.name }}, Côte d'Ivoire sur KIABA Rencontres : escort girls, escort boys et transgenres.{% else %}KIABA Rencontres - Site de petites annonces adultes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces vérifiées : escort girls, escort boys et transgenres à Abidjan, Bouaké, Daloa et dans toute la Côte d'Ivoire.{% endif %}{% endblock %}
-{% block keywords %}{% if selected_city %}rencontres adultes {{ selected_city.name|lower }}, {{ selected_city.name|lower }}, {% endif %}kiaba, kiaba rencontres, escort girl, escort boy, transgenre, annonces adultes, escorte côte d'ivoire{% endblock %}
+{% block title %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} – Escort Girl {{ selected_city.name }} · KIABA{% elif selected_city and selected_category == 'escorte_boy' %}Escort Boy {{ selected_city.name }} · KIABA Rencontres{% elif selected_city and selected_category == 'transgenre' %}Transgenre {{ selected_city.name }} – Bizi Trans · KIABA{% elif selected_city %}Bizi {{ selected_city.name }} – Annonces Adultes · KIABA{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort Girl Côte d'Ivoire · KIABA{% elif selected_category == 'escorte_boy' %}Escort Boy Côte d'Ivoire – Bizi Boy · KIABA{% elif selected_category == 'transgenre' %}Transgenre Escorte Côte d'Ivoire – Bizi Trans · KIABA{% else %}Bizi – Annonces Adultes Côte d'Ivoire · KIABA Rencontres{% endif %}{% endblock %}
+{% block description %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} : escort girls, prostituées et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA, site Nº1 Côte d'Ivoire.{% elif selected_city and selected_category == 'escorte_boy' %}Escort boys et bizi boy à {{ selected_city.name }}, Côte d'Ivoire. Massage sexuel, rencontres adultes. Annonces vérifiées sur KIABA Rencontres.{% elif selected_city and selected_category == 'transgenre' %}Escortes transgenres et bizi trans à {{ selected_city.name }}, Côte d'Ivoire. Services adultes : massage, finition, rencontres. Annonces vérifiées KIABA.{% elif selected_city %}Bizi {{ selected_city.name }} – escort girls, escort boys, transgenres et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA.{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort girls et prostituées en Côte d'Ivoire : massage sexuel, sodomie, finition, partouze. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA, site Nº1.{% elif selected_category == 'escorte_boy' %}Escort boys et bizi en Côte d'Ivoire : massage sexuel, rencontres adultes, finition. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA Rencontres.{% elif selected_category == 'transgenre' %}Escortes transgenres (bizi trans) en Côte d'Ivoire : massage sexuel, sodomie, services adultes. Annonces vérifiées sur KIABA, site Nº1.{% else %}KIABA – Site Nº1 Bizi & escortes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces adultes vérifiées : escort girls, escort boys, transgenres, massage sexuel, sodomie, finition.{% endif %}{% endblock %}
+{% block keywords %}{% if selected_city %}bizi {{ selected_city.name|lower }}, escorte {{ selected_city.name|lower }}, prostituée {{ selected_city.name|lower }}, rencontre adulte {{ selected_city.name|lower }}, {% endif %}{% if selected_category == 'escorte_girl' %}bizi, escort girl, prostituée, escorte erotique, sodomie, massage sexuel, finition, jedolo, baise, {% elif selected_category == 'escorte_boy' %}escort boy, bizi boy, massage sexuel, rencontre homme, {% elif selected_category == 'transgenre' %}transgenre, bizi trans, escorte trans, sodomie, massage sexuel, {% endif %}kiaba, bizi abidjan, escorte côte d'ivoire, annonces adultes, site sexe côte d'ivoire{% endblock %}
 {% block canonical_url %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 {% block hreflang_fr_ci %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
 {% block hreflang_default %}https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
@@ -95,13 +95,32 @@
   <div class="flex-1">
 <header class="mb-3 md:mb-4">
   <h1 class="text-2xl font-bold text-gray-900">
-    {% if selected_city %}Annonces adultes {{ selected_category|default:"escorte"}} à {{ selected_city.name }}, Côte d'Ivoire · KIABA Rencontres{% elif selected_category %}Annonces {{ selected_category|title }} en Côte d'Ivoire · KIABA Rencontres{% else %}Annonces Adultes en Côte d'Ivoire · KIABA Rencontres{% endif %}
+    {% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} – Escort Girl {{ selected_city.name }}, Côte d'Ivoire
+    {% elif selected_city and selected_category == 'escorte_boy' %}Escort Boy {{ selected_city.name }}, Côte d'Ivoire – KIABA
+    {% elif selected_city and selected_category == 'transgenre' %}Transgenre {{ selected_city.name }} – Bizi Trans, Côte d'Ivoire
+    {% elif selected_city %}Bizi {{ selected_city.name }} – Annonces Adultes Côte d'Ivoire · KIABA
+    {% elif selected_category == 'escorte_girl' %}Bizi CI – Escort Girl &amp; Prostituée Côte d'Ivoire · KIABA
+    {% elif selected_category == 'escorte_boy' %}Escort Boy &amp; Bizi Boy Côte d'Ivoire · KIABA Rencontres
+    {% elif selected_category == 'transgenre' %}Transgenre &amp; Bizi Trans Côte d'Ivoire · KIABA
+    {% else %}Bizi – Annonces Adultes Côte d'Ivoire · KIABA Rencontres{% endif %}
   </h1>
   <p class="text-sm text-gray-600 mt-1">
-    {% if selected_city %}
-      Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire : escort girls, escort boys et transgenres.
+    {% if selected_city and selected_category == 'escorte_girl' %}
+      Escort girls et prostituées à {{ selected_city.name }} : massage sexuel, sodomie, finition, bizi 24h. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city and selected_category == 'escorte_boy' %}
+      Escort boys à {{ selected_city.name }} : massage sexuel, rencontres adultes. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city and selected_category == 'transgenre' %}
+      Escortes transgenres à {{ selected_city.name }} : massage sexuel, services adultes, bizi trans. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city %}
+      Escort girls, escort boys, transgenres et bizi à {{ selected_city.name }}, Côte d'Ivoire. Annonces adultes vérifiées.
+    {% elif selected_category == 'escorte_girl' %}
+      Escort girls et prostituées en Côte d'Ivoire : massage sexuel, sodomie, finition, partouze. Annonces vérifiées sur KIABA.
+    {% elif selected_category == 'escorte_boy' %}
+      Escort boys en Côte d'Ivoire : massage sexuel, rencontres adultes, finition. Annonces vérifiées sur KIABA.
+    {% elif selected_category == 'transgenre' %}
+      Escortes transgenres en Côte d'Ivoire : massage sexuel, services adultes, sodomie. Annonces vérifiées sur KIABA.
     {% else %}
-      Parcourez des annonces adultes vérifiées dans toute la Côte d'Ivoire.
+      Site Nº1 Bizi & escortes en Côte d'Ivoire. Escort girls, escort boys, transgenres — massage sexuel, sodomie, finition, partouze.
     {% endif %}
   </p>
 </header>
@@ -260,6 +279,41 @@
     </nav>
   </div>
 {% endif %}
+
+<!-- Bloc SEO textuel bas de page -->
+<section class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">
+  <h2 class="text-lg font-bold text-gray-800 mb-3">
+    {% if selected_category == 'escorte_girl' %}Escort Girl &amp; Bizi en Côte d'Ivoire – KIABA
+    {% elif selected_category == 'escorte_boy' %}Escort Boy en Côte d'Ivoire – KIABA Rencontres
+    {% elif selected_category == 'transgenre' %}Transgenre &amp; Bizi Trans en Côte d'Ivoire
+    {% elif selected_city %}Bizi et Escortes à {{ selected_city.name }} – KIABA
+    {% else %}KIABA – Site Nº1 Bizi &amp; Escortes Côte d'Ivoire{% endif %}
+  </h2>
+  <p class="text-sm text-gray-600 leading-relaxed">
+    {% if selected_category == 'escorte_girl' %}
+      <strong>KIABA</strong> est le site Nº1 des <strong>escort girls</strong>, <strong>bizi</strong> et <strong>prostituées</strong> en Côte d'Ivoire.
+      Parcourez nos annonces de <strong>bizi Abidjan</strong>, <strong>bizi Bouaké</strong>, <strong>bizi Daloa</strong> et de toutes les villes ivoiriennes.
+      Services disponibles : <strong>massage sexuel</strong>, <strong>sodomie</strong>, <strong>finition</strong>, <strong>massage partouze</strong>, <strong>bizi 24h</strong>.
+      Contactez directement les annonceurs par WhatsApp, SMS ou appel.
+    {% elif selected_category == 'escorte_boy' %}
+      <strong>KIABA</strong> est le site Nº1 des <strong>escort boys</strong> et <strong>bizi boys</strong> en Côte d'Ivoire.
+      Trouvez des escort boys à <strong>Abidjan</strong>, <strong>Bouaké</strong>, <strong>Daloa</strong> et dans tout le pays.
+      Services disponibles : <strong>massage sexuel</strong>, <strong>massage du corps</strong>, <strong>finition</strong>, rencontres adultes consensuelles.
+    {% elif selected_category == 'transgenre' %}
+      <strong>KIABA</strong> est le site Nº1 des <strong>escortes transgenres</strong> et <strong>bizi trans</strong> en Côte d'Ivoire.
+      Trouvez des annonces de transgenres à <strong>Abidjan</strong>, <strong>Bouaké</strong>, <strong>Daloa</strong> et dans tout le pays.
+      Services disponibles : <strong>massage sexuel</strong>, <strong>sodomie</strong>, <strong>finition</strong>, rencontres adultes.
+    {% elif selected_city %}
+      <strong>KIABA</strong> référence les meilleures annonces de <strong>bizi</strong> et d'escortes à <strong>{{ selected_city.name }}</strong>.
+      Escort girls, escort boys, transgenres — <strong>massage sexuel</strong>, <strong>sodomie</strong>, <strong>finition</strong>, <strong>bizi 24h</strong>.
+      Toutes les annonces sont vérifiées. Contactez directement par WhatsApp, SMS ou appel.
+    {% else %}
+      <strong>KIABA</strong> est le site Nº1 du <strong>bizi</strong> et des <strong>escortes</strong> en Côte d'Ivoire.
+      Escort girls (<strong>bizi girl</strong>), escort boys (<strong>bizi boy</strong>), transgenres — <strong>massage sexuel</strong>, <strong>sodomie</strong>, <strong>finition</strong>, <strong>massage partouze</strong>, <strong>jedolo</strong> et bien plus.
+      Des milliers d'annonces vérifiées à <a href="/ads?city=abidjan" class="text-pink-600 hover:text-pink-800 underline">Abidjan</a>, <a href="/ads?city=bouake" class="text-pink-600 hover:text-pink-800 underline">Bouaké</a>, <a href="/ads?city=daloa" class="text-pink-600 hover:text-pink-800 underline">Daloa</a>, <a href="/ads?city=yamoussoukro" class="text-pink-600 hover:text-pink-800 underline">Yamoussoukro</a> et dans toutes les villes de Côte d'Ivoire.
+    {% endif %}
+  </p>
+</section>
 
 <!-- Bouton Créer une annonce en bas -->
 <section class="mt-8" style="background: linear-gradient(to right, #ec4899, #3b82f6); color: #fff; padding: 2rem 1rem; border-radius: 0.5rem; text-align: center;">

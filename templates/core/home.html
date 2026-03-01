@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}KIABA : Annonces Rencontres, Massages, Escortes en Côte d'Ivoire{% endblock %}
-{% block description %}Site Nº1 des annonces rencontres, massages et escortes en Côte d'Ivoire, CI. Plus de {{ total_approved_ads }} annonces. Escort girls, escort boys, transgenres. Abidjan, Bouaké, Daloa, Yamoussoukro.{% endblock %}
-{% block keywords %}kiaba, kiaba rencontres, escort girl, escort boy, transgenre, annonces adultes, escorte côte d'ivoire, site de rencontre adulte, abidjan, bouaké, daloa, yamoussoukro{% endblock %}
+{% block title %}KIABA Bizi – Site Nº1 Escortes & Rencontres Adultes Côte d'Ivoire{% endblock %}
+{% block description %}KIABA – Site Nº1 Bizi, escortes et rencontres adultes en Côte d'Ivoire. Escort girls, escort boys, transgenres, massage sexuel, sodomie, finition. Plus de {{ total_approved_ads }} annonces vérifiées à Abidjan, Bouaké, Daloa.{% endblock %}
+{% block keywords %}bizi, bizzi, bizi abidjan, bizi 24, kiaba, kiaba rencontres, prostituée abidjan, prostitution côte d'ivoire, escort girl abidjan, escort boy, transgenre, escorte erotique, escorte erotic, sodomie, massage sexuel, massage partouze, finition, jedolo, baise abidjan, rencontre adulte côte d'ivoire, site sexe côte d'ivoire, abidjan, bouaké, daloa, yamoussoukro{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -9,10 +9,10 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "KIABA Rencontres",
-        "alternateName": "KIABA",
-        "keywords": "kiaba, kiaba rencontres, escort girl, escort boy, transgenre, annonces adultes, escorte côte d'ivoire",
+  "alternateName": ["KIABA", "Bizi CI", "Site Escorte Côte d'Ivoire"],
+  "keywords": "bizi, bizzi, escort girl, escort boy, transgenre, escorte erotique, prostituée côte d'ivoire, sodomie, massage sexuel, finition, jedolo, kiaba rencontres, annonces adultes côte d'ivoire",
   "url": "https://ci-kiaba.com",
-        "description": "Site Nº1 des annonces rencontres, massages et escortes en Côte d'Ivoire, CI. Escort girls, escort boys, transgenres.",
+  "description": "KIABA – Site Nº1 Bizi, escortes et rencontres adultes en Côte d'Ivoire. Escort girls, escort boys, transgenres, massage sexuel, sodomie, finition.",
   "inLanguage": "fr-CI",
   "publisher": {
     "@type": "Organization",
@@ -28,9 +28,46 @@
     "@type": "SearchAction",
     "target": "https://ci-kiaba.com/ads?q={search_term_string}",
     "query-input": "required name=search_term_string"
-  },
-  "sameAs": [
-    "https://ci-kiaba.com"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "C'est quoi le bizi en Côte d'Ivoire ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Le « bizi » est un terme populaire ivoirien désignant les services d'escorte et de rencontres adultes. Sur KIABA, vous trouverez des annonces d'escort girls, escort boys et transgenres proposant divers services (massage sexuel, sodomie, finition, partouze) à Abidjan et dans toute la Côte d'Ivoire."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment trouver une escorte à Abidjan ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "KIABA est le site Nº1 pour trouver des escortes à Abidjan et en Côte d'Ivoire. Parcourez les annonces d'escort girls, escort boys et transgenres, filtrez par ville (Abidjan, Bouaké, Daloa) et contactez directement l'annonceur par WhatsApp, SMS ou appel."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment contacter une escorte sur KIABA ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sur KIABA, chaque annonce affiche les méthodes de contact acceptées par l'escorte : WhatsApp, SMS ou appel téléphonique. Cliquez sur l'annonce qui vous intéresse et contactez directement l'annonceur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels services proposent les escortes sur KIABA ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Les annonces sur KIABA proposent une variété de services adultes : massage sexuel, massage du corps, sex vaginal, sodomie (sex anal), finition, partouze et bien d'autres. Chaque annonceur précise ses services dans sa fiche."
+      }
+    }
   ]
 }
 </script>
@@ -41,13 +78,13 @@
 <section class="bg-gradient-to-br from-pink-500 to-blue-500 text-white py-16 md:py-24">
   <div class="max-w-7xl mx-auto px-4 text-center">
     <h1 class="text-4xl md:text-6xl font-bold mb-6">
-      KIABA Rencontres - Site Adultes en Côte d'Ivoire
+      KIABA – Site Nº1 Bizi &amp; Escortes en Côte d'Ivoire
       <span class="block text-2xl md:text-3xl font-normal text-white">
-        Escort girls, escort boys et transgenres disponibles près de chez vous
+        Escort girls, escort boys, transgenres &amp; services adultes à Abidjan
       </span>
     </h1>
     <p class="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto">
-      Rencontres adultes, massages sensuels et services d'escorte. 
+      Bizi 24h/24 — massage sexuel, sodomie, finition, partouze et plus encore.
       Plus de <strong>{{ total_approved_ads }}</strong> annonces vérifiées en Côte d'Ivoire.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -185,52 +222,79 @@
   </div>
 </section>
 
+<!-- Recherches populaires (maillage interne + signaux SEO) -->
+<section class="bg-gray-50 py-10">
+  <div class="max-w-4xl mx-auto px-4">
+    <h2 class="text-xl font-bold text-gray-800 mb-5 text-center">Recherches populaires sur KIABA</h2>
+    <div class="flex flex-wrap gap-2 justify-center">
+      <a href="/ads?category=escorte_girl&city=abidjan" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Bizi Abidjan</a>
+      <a href="/ads?category=escorte_girl" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Escort girl Côte d'Ivoire</a>
+      <a href="/ads?category=escorte_boy" class="px-3 py-1.5 bg-white border border-blue-200 rounded-full text-sm text-blue-700 hover:bg-blue-50 transition">Escort boy Abidjan</a>
+      <a href="/ads?category=transgenre" class="px-3 py-1.5 bg-white border border-purple-200 rounded-full text-sm text-purple-700 hover:bg-purple-50 transition">Transgenre escorte CI</a>
+      <a href="/ads" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Bizi 24h Abidjan</a>
+      <a href="/ads" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">Massage sexuel Abidjan</a>
+      <a href="/ads" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">Escorte érotique CI</a>
+      <a href="/ads?category=escorte_girl&city=bouake" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Bizi Bouaké</a>
+      <a href="/ads?category=escorte_girl&city=daloa" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Bizi Daloa</a>
+      <a href="/ads?category=escorte_girl&city=yamoussoukro" class="px-3 py-1.5 bg-white border border-pink-200 rounded-full text-sm text-pink-700 hover:bg-pink-50 transition">Bizi Yamoussoukro</a>
+      <a href="/ads?category=transgenre&city=abidjan" class="px-3 py-1.5 bg-white border border-purple-200 rounded-full text-sm text-purple-700 hover:bg-purple-50 transition">Transgenre Abidjan</a>
+      <a href="/ads" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:bg-gray-100 transition">Prostituée Abidjan</a>
+    </div>
+  </div>
+</section>
+
 <!-- SEO Content -->
 <section class="bg-white py-16">
   <div class="max-w-4xl mx-auto px-4">
     <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">
-      Pourquoi choisir KIABA Rencontres ?
+      Pourquoi choisir KIABA – Le site Nº1 Bizi en Côte d'Ivoire ?
     </h2>
     <div class="prose max-w-none">
       <p class="text-lg text-gray-600 mb-6">
-        <strong>KIABA Rencontres</strong> est la plateforme dédiée aux adultes en Côte d'Ivoire. 
-        Rencontrez des <strong>escort girls</strong>, <strong>escort boys</strong> et <strong>personnes transgenres</strong> pour des rendez-vous privés, massages sensuels et services d'escorte.
+        <strong>KIABA</strong> est la plateforme Nº1 de <strong>bizi</strong>, d'escortes et de rencontres adultes en Côte d'Ivoire.
+        Que vous recherchiez une <a href="/ads?category=escorte_girl" class="text-pink-600 hover:text-pink-800 font-semibold underline">escort girl</a>, un <a href="/ads?category=escorte_boy" class="text-pink-600 hover:text-pink-800 font-semibold underline">escort boy</a> ou une <a href="/ads?category=transgenre" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte transgenre</a>,
+        KIABA met à votre disposition des milliers d'annonces vérifiées à <a href="/ads?city=abidjan" class="text-pink-600 hover:text-pink-800 font-semibold underline">Abidjan</a>, <a href="/ads?city=bouake" class="text-pink-600 hover:text-pink-800 font-semibold underline">Bouaké</a>, <a href="/ads?city=daloa" class="text-pink-600 hover:text-pink-800 font-semibold underline">Daloa</a> et partout en Côte d'Ivoire.
       </p>
-      
-      <h3 class="text-xl font-bold text-gray-900 mb-4">KIABA : Votre partenaire pour les rencontres adultes</h3>
+
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Services adultes disponibles sur KIABA</h3>
       <p class="text-lg text-gray-600 mb-4">
-        <strong>KIABA</strong> comprend les besoins des utilisateurs majeurs et offre une expérience 
-        discrète et adaptée pour publier ou trouver des annonces de services adultes : rencontres, escortes, massages et services intimes consensuels.
+        Les escortes sur KIABA proposent une large gamme de services adultes consensuels : <strong>massage sexuel</strong>, <strong>massage du corps</strong>,
+        <strong>sex vaginal</strong>, <strong>sodomie</strong> (sex anal), <strong>finition</strong>, <strong>massage partouze</strong> et bien d'autres prestations.
+        Chaque annonceur précise ses services et ses méthodes de contact (WhatsApp, SMS, appel direct).
       </p>
-      
-      <h3 class="text-xl font-bold text-gray-900 mb-4">Nos avantages :</h3>
+
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Bizi Abidjan – Retrouvez les meilleures escortes 24h/24</h3>
+      <p class="text-lg text-gray-600 mb-4">
+        Le <strong>bizi Abidjan</strong> est facilement accessible sur KIABA. Nos annonces de <strong>bizi 24h</strong> couvrent tous les quartiers d'Abidjan —
+        Cocody, Yopougon, Plateau, Marcory, Abobo — et toutes les grandes villes ivoiriennes.
+        Filtrez par catégorie (<strong>escorte girl</strong>, <strong>escorte boy</strong>, <strong>transgenre</strong>) et par ville pour trouver le profil qui vous correspond.
+      </p>
+
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Nos avantages</h3>
       <ul class="list-disc list-inside text-gray-600 space-y-2 mb-6">
-        <li><strong>Annonces vérifiées</strong> : contrôle manuel pour limiter les faux profils et arnaques</li>
-        <li><strong>Couverture nationale</strong> : Présent dans plus de 100 villes de Côte d'Ivoire (Abidjan, Bouaké, Daloa, Yamoussoukro, etc.)</li>
-        <li><strong>Discrétion</strong> : aucune donnée sensible affichée publiquement (numéros masqués jusqu'au clic)</li>
-        <li><strong>Gratuit</strong> : publication et consultation d'annonces gratuites</li>
-        <li><strong>Mobile-friendly</strong> : interface optimisée pour smartphones et tablettes</li>
-        <li><strong>Photos multiples</strong> : jusqu'à 5 photos par annonce pour mieux visualiser</li>
+        <li><strong>Annonces vérifiées</strong> – contrôle manuel pour limiter les faux profils et arnaques</li>
+        <li><strong>100+ villes couvertes</strong> – Abidjan, Bouaké, Daloa, Yamoussoukro, San-Pédro, Korhogo…</li>
+        <li><strong>Discrétion totale</strong> – numéros masqués jusqu'au clic, aucune donnée sensible affichée</li>
+        <li><strong>Gratuit</strong> – publication et consultation d'annonces 100 % gratuite</li>
+        <li><strong>Photos obligatoires</strong> – chaque annonce contient au moins une vraie photo</li>
+        <li><strong>Mobile-friendly</strong> – interface optimisée pour smartphones et tablettes</li>
       </ul>
-      
-      <p class="text-lg text-gray-600 mb-4">
-        Rejoignez les utilisateurs majeurs qui font confiance à <strong>KIABA</strong> 
-        pour leurs rencontres adultes en Côte d'Ivoire. Que vous cherchiez une <a href="/ads?category=escorte_girl" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte girl</a>, 
-        un <a href="/ads?category=escorte_boy" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte boy</a> ou une <a href="/ads?category=transgenre" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte transgenre</a> dans votre ville, 
-        <strong>KIABA Rencontres</strong> est votre plateforme de référence. <a href="/ads" class="text-pink-600 hover:text-pink-800 font-semibold underline">Consultez toutes nos annonces adultes</a>.
+
+      <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Questions fréquentes sur les escortes en Côte d'Ivoire</h3>
+
+      <p class="text-lg text-gray-600 mb-3">
+        <strong>C'est quoi le bizi ?</strong><br>
+        Le terme <strong>« bizi »</strong> (ou <em>bizzi</em>) est un mot populaire ivoirien (nouchi) désignant les services d'escorte et de rencontres adultes tarifées.
+        Sur KIABA, vous trouverez des centaines d'annonces de <strong>bizi Abidjan</strong>, <strong>bizi Bouaké</strong>, <strong>bizi Daloa</strong> et d'autres villes.
       </p>
-      
-      <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Recherches populaires sur KIABA :</h3>
-      <p class="text-lg text-gray-600 mb-4">
-        Les utilisateurs recherchent souvent : <a href="/ads?category=escorte_girl&city=abidjan" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte girl Abidjan</a>, <a href="/ads?category=escorte_boy" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte boy</a>, 
-        <a href="/ads?category=transgenre" class="text-pink-600 hover:text-pink-800 font-semibold underline">escorte transgenre</a>, <a href="/ads" class="text-pink-600 hover:text-pink-800 font-semibold underline">massage sexuel</a>, 
-        et d'autres services adultes en Côte d'Ivoire.
+
+      <p class="text-lg text-gray-600 mb-3">
+        <strong>C'est quoi le jedolo ?</strong><br>
+        Le <strong>jedolo</strong> est un terme ivoirien désignant des services sexuels. Sur KIABA, retrouvez des annonces proposant ce type de service dans votre ville.
       </p>
-      
+
       <p class="text-lg text-gray-600">
-        <strong>KIABA Rencontres</strong> répond à toutes ces recherches en offrant une plateforme complète, sécurisée et adaptée 
-        au public adulte en Côte d'Ivoire. Que vous soyez à <a href="/ads?city=abidjan" class="text-pink-600 hover:text-pink-800 font-semibold underline">Abidjan</a>, <a href="/ads?city=bouake" class="text-pink-600 hover:text-pink-800 font-semibold underline">Bouaké</a>, <a href="/ads?city=daloa" class="text-pink-600 hover:text-pink-800 font-semibold underline">Daloa</a>, <a href="/ads?city=yamoussoukro" class="text-pink-600 hover:text-pink-800 font-semibold underline">Yamoussoukro</a> ou dans toute autre ville de Côte d'Ivoire, 
-        <strong>KIABA</strong> est votre destination pour les rencontres adultes. <a href="/post" class="text-pink-600 hover:text-pink-800 font-semibold underline">Publiez votre annonce gratuitement</a> dès aujourd'hui.
+        <a href="/post" class="text-pink-600 hover:text-pink-800 font-semibold underline">Publiez votre annonce gratuitement</a> dès aujourd'hui et rejoignez la communauté KIABA, le site Nº1 du sexe et des escortes en Côte d'Ivoire.
       </p>
     </div>
   </div>
