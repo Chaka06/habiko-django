@@ -1,6 +1,5 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
 import bleach
 from .models import Ad, City
 from accounts.validators import E164_VALIDATOR
@@ -174,65 +173,6 @@ class AdForm(forms.Form):
         help_text="Sélectionnez les moyens par lesquels les clients peuvent vous contacter",
     )
 
-    image1 = forms.ImageField(
-        required=False,
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": ".jpg,.jpeg,.png,.webp",
-            }
-        ),
-        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
-        label="Photo 1",
-    )
-
-    image2 = forms.ImageField(
-        required=False,
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": ".jpg,.jpeg,.png,.webp",
-            }
-        ),
-        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
-        label="Photo 2",
-    )
-
-    image3 = forms.ImageField(
-        required=False,
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": ".jpg,.jpeg,.png,.webp",
-            }
-        ),
-        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
-        label="Photo 3",
-    )
-
-    image4 = forms.ImageField(
-        required=False,
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": ".jpg,.jpeg,.png,.webp",
-            }
-        ),
-        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
-        label="Photo 4",
-    )
-
-    image5 = forms.ImageField(
-        required=False,
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
-                "accept": ".jpg,.jpeg,.png,.webp",
-            }
-        ),
-        validators=[FileExtensionValidator(allowed_extensions=_ALLOWED_IMAGE_EXTENSIONS), _validate_image_file],
-        label="Photo 5",
-    )
 
     def clean_description(self):
         description = self.cleaned_data["description"]

@@ -82,6 +82,29 @@ def post(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             phone1 = (form.cleaned_data.get("phone1") or "").strip()
             phone2 = (form.cleaned_data.get("phone2") or "").strip()
+
+            # Validation des photos : au moins 1 obligatoire, max 5, taille et MIME
+            uploaded_images = request.FILES.getlist("images")
+            image_error = None
+            if not uploaded_images:
+                image_error = "Au moins une photo est obligatoire pour publier une annonce."
+            elif len(uploaded_images) > 5:
+                image_error = "Vous ne pouvez pas envoyer plus de 5 photos."
+            else:
+                for img in uploaded_images:
+                    if img.size > 5 * 1024 * 1024:
+                        image_error = f"Photo « {img.name} » trop volumineuse (max 5 Mo)."
+                        break
+                    if not img.content_type.startswith("image/"):
+                        image_error = f"Fichier « {img.name} » n'est pas une image valide."
+                        break
+            if image_error:
+                return render(request, "core/post.html", {
+                    "form": form,
+                    "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES)),
+                    "image_error": image_error,
+                })
+
             if _phone_used_by_other_account(phone1, request.user):
                 form.add_error("phone1", "Ce numéro est déjà utilisé par un autre compte.")
                 return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
@@ -178,29 +201,14 @@ def post(request: HttpRequest) -> HttpResponse:
                 # Le broker Celery (Redis) est indisponible : l'annonce est créée, la tâche sera ignorée.
                 logger.exception("Impossible de dispatcher la tâche Celery pour annonce %s : %s", ad.id, e)
 
-            # Ajouter les images avec validation (une erreur sur une photo ne bloque pas l'annonce)
-            image_fields = ["image1", "image2", "image3", "image4", "image5"]
+            # Enregistrer les images (déjà validées avant la création de l'annonce)
             images_added = 0
-
-            for i, field_name in enumerate(image_fields):
-                if field_name in request.FILES and request.FILES[field_name]:
-                    image = request.FILES[field_name]
-
-                    # Validation de la taille
-                    if image.size > 5 * 1024 * 1024:  # 5MB max
-                        messages.error(request, f"Photo {image.name} trop volumineuse (max 5MB).")
-                        return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
-
-                    # Validation du type MIME
-                    if not image.content_type.startswith("image/"):
-                        messages.error(request, f"Fichier {image.name} n'est pas une image.")
-                        return render(request, "core/post.html", {"form": form, "subcategory_choices_json": json.dumps(list(Ad.SUBCATEGORY_CHOICES))})
-
-                    try:
-                        AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
-                        images_added += 1
-                    except Exception as e:
-                        logger.exception("Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e)
+            for image in uploaded_images:
+                try:
+                    AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
+                    images_added += 1
+                except Exception as e:
+                    logger.exception("Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e)
 
             # En liste, l'annonce n'apparaît qu'une fois toutes les images traitées (filigrane + miniature)
             if images_added and getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", False):
@@ -286,10 +294,23 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
             request.user.save()
 
             # Gérer les nouvelles images - remplacer toutes les images existantes
-            if any(
-                field_name in request.FILES and request.FILES[field_name]
-                for field_name in ["image1", "image2", "image3", "image4", "image5"]
-            ):
+            new_images = request.FILES.getlist("images")
+            if new_images:
+                # Validation : max 5, taille, MIME
+                image_error = None
+                if len(new_images) > 5:
+                    image_error = "Vous ne pouvez pas envoyer plus de 5 photos."
+                else:
+                    for img in new_images:
+                        if img.size > 5 * 1024 * 1024:
+                            image_error = f"Photo « {img.name} » trop volumineuse (max 5 Mo)."
+                            break
+                        if not img.content_type.startswith("image/"):
+                            image_error = f"Fichier « {img.name} » n'est pas une image valide."
+                            break
+                if image_error:
+                    return render(request, "core/edit_ad.html", {"form": form, "ad": ad, "image_error": image_error})
+
                 # Supprimer toutes les images existantes
                 existing_media = AdMedia.objects.filter(ad=ad)
                 for media in existing_media:
@@ -297,33 +318,16 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                         media.image.delete(save=False)
                     media.delete()
 
-                # Ajouter les nouvelles images
-                image_fields = ["image1", "image2", "image3", "image4", "image5"]
+                # Enregistrer les nouvelles images
                 images_added = 0
-
-                for i, field_name in enumerate(image_fields):
-                    if field_name in request.FILES and request.FILES[field_name]:
-                        image = request.FILES[field_name]
-
-                        # Validation de la taille
-                        if image.size > 5 * 1024 * 1024:  # 5MB max
-                            messages.error(
-                                request, f"Photo {image.name} trop volumineuse (max 5MB)."
-                            )
-                            return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
-
-                        # Validation du type MIME
-                        if not image.content_type.startswith("image/"):
-                            messages.error(request, f"Fichier {image.name} n'est pas une image.")
-                            return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
-
-                        try:
-                            AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
-                            images_added += 1
-                        except Exception as e:
-                            logger.exception(
-                                "Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e
-                            )
+                for image in new_images:
+                    try:
+                        AdMedia.objects.create(ad=ad, image=image, is_primary=(images_added == 0))
+                        images_added += 1
+                    except Exception as e:
+                        logger.exception(
+                            "Erreur enregistrement photo annonce %s (photo ignorée): %s", ad.id, e
+                        )
 
                 if images_added and getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", False):
                     ad.image_processing_done = False
