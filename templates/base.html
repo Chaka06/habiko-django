@@ -468,6 +468,12 @@
     </style>
 
     {% block extra_head %}{% endblock %}
+    <!-- Empêche le zoom automatique iOS Safari sur les champs de formulaire (font-size < 16px) -->
+    <style>
+      @media (max-width: 768px) {
+        input, select, textarea { font-size: 16px !important; }
+      }
+    </style>
   </head>
   <body class="min-h-full bg-gradient-to-b from-pink-50 to-white">
     {% block header %}
