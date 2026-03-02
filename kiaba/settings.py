@@ -212,8 +212,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # Compression gzip pour améliorer les performances
-    "core.middleware.GZipCompressionMiddleware",
+    # Compression gzip (built-in Django — non-bloquant, optimisé)
+    "django.middleware.gzip.GZipMiddleware",
     # Cache agressif pour static / media (images d'annonces)
     "core.middleware.StaticMediaCacheMiddleware",
     # En dev on désactive les redirections HTTP->HTTPS pour pouvoir utiliser http://127.0.0.1

@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.db.models import Q, F, Case, When, Value, IntegerField
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
@@ -8,9 +9,24 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Ad, City
 
 
-@cache_page(900)  # 15 min par URL (/?city=…&category=…&page=…)
-@require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
+    q = request.GET.get("q", "").strip()
+
+    # Les recherches libres (?q=…) sont uniques et rempliraient le cache inutilement.
+    # On ne met en cache que les pages de navigation (city, category, page).
+    if not q:
+        return _ad_list_cached(request)
+    return _ad_list_view(request, q)
+
+
+@cache_page(900)  # 15 min par combinaison city/category/page
+@require_GET
+def _ad_list_cached(request: HttpRequest) -> HttpResponse:
+    return _ad_list_view(request, q="")
+
+
+@require_GET
+def _ad_list_view(request: HttpRequest, q: str) -> HttpResponse:
     # prefetch_related("media") complet : certaines annonces créées avant la refonte
     # n'ont pas is_primary=True, un Prefetch filtré les rendrait invisibles (LCP = lazy image = 5s+)
     qs = (
@@ -39,7 +55,6 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             qs = qs.filter(user_id=int(provider))
         else:
             qs = qs.filter(user__username=provider)
-    q = request.GET.get("q", "").strip()
     if q:
         q_search = Q(title__icontains=q) | Q(description_sanitized__icontains=q)
         for sub in Ad.SUBCATEGORY_CHOICES:
@@ -49,21 +64,14 @@ def ad_list(request: HttpRequest) -> HttpResponse:
 
     # Pagination - 10 annonces par page
     paginator = Paginator(qs, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     # Cache des villes (elles changent rarement)
-    from django.core.cache import cache
     cities = cache.get("all_cities")
     if cities is None:
         cities = list(City.objects.all())
-        cache.set("all_cities", cities, 86400)  # 24h — les villes changent très rarement
+        cache.set("all_cities", cities, 86400)  # 24h
 
-    from core.context_processors import CACHE_KEY_TOTAL_ADS, CACHE_TTL
-    total_approved_ads = cache.get(CACHE_KEY_TOTAL_ADS)
-    if total_approved_ads is None:
-        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).count()
-        cache.set(CACHE_KEY_TOTAL_ADS, total_approved_ads, CACHE_TTL)
     return render(
         request,
         "ads/list.html",
@@ -75,7 +83,6 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "selected_city": selected_city,
             "selected_category": selected_category,
             "category_choices": Ad.Category.choices,
-            "total_approved_ads": total_approved_ads,
         },
     )
 
@@ -85,6 +92,11 @@ def search_suggestions(request: HttpRequest) -> JsonResponse:
     q = (request.GET.get("q") or "").strip()[:80]
     if len(q) < 2:
         return JsonResponse({"suggestions": []})
+
+    cache_key = f"search_suggestions_{q.lower()}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse({"suggestions": cached})
 
     q_lower = q.lower()
     suggestions = []
@@ -109,7 +121,9 @@ def search_suggestions(request: HttpRequest) -> JsonResponse:
         if title and title not in [s.get("label") for s in suggestions]:
             suggestions.append({"type": "title", "label": title[:60] + ("…" if len(title) > 60 else ""), "value": title})
 
-    return JsonResponse({"suggestions": suggestions[:15]})
+    result = suggestions[:15]
+    cache.set(cache_key, result, 300)  # 5 min
+    return JsonResponse({"suggestions": result})
 
 
 @cache_page(120)  # 2 min par annonce (contenu stable)

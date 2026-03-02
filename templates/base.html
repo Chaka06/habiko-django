@@ -247,11 +247,7 @@
     <meta name="theme-color" content="#ec4899" />
 
     {% block tailwind_css %}{% endblock %} {% block htmx_js %}
-    <script>
-      (function(){ function l(){ var s=document.createElement('script'); s.src='https://unpkg.com/htmx.org@1.9.12'; s.defer=true; document.head.appendChild(s); }
-      if (document.readyState==='complete') setTimeout(l,0); else window.addEventListener('load',l);
-      })();
-    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
     {% endblock %}
 
     <!-- Google Fonts : non-bloquant (1.3KB CSS bloquait 750ms le rendu).
