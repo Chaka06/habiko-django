@@ -217,6 +217,9 @@ def auto_approve_ad(self, ad_id: int):
         ad.status = Ad.Status.APPROVED
         ad.save(update_fields=["status", "updated_at"])
 
+        from core.context_processors import invalidate_site_metrics_cache
+        invalidate_site_metrics_cache()
+
         # Envoyer l'email de confirmation
         send_ad_published_email.delay(ad.id)
 

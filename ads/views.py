@@ -7,37 +7,36 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from .models import Ad, City
+from core.context_processors import get_ad_list_version
+
+AD_LIST_CACHE_TTL = 900  # 15 min
 
 
+@require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
+    city = request.GET.get("city", "")
+    category = request.GET.get("category", "")
+    provider = request.GET.get("provider", "")
+    page = request.GET.get("page", "1")
     q = request.GET.get("q", "").strip()
 
-    # Les recherches libres (?q=…) sont uniques et rempliraient le cache inutilement.
-    # On ne met en cache que les pages de navigation (city, category, page).
+    # Les recherches libres (?q=…) sont uniques : pas de cache pour ne pas le polluer.
+    # Les pages de navigation (city/category/page) sont mises en cache avec une clé
+    # versionnée — invalider la version suffit à rafraîchir toutes les pages d'un coup.
+    cache_key = None
     if not q:
-        return _ad_list_cached(request)
-    return _ad_list_view(request, q)
+        version = get_ad_list_version()
+        cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{page}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
 
-
-@cache_page(900)  # 15 min par combinaison city/category/page
-@require_GET
-def _ad_list_cached(request: HttpRequest) -> HttpResponse:
-    return _ad_list_view(request, q="")
-
-
-@require_GET
-def _ad_list_view(request: HttpRequest, q: str) -> HttpResponse:
-    # prefetch_related("media") complet : certaines annonces créées avant la refonte
-    # n'ont pas is_primary=True, un Prefetch filtré les rendrait invisibles (LCP = lazy image = 5s+)
     qs = (
         Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")
         .order_by("-is_premium", "-is_urgent", "-created_at")
     )
-    city = request.GET.get("city")
-    category = request.GET.get("category")
-    provider = request.GET.get("provider")
     selected_city = None
     selected_category = None
 
@@ -62,17 +61,15 @@ def _ad_list_view(request: HttpRequest, q: str) -> HttpResponse:
                 q_search |= Q(subcategories__contains=[sub])
         qs = qs.filter(q_search)
 
-    # Pagination - 10 annonces par page
     paginator = Paginator(qs, 10)
-    page_obj = paginator.get_page(request.GET.get("page"))
+    page_obj = paginator.get_page(page)
 
-    # Cache des villes (elles changent rarement)
     cities = cache.get("all_cities")
     if cities is None:
         cities = list(City.objects.all())
         cache.set("all_cities", cities, 86400)  # 24h
 
-    return render(
+    response = render(
         request,
         "ads/list.html",
         {
@@ -85,6 +82,11 @@ def _ad_list_view(request: HttpRequest, q: str) -> HttpResponse:
             "category_choices": Ad.Category.choices,
         },
     )
+
+    if cache_key is not None:
+        cache.set(cache_key, response, AD_LIST_CACHE_TTL)
+
+    return response
 
 
 def search_suggestions(request: HttpRequest) -> JsonResponse:

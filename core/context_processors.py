@@ -6,13 +6,26 @@ from django.db import models
 # Clés de cache partagées avec ads/views (invalider quand le nombre d'annonces change)
 CACHE_KEY_TOTAL_ADS = "total_approved_ads"
 CACHE_KEY_POPULAR_CITIES = "popular_cities_footer"
+CACHE_KEY_AD_LIST_VERSION = "ad_list_version"
 CACHE_TTL = 300  # 5 min
+
+
+def get_ad_list_version() -> int:
+    """Retourne la version courante du cache de la liste d'annonces."""
+    v = cache.get(CACHE_KEY_AD_LIST_VERSION)
+    if v is None:
+        v = 1
+        cache.set(CACHE_KEY_AD_LIST_VERSION, v, None)  # pas d'expiration
+    return v
 
 
 def invalidate_site_metrics_cache():
     """À appeler après approbation/rejet/archivage d'annonces pour rafraîchir le footer et les compteurs."""
     cache.delete(CACHE_KEY_TOTAL_ADS)
     cache.delete(CACHE_KEY_POPULAR_CITIES)
+    # Incrémenter la version force la régénération de toutes les pages de liste
+    v = cache.get(CACHE_KEY_AD_LIST_VERSION) or 1
+    cache.set(CACHE_KEY_AD_LIST_VERSION, v + 1, None)
 
 
 def site_metrics(request):
