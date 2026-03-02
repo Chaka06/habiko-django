@@ -179,13 +179,18 @@
   </section>
 </div>
 
+<style>
+  #delete-modal.flex { background: rgba(0,0,0,0.5); }
+</style>
+
 <!-- Modal de confirmation de suppression -->
-<div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+<div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full px-8 py-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-1">Supprimer l'annonce</h2>
     <p class="text-gray-500 text-sm mb-1">Vous êtes sur le point de supprimer :</p>
     <p class="font-semibold text-gray-900 mb-4" id="delete-modal-title"></p>
-    <p class="text-red-500 text-sm mb-6"><i class="bx bx-error-circle"></i> Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
+    <p class="text-red-500 text-sm mb-4"><i class="bx bx-error-circle"></i> Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
+    <p class="text-red-600 text-sm font-medium mb-6 hidden" id="delete-error-msg"></p>
     <div class="flex gap-3">
       <button id="delete-cancel-btn" class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition text-sm">Annuler</button>
       <button id="delete-confirm-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition text-sm">Supprimer définitivement</button>
@@ -199,10 +204,12 @@
   var modalTitle = document.getElementById('delete-modal-title');
   var cancelBtn = document.getElementById('delete-cancel-btn');
   var confirmBtn = document.getElementById('delete-confirm-btn');
+  var errorMsg = document.getElementById('delete-error-msg');
   var currentAdId = null;
+  var csrfToken = '{{ csrf_token }}';
 
   function showModal() { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-  function hideModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); currentAdId = null; }
+  function hideModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); errorMsg.classList.add('hidden'); currentAdId = null; }
 
   document.querySelectorAll('.delete-ad-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -219,20 +226,30 @@
     if (!currentAdId) return;
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Suppression…';
+    errorMsg.classList.add('hidden');
+
     fetch('/delete/' + currentAdId + '/', {
       method: 'POST',
-      headers: {'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''},
+      headers: { 'X-CSRFToken': csrfToken },
       credentials: 'same-origin'
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) { throw new Error('Erreur serveur ' + r.status); }
+      return r.json();
+    })
     .then(function(data) {
       if (data.ok) {
         var card = document.querySelector('[data-ad-card="' + currentAdId + '"]');
         if (card) card.remove();
         hideModal();
+      } else {
+        throw new Error('Suppression refusée');
       }
     })
-    .catch(function() {})
+    .catch(function(err) {
+      errorMsg.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+      errorMsg.classList.remove('hidden');
+    })
     .finally(function() {
       confirmBtn.disabled = false;
       confirmBtn.textContent = 'Supprimer définitivement';
