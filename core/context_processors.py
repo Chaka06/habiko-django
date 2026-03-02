@@ -41,8 +41,6 @@ def site_metrics(request):
     return {
         "total_approved_ads": total_approved_ads,
         "GA_MEASUREMENT_ID": getattr(settings, "GA_MEASUREMENT_ID", None),
-        "ADSENSE_PUBLISHER_ID": getattr(settings, "ADSENSE_PUBLISHER_ID", None),
-        "ADSENSE_ENABLED": getattr(settings, "ADSENSE_ENABLED", False),
         "popular_cities_footer": popular_cities,
         "ENABLE_AGE_GATE": getattr(settings, "ENABLE_AGE_GATE", False),
     }

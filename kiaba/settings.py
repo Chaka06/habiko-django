@@ -712,12 +712,6 @@ if not USE_SUPABASE_STORAGE:
 # Google Analytics
 GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default=None)
 
-# Google AdSense
-ADSENSE_PUBLISHER_ID = env(
-    "ADSENSE_PUBLISHER_ID", default="ca-pub-3273662002214639"
-)  # Format: ca-pub-XXXXXXXXXX
-ADSENSE_ENABLED = env("ADSENSE_ENABLED", default="True").lower() in ("true", "1", "yes")
-
 # Celery (broker/backend via Redis ou base de données)
 REDIS_URL = env("REDIS_URL", default=None)
 if REDIS_URL and REDIS_URL.strip():

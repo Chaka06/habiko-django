@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- GA chargé après load pour ne pas bloquer LCP/TBT (AdSense est dans le head pour validation propriété) -->
+    <!-- GA chargé après load pour ne pas bloquer LCP/TBT -->
     {% if GA_MEASUREMENT_ID %}
     <script>
       (function(){
@@ -109,12 +109,6 @@
       name="google-site-verification"
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
-    <!-- AdSense : script dans le head pour la validation propriété (le robot ne voit pas le JS injecté après load) -->
-    {% if ADSENSE_PUBLISHER_ID %}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_PUBLISHER_ID|escapejs }}"
-         crossorigin="anonymous"></script>
-    {% endif %}
-
     <!-- Preconnect CDN -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
