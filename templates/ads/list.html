@@ -294,11 +294,50 @@
   </div>
 </section>
 
-<!-- Zone publicitaire Google AdSense (en bas de page) -->
-<section class="mt-8 flex justify-center">
-  <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 min-h-[280px] flex items-center justify-center w-full max-w-[336px] mx-auto">
-    {% load adsense_tags %}
-    {% adsense_ad ad_format="rectangle" class_name="adsense-container w-full" ad_style="display:block; min-height: 250px;" %}
+<!-- Barre catégories / sous-catégories -->
+<section class="mt-8 bg-white border border-blue-100 rounded-xl px-4 py-3">
+  <div class="flex flex-wrap items-center gap-x-0 gap-y-2">
+
+    {# Catégories #}
+    <a href="/ads?category=escorte_girl"
+       class="text-pink-600 hover:text-pink-800 font-medium text-sm transition whitespace-nowrap px-2">
+      Escorte girl
+    </a>
+    <span class="text-blue-200 select-none">|</span>
+    <a href="/ads?category=escorte_boy"
+       class="text-pink-600 hover:text-pink-800 font-medium text-sm transition whitespace-nowrap px-2">
+      Escorte boy
+    </a>
+    <span class="text-blue-200 select-none">|</span>
+    <a href="/ads?category=transgenre"
+       class="text-pink-600 hover:text-pink-800 font-medium text-sm transition whitespace-nowrap px-2">
+      Transgenre
+    </a>
+
+    {# Séparateur entre catégories et sous-catégories #}
+    <span class="text-blue-300 select-none font-bold px-1">|</span>
+
+    {# Sous-catégories #}
+    <a href="/ads?q=Sex+vaginal"
+       class="text-pink-500 hover:text-pink-700 text-sm transition whitespace-nowrap px-2">
+      Sex vaginal
+    </a>
+    <span class="text-blue-200 select-none">|</span>
+    <a href="/ads?q=Sex+anal"
+       class="text-pink-500 hover:text-pink-700 text-sm transition whitespace-nowrap px-2">
+      Sex anal (sodomie)
+    </a>
+    <span class="text-blue-200 select-none">|</span>
+    <a href="/ads?q=Massage+sexuel"
+       class="text-pink-500 hover:text-pink-700 text-sm transition whitespace-nowrap px-2">
+      Massage sexuel
+    </a>
+    <span class="text-blue-200 select-none">|</span>
+    <a href="/ads?q=Massage+du+corps"
+       class="text-pink-500 hover:text-pink-700 text-sm transition whitespace-nowrap px-2">
+      Massage du corps
+    </a>
+
   </div>
 </section>
 
