@@ -736,10 +736,20 @@ CELERY_TASK_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULE = {
-    # Archive les annonces dont expires_at est dépassé — tous les jours à minuit CI
-    "expire-ads-daily": {
+    # Supprime les annonces dont expires_at est dépassé — toutes les heures
+    "expire-ads-hourly": {
         "task": "ads.tasks.expire_ads",
-        "schedule": 60 * 60 * 24,  # toutes les 24h
+        "schedule": 60 * 60,  # toutes les heures
+    },
+    # Email J-1 : notifie les utilisateurs dont l'annonce expire dans ~24h — toutes les heures
+    "notify-expiring-24h": {
+        "task": "ads.tasks.notify_expiring_soon_24h",
+        "schedule": 60 * 60,  # toutes les heures
+    },
+    # Email H-1 : notifie les utilisateurs dont l'annonce expire dans ~1h — toutes les 15 minutes
+    "notify-expiring-1h": {
+        "task": "ads.tasks.notify_expiring_soon_1h",
+        "schedule": 60 * 15,  # toutes les 15 minutes
     },
     # Remet les annonces boostées en tête de liste pour 2h — tous les jours à minuit UTC
     "promote-boosted-ads-daily": {

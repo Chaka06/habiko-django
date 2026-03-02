@@ -186,7 +186,7 @@ def post(request: HttpRequest) -> HttpResponse:
                 city=form.cleaned_data["city"],
                 additional_data=additional_data,
                 status=Ad.Status.PENDING,
-                expires_at=timezone.now() + timezone.timedelta(days=30),
+                expires_at=timezone.now() + timezone.timedelta(days=5),
             )
 
             # Enregistrer les images (déjà validées avant la création de l'annonce)

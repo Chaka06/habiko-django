@@ -105,6 +105,10 @@ class Ad(models.Model):
 
     features = models.ManyToManyField(Feature, through="AdFeature", blank=True)
 
+    # Flags anti-doublon pour les emails de pré-expiration
+    expiry_notified_24h = models.BooleanField(default=False, help_text=_("Email d'avertissement J-1 déjà envoyé"))
+    expiry_notified_1h = models.BooleanField(default=False, help_text=_("Email d'avertissement H-1 déjà envoyé"))
+
     # False tant que le traitement async (filigrane + miniature) des photos n'est pas terminé
     image_processing_done = models.BooleanField(
         default=True,
@@ -154,9 +158,9 @@ class Ad(models.Model):
         # Initialize contacts_clicks structure
         if not self.contacts_clicks:
             self.contacts_clicks = {"sms": 0, "whatsapp": 0, "call": 0}
-        # Set default expiration to 14 days if not set
+        # Durée de vie par défaut : 5 jours
         if not self.expires_at:
-            self.expires_at = timezone.now() + timezone.timedelta(days=14)
+            self.expires_at = timezone.now() + timezone.timedelta(days=5)
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:  # pragma: no cover

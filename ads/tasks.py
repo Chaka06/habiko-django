@@ -39,27 +39,139 @@ def process_ad_media_image(self, media_id: int):
 @shared_task
 def expire_ads():
     """
-    Archive les annonces dont la date d'expiration est dépassée.
-    (Remplace l'ancienne suppression — les annonces payées restent consultables.)
+    Supprime définitivement les annonces dont la date d'expiration est dépassée.
+    Envoie l'email d'expiration puis supprime l'annonce et ses médias du storage.
     """
-    from accounts.tasks import send_ad_expiration_email
+    import logging
+    from accounts.email_service import EmailService
+    from django.conf import settings
 
+    logger = logging.getLogger(__name__)
     now = timezone.now()
-    expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED)
+    expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED).select_related("user", "city").prefetch_related("media")
     count = 0
 
     for ad in expired:
         try:
-            send_ad_expiration_email.delay(ad.id)
+            # Email d'expiration
+            EmailService.send_email(
+                subject=f"Votre annonce '{ad.title}' a expiré et a été supprimée",
+                to_emails=[ad.user.email],
+                template_name="account/email/ad_expiration",
+                context={
+                    "user": ad.user,
+                    "ad": ad,
+                    "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
+                },
+                fail_silently=True,
+            )
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning("Email expiration annonce %s: %s", ad.id, e)
+            logger.warning("Email expiration annonce %s: %s", ad.id, e)
 
-        ad.status = Ad.Status.ARCHIVED
-        ad.save(update_fields=["status"])
+        # Supprimer les fichiers media du storage
+        for media in ad.media.all():
+            try:
+                if media.image:
+                    media.image.delete(save=False)
+                if media.thumbnail:
+                    media.thumbnail.delete(save=False)
+            except Exception as e:
+                logger.warning("Erreur suppression fichier media %s: %s", media.id, e)
+
+        ad.delete()
         count += 1
 
-    return f"{count} annonces archivées"
+    return f"{count} annonces supprimées"
+
+
+@shared_task
+def notify_expiring_soon_24h():
+    """
+    Envoie un email d'avertissement J-1 aux utilisateurs dont l'annonce expire
+    dans les prochaines 23h–25h. Le flag expiry_notified_24h évite les doublons.
+    """
+    import logging
+    from accounts.email_service import EmailService
+    from django.conf import settings
+
+    logger = logging.getLogger(__name__)
+    now = timezone.now()
+    window_start = now + timezone.timedelta(hours=23)
+    window_end = now + timezone.timedelta(hours=25)
+
+    ads = Ad.objects.filter(
+        status=Ad.Status.APPROVED,
+        expires_at__gte=window_start,
+        expires_at__lte=window_end,
+        expiry_notified_24h=False,
+    ).select_related("user", "city")
+
+    count = 0
+    for ad in ads:
+        try:
+            EmailService.send_email(
+                subject=f"Votre annonce expire demain – KIABA Rencontres",
+                to_emails=[ad.user.email],
+                template_name="account/email/ad_expiration_warning_24h",
+                context={
+                    "user": ad.user,
+                    "ad": ad,
+                    "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
+                },
+                fail_silently=True,
+            )
+            ad.expiry_notified_24h = True
+            ad.save(update_fields=["expiry_notified_24h"])
+            count += 1
+        except Exception as e:
+            logger.warning("Email J-1 annonce %s: %s", ad.id, e)
+
+    return f"{count} emails J-1 envoyés"
+
+
+@shared_task
+def notify_expiring_soon_1h():
+    """
+    Envoie un email d'avertissement H-1 aux utilisateurs dont l'annonce expire
+    dans les prochaines 45min–75min. Le flag expiry_notified_1h évite les doublons.
+    """
+    import logging
+    from accounts.email_service import EmailService
+    from django.conf import settings
+
+    logger = logging.getLogger(__name__)
+    now = timezone.now()
+    window_start = now + timezone.timedelta(minutes=45)
+    window_end = now + timezone.timedelta(minutes=75)
+
+    ads = Ad.objects.filter(
+        status=Ad.Status.APPROVED,
+        expires_at__gte=window_start,
+        expires_at__lte=window_end,
+        expiry_notified_1h=False,
+    ).select_related("user", "city")
+
+    count = 0
+    for ad in ads:
+        try:
+            EmailService.send_email(
+                subject=f"Votre annonce expire dans 1 heure – KIABA Rencontres",
+                to_emails=[ad.user.email],
+                template_name="account/email/ad_expiration_warning_1h",
+                context={
+                    "user": ad.user,
+                    "ad": ad,
+                    "ad_url": f"{settings.SITE_URL}/ads/{ad.slug}/",
+                },
+                fail_silently=True,
+            )
+            ad.expiry_notified_1h = True
+            ad.save(update_fields=["expiry_notified_1h"])
+            count += 1
+        except Exception as e:
+            logger.warning("Email H-1 annonce %s: %s", ad.id, e)
+
+    return f"{count} emails H-1 envoyés"
 
 
 @shared_task
