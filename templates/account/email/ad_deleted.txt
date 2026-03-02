@@ -1,0 +1,21 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+Votre annonce a été supprimée définitivement de la plateforme {{ site_name }} conformément à votre demande.
+
+--- Détails de l'annonce supprimée ---
+Titre : {{ ad_title }}
+Catégorie : {{ ad_category }}
+Statut : Supprimée définitivement
+
+Si vous souhaitez à nouveau apparaître sur la plateforme, publiez une nouvelle annonce :
+{{ site_url }}/post/
+
+Tableau de bord : {{ site_url }}/dashboard/
+
+---
+Vous n'avez pas effectué cette suppression ?
+Contactez-nous immédiatement : {{ support_email }}
+
+---
+Merci d'utiliser {{ site_name }}.
+{{ site_url }}

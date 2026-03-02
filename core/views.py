@@ -1,8 +1,9 @@
 import json
 import logging
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
@@ -14,6 +15,7 @@ from ads.models import Ad, AdMedia
 from ads.forms import AdForm
 from accounts.models import Profile
 from accounts.tasks import send_ad_published_email
+from accounts.email_service import EmailService
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -342,6 +344,23 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         )
 
     return render(request, "core/edit_ad.html", {"form": form, "ad": ad})
+
+
+@login_required
+@require_POST
+def delete_ad(request: HttpRequest, ad_id: int) -> JsonResponse:
+    ad = get_object_or_404(Ad, id=ad_id, user=request.user)
+    ad_title = ad.title
+    ad_category = ad.get_category_display()
+    EmailService.send_email(
+        subject="Votre annonce a été supprimée – KIABA Rencontres",
+        to_emails=[request.user.email],
+        template_name="account/email/ad_deleted",
+        context={"user": request.user, "ad_title": ad_title, "ad_category": ad_category},
+        fail_silently=True,
+    )
+    ad.delete()
+    return JsonResponse({"ok": True})
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:

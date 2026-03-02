@@ -3,59 +3,58 @@
 {% block email_title %}Votre annonce est en ligne - {{ site_name }}{% endblock %}
 
 {% block email_content %}
-<h1 class="main-title"><i class="bx bx-party"></i> Votre annonce est en ligne !</h1>
+<h1 class="main-title">Votre annonce est en ligne !</h1>
 
 <p>Félicitations <strong>{{ user.get_full_name|default:user.username }}</strong> !</p>
 
 <p>Votre annonce a été publiée avec succès sur <strong>{{ site_name }}</strong> et est maintenant visible par tous les visiteurs de la plateforme.</p>
 
 <div class="info-box">
-    <h3><i class="bx bx-check-circle"></i> Publication réussie</h3>
+    <h3>{% include "account/email/icons/check.html" %} Publication réussie</h3>
     <p style="margin-bottom: 0;">Les visiteurs peuvent maintenant consulter votre annonce, voir vos photos et vous contacter directement.</p>
 </div>
 
 <div class="details">
-    <h3>📋 Détails de votre annonce :</h3>
+    <h3>Détails de votre annonce :</h3>
     <dl>
-        <dt><i class="bx bx-pin"></i> Titre :</dt>
+        <dt>{% include "account/email/icons/bullet.html" %} Titre :</dt>
         <dd><strong>{{ ad.title }}</strong></dd>
-        
-        <dt><i class="bx bx-purchase-tag"></i> Catégorie :</dt>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Catégorie :</dt>
         <dd>{{ ad.get_category_display }}</dd>
-        
-        <dt><i class="bx bx-map"></i> Ville :</dt>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Ville :</dt>
         <dd>{{ ad.city.name }}</dd>
-        
-        <dt><i class="bx bx-calendar"></i> Date de publication :</dt>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Date de publication :</dt>
         <dd>{{ ad.created_at|date:"d/m/Y à H:i" }}</dd>
-        
-        <dt><i class="bx bx-time"></i> Expiration :</dt>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Expiration :</dt>
         <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }} (dans {{ ad.expires_at|timeuntil }})</dd>
     </dl>
 </div>
 
 <div class="button-container">
-    <a href="{{ ad_url }}" class="button"><i class="bx bx-show"></i> Voir mon annonce</a>
+    <a href="{{ ad_url }}" class="button">Voir mon annonce</a>
 </div>
 
 <div class="info-box">
-    <h3><i class="bx bx-bulb"></i> Conseil pour maximiser vos chances :</h3>
+    <h3>{% include "account/email/icons/bullet.html" %} Conseil pour maximiser vos chances :</h3>
     <ul>
-        <li><i class="bx bxs-star"></i> <strong>Boostez votre annonce</strong> pour la mettre en tête de liste</li>
-        <li><i class="bx bxs-hot"></i> Ajoutez le badge <strong>"URGENT"</strong> pour attirer l'attention</li>
-        <li><i class="bx bx-camera"></i> Assurez-vous d'avoir ajouté des photos de qualité</li>
-        <li><i class="bx bx-phone"></i> Vérifiez que vos coordonnées sont à jour</li>
+        <li>{% include "account/email/icons/star.html" %} <strong>Boostez votre annonce</strong> pour la mettre en tête de liste</li>
+        <li>{% include "account/email/icons/star.html" %} Ajoutez le badge <strong>"URGENT"</strong> pour attirer l'attention</li>
+        <li>{% include "account/email/icons/bullet.html" %} Assurez-vous d'avoir ajouté des photos de qualité</li>
+        <li>{% include "account/email/icons/bullet.html" %} Vérifiez que vos coordonnées sont à jour</li>
     </ul>
 </div>
 
 <p style="text-align: center; margin-top: 25px;">
-    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;"><i class="bx bx-bar-chart-alt-2"></i> Accéder à mon tableau de bord</a>
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;">Accéder à mon tableau de bord</a>
 </p>
 
 <div class="warning-box">
-    <p style="margin: 0;"><strong><i class="bx bx-error"></i> Rappel :</strong> Votre annonce expirera automatiquement le {{ ad.expires_at|date:"d/m/Y" }}. Pensez à la renouveler ou la prolonger avant cette date.</p>
+    <p style="margin: 0;"><strong>{% include "account/email/icons/warning.html" %} Rappel :</strong> Votre annonce expirera automatiquement le {{ ad.expires_at|date:"d/m/Y" }}. Pensez à la renouveler ou la prolonger avant cette date.</p>
 </div>
 
 <p style="font-size: 13px; color: #666666; text-align: center;">Des questions ? Contactez-nous : <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
 {% endblock %}
-

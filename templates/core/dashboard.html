@@ -98,7 +98,7 @@
     {% if ads %}
       <div class="space-y-4">
         {% for ad in ads %}
-          <div class="border rounded-lg p-4 hover:bg-gray-50 transition hover:shadow-md">
+          <div class="border rounded-lg p-4 hover:bg-gray-50 transition hover:shadow-md" data-ad-card="{{ ad.id }}">
             <div class="flex flex-col sm:flex-row items-start gap-4">
               <!-- Miniature -->
               <div class="w-full sm:w-24 h-32 sm:h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
@@ -154,6 +154,13 @@
                       <i class="bx bx-edit text-base"></i>
                       <span>Modifier</span>
                     </a>
+                    <button type="button"
+                      class="delete-ad-btn inline-flex items-center justify-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]"
+                      data-ad-id="{{ ad.id }}"
+                      data-ad-title="{{ ad.title|escapejs }}">
+                      <i class="bx bx-trash text-base"></i>
+                      <span>Supprimer</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -171,4 +178,70 @@
     {% endif %}
   </section>
 </div>
+
+<!-- Modal de confirmation de suppression -->
+<div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 px-4">
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+    <h2 class="text-lg font-bold text-gray-900 mb-2">Supprimer l'annonce</h2>
+    <p class="text-gray-600 mb-1">Vous êtes sur le point de supprimer :</p>
+    <p class="font-semibold text-gray-900 mb-4" id="delete-modal-title"></p>
+    <p class="text-red-600 text-sm font-medium mb-6">⚠ Cette action est irréversible. L'annonce sera définitivement supprimée.</p>
+    <div class="flex gap-3">
+      <button id="delete-cancel-btn" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition">Annuler</button>
+      <button id="delete-confirm-btn" class="flex-1 px-4 py-2.5 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">Supprimer définitivement</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var modal = document.getElementById('delete-modal');
+  var modalTitle = document.getElementById('delete-modal-title');
+  var cancelBtn = document.getElementById('delete-cancel-btn');
+  var confirmBtn = document.getElementById('delete-confirm-btn');
+  var currentAdId = null;
+
+  document.querySelectorAll('.delete-ad-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentAdId = this.dataset.adId;
+      modalTitle.textContent = '"' + this.dataset.adTitle + '"';
+      modal.classList.remove('hidden');
+    });
+  });
+
+  cancelBtn.addEventListener('click', function() {
+    modal.classList.add('hidden');
+    currentAdId = null;
+  });
+
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) { modal.classList.add('hidden'); currentAdId = null; }
+  });
+
+  confirmBtn.addEventListener('click', function() {
+    if (!currentAdId) return;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Suppression…';
+    fetch('/delete/' + currentAdId + '/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''},
+      credentials: 'same-origin'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        var card = document.querySelector('[data-ad-card="' + currentAdId + '"]');
+        if (card) card.remove();
+        modal.classList.add('hidden');
+      }
+    })
+    .catch(function() {})
+    .finally(function() {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Supprimer définitivement';
+      currentAdId = null;
+    });
+  });
+})();
+</script>
 {% endblock %}

@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.landing, name="landing"),
     path("post/", views.post, name="post"),
     path("edit/<int:ad_id>/", views.edit_ad, name="edit_ad"),
+    path("delete/<int:ad_id>/", views.delete_ad, name="delete_ad"),
     path("dashboard/", views.dashboard, name="dashboard"),
     # Légal
     path("legal/tos", views.legal_tos, name="legal_tos"),
