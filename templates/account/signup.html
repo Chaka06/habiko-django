@@ -72,8 +72,7 @@
                  class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none"
                  {% if form.password1.field.required %}required{% endif %}>
           <span class="password-toggle" data-target-id="{{ form.password1.id_for_label }}" aria-label="Afficher ou masquer le mot de passe">
-            <i class="bx bx-show eye-on"></i>
-            <i class="bx bx-hide eye-off hidden"></i>
+            <i class="bx bx-show"></i>
           </span>
         </div>
         {{ form.password1.errors }}
@@ -88,8 +87,7 @@
                  class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none"
                  {% if form.password2.field.required %}required{% endif %}>
           <span class="password-toggle" data-target-id="{{ form.password2.id_for_label }}" aria-label="Afficher ou masquer le mot de passe">
-            <i class="bx bx-show eye-on"></i>
-            <i class="bx bx-hide eye-off hidden"></i>
+            <i class="bx bx-show"></i>
           </span>
         </div>
         {{ form.password2.errors }}
@@ -111,23 +109,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.password-toggle').forEach(function (toggle) {
       toggle.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target-id');
-        const input = document.getElementById(targetId);
-        const eyeOn = this.querySelector('.eye-on');
-        const eyeOff = this.querySelector('.eye-off');
-        if (!input) return;
+        const input = document.getElementById(this.getAttribute('data-target-id'));
+        const icon = this.querySelector('i');
+        if (!input || !icon) return;
         if (input.type === 'password') {
           input.type = 'text';
-          if (eyeOn && eyeOff) {
-            eyeOn.classList.add('hidden');
-            eyeOff.classList.remove('hidden');
-          }
+          icon.classList.replace('bx-show', 'bx-hide');
         } else {
           input.type = 'password';
-          if (eyeOn && eyeOff) {
-            eyeOn.classList.remove('hidden');
-            eyeOff.classList.add('hidden');
-          }
+          icon.classList.replace('bx-hide', 'bx-show');
         }
       });
     });
