@@ -4,7 +4,7 @@ from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 from .models import Ad, City
 
 
@@ -134,8 +134,8 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
     return render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
 
 
+@csrf_exempt
 @require_POST
-@ensure_csrf_cookie
 def record_ad_view(request: HttpRequest, slug: str) -> JsonResponse:
     """
     Enregistre une vue pour l'annonce (appelé côté client après 5 secondes sur la page détail).
