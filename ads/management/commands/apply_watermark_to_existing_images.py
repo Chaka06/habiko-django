@@ -84,12 +84,10 @@ class Command(BaseCommand):
                     image_path = media.image.path if hasattr(media.image, 'path') else media.image.name
                     self.stdout.write(f"  Traitement: {image_path}")
                     
-                    # Appliquer le filigrane
-                    result = media._add_watermark()
+                    # Appliquer le filigrane + régénérer le thumbnail
+                    result = media._add_watermark_and_thumbnail()
                     if result:
-                        # Sauvegarder l'image modifiée (même si le fichier a été écrit directement)
-                        # Cela met à jour les métadonnées dans la base de données
-                        media.save(update_fields=[])  # Sauvegarder sans mettre à jour de champs spécifiques
+                        media.save(update_fields=["image", "thumbnail"])
                         processed += 1
                         self.stdout.write(
                             self.style.SUCCESS(f"  ✓ Filigrane appliqué: {media.image.name} (Ad #{media.ad_id})")

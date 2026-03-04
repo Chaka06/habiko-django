@@ -330,7 +330,7 @@ class AdMedia(models.Model):
                 img_rgb.save(
                     output,
                     format="WEBP",
-                    quality=65,
+                    quality=60,
                     method=6,
                     optimize=True,
                 )
@@ -347,7 +347,7 @@ class AdMedia(models.Model):
                         rgb_img = Image.new("RGB", img.size, (255, 255, 255))
                         rgb_img.paste(img, mask=img.split()[3])
                         img = rgb_img
-                    img.save(output, format="JPEG", quality=65, optimize=True, progressive=True)
+                    img.save(output, format="JPEG", quality=60, optimize=True, progressive=True)
 
             output.seek(0)
             image_content = output.read()
@@ -382,7 +382,7 @@ class AdMedia(models.Model):
             thumb_img.save(
                 thumb_output,
                 format="WEBP",
-                quality=65,
+                quality=50,
                 method=6,
                 optimize=True,
             )
