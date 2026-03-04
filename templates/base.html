@@ -109,18 +109,15 @@
       name="google-site-verification"
       content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
     />
-    <!-- Preconnect CDN -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <!-- Preconnect origines utilisées -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://uagqyedwkyqbaowbornm.storage.supabase.co" crossorigin />
     <!-- Preload image LCP critique (WebP prioritaire) -->
-    <link rel="preload" href="{% static 'img/logo.webp' %}?v=1" as="image" type="image/webp" />
-    <!-- Tailwind : preload (téléchargement anticipé) + link synchrone
-         IMPORTANT : async CSS (onload trick) → body reflow complet → CLS 1.000 catastrophique.
-         On garde le chargement synchrone pour CLS = 0. -->
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <link rel="preload" href="{% static 'img/logo.webp' %}?v=2" as="image" type="image/webp" />
+    <!-- Tailwind CSS purgé (27 KiB local vs 249 KiB CDN) : chargement synchrone pour CLS = 0 -->
+    <link rel="preload" href="{% static 'css/tailwind.min.css' %}?v=1" as="style" />
+    <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}?v=1" />
     <!-- Boxicons CSS : différé (icônes uniquement sous la fold : dashboard, login) -->
     <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" /></noscript>
@@ -475,15 +472,15 @@
         <a href="/" class="text-2xl font-semibold tracking-tight text-gray-900">
       <div class="logo-container">
             <picture>
-              <source srcset="{% static 'img/logo.webp' %}?v=1" type="image/webp" />
+              <source srcset="{% static 'img/logo.webp' %}?v=2" type="image/webp" />
               <img
                 src="{% static 'img/logo.png' %}?v=3"
                 alt="KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire"
                 class="h-12 md:h-16 w-auto"
                 loading="eager"
                 fetchpriority="high"
-                width="320"
-                height="133"
+                width="256"
+                height="106"
               />
             </picture>
           </div>
