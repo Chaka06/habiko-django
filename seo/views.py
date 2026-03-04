@@ -6,6 +6,7 @@ def robots_txt(_: object) -> HttpResponse:
     # Format standard : pas de BOM, fin par newline. Sitemap URL absolue valide.
     content = (
         "User-agent: *\n"
+        "Allow: /accounts/u/\n"
         "Disallow: /admin/\n"
         "Disallow: /auth/\n"
         "Disallow: /accounts/\n"

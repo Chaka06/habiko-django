@@ -114,15 +114,16 @@
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Preload image LCP critique -->
-    <link rel="preload" href="{% static 'img/logo.png' %}?v=3" as="image" />
+    <!-- Preload image LCP critique (WebP prioritaire) -->
+    <link rel="preload" href="{% static 'img/logo.webp' %}?v=1" as="image" type="image/webp" />
     <!-- Tailwind : preload (téléchargement anticipé) + link synchrone
          IMPORTANT : async CSS (onload trick) → body reflow complet → CLS 1.000 catastrophique.
          On garde le chargement synchrone pour CLS = 0. -->
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" as="style" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-    <!-- Boxicons CSS : synchrone (icônes dans le header = above-fold) -->
-    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+    <!-- Boxicons CSS : différé (icônes uniquement sous la fold : dashboard, login) -->
+    <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" /></noscript>
 
     <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
     <script type="application/ld+json">
@@ -473,15 +474,18 @@
       >
         <a href="/" class="text-2xl font-semibold tracking-tight text-gray-900">
       <div class="logo-container">
-            <img
-              src="{% static 'img/logo.png' %}?v=3"
-              alt="KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire"
-              class="h-12 md:h-16 w-auto"
-              loading="eager"
-              fetchpriority="high"
-              width="264"
-              height="112"
-            />
+            <picture>
+              <source srcset="{% static 'img/logo.webp' %}?v=1" type="image/webp" />
+              <img
+                src="{% static 'img/logo.png' %}?v=3"
+                alt="KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire"
+                class="h-12 md:h-16 w-auto"
+                loading="eager"
+                fetchpriority="high"
+                width="320"
+                height="133"
+              />
+            </picture>
           </div>
         </a>
         <nav class="hidden md:flex items-center gap-3">
@@ -530,7 +534,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
           <!-- Navigation -->
           <div>
-            <h3 class="font-semibold text-gray-900 mb-3">Navigation</h3>
+            <p class="font-semibold text-gray-900 mb-3">Navigation</p>
             <ul class="space-y-2 text-sm text-gray-600">
               <li>
                 <a href="/ads" class="hover:text-pink-600 transition-colors"
@@ -565,7 +569,7 @@
           <!-- Villes populaires (SEO - maillage interne) -->
           {% if popular_cities_footer %}
           <div>
-            <h3 class="font-semibold text-gray-900 mb-3">Villes populaires</h3>
+            <p class="font-semibold text-gray-900 mb-3">Villes populaires</p>
             <ul class="space-y-2 text-sm text-gray-600">
               {% for city in popular_cities_footer %}
               <li>
@@ -582,7 +586,7 @@
 
           <!-- Contact -->
           <div>
-            <h3 class="font-semibold text-gray-900 mb-3">Contact</h3>
+            <p class="font-semibold text-gray-900 mb-3">Contact</p>
             <ul class="space-y-2 text-sm text-gray-600">
               <li>
                 Email:

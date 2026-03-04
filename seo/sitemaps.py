@@ -28,7 +28,6 @@ class StaticSitemap(KiabaSitemapBase):
         return [
             "landing",
             "ad_list",
-            "post",
             "legal_tos",
             "legal_privacy",
             "legal_content_policy",
