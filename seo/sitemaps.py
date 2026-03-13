@@ -26,7 +26,6 @@ class StaticSitemap(KiabaSitemapBase):
 
     def items(self):
         return [
-            "landing",
             "ad_list",
             "legal_tos",
             "legal_privacy",
@@ -34,8 +33,6 @@ class StaticSitemap(KiabaSitemapBase):
         ]
 
     def location(self, item):
-        if item == "landing":
-            return "/"
         return reverse(item)
 
     def lastmod(self, item):
@@ -53,7 +50,7 @@ class AdSitemap(KiabaSitemapBase):
         return Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).select_related("city").order_by("-updated_at")
 
     def location(self, obj: Ad):
-        return f"/ads/{obj.slug}"
+        return f"/ads/{obj.slug}/"
 
     def lastmod(self, obj: Ad):
         return obj.updated_at
@@ -68,7 +65,7 @@ class CitySitemap(KiabaSitemapBase):
         return City.objects.all().order_by("name")
 
     def location(self, obj: City):
-        return f"/ads?city={obj.slug}"
+        return f"/ads/?city={obj.slug}"
 
 
 class CategorySitemap(KiabaSitemapBase):
@@ -80,7 +77,7 @@ class CategorySitemap(KiabaSitemapBase):
         return AD_CATEGORY_SLUGS
 
     def location(self, item):
-        return f"/ads?category={item}"
+        return f"/ads/?category={item}"
 
 
 class CityCategorySitemap(KiabaSitemapBase):
@@ -106,4 +103,4 @@ class CityCategorySitemap(KiabaSitemapBase):
 
     def location(self, item):
         city_slug, category = item
-        return f"/ads?city={city_slug}&category={category}"
+        return f"/ads/?city={city_slug}&category={category}"

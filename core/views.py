@@ -34,10 +34,9 @@ def _phone_used_by_other_account(phone: str, current_user) -> bool:
 
 
 def landing(request: HttpRequest) -> HttpResponse:
-    """Page d'accueil - redirige vers /ads"""
-    from ads.views import ad_list
-
-    return ad_list(request)
+    """Page d'accueil - redirige vers /ads/ (301 permanent pour éviter le contenu dupliqué)"""
+    from django.http import HttpResponsePermanentRedirect
+    return HttpResponsePermanentRedirect("/ads/")
 
 
 def age_gate(request: HttpRequest) -> HttpResponse:

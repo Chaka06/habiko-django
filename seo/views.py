@@ -15,6 +15,9 @@ def robots_txt(_: object) -> HttpResponse:
         "Disallow: /age-gate/\n"
         "Disallow: /edit/\n"
         "Disallow: /report/\n"
+        "Disallow: /pay/\n"
+        "Disallow: /health/\n"
+        "Disallow: /api/\n"
         "\n"
         "Sitemap: https://ci-kiaba.com/sitemap.xml\n"
     )

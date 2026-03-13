@@ -10,11 +10,11 @@ urlpatterns = [
     path("delete/<int:ad_id>/", views.delete_ad, name="delete_ad"),
     path("dashboard/", views.dashboard, name="dashboard"),
     # Légal
-    path("legal/tos", views.legal_tos, name="legal_tos"),
-    path("legal/privacy", views.legal_privacy, name="legal_privacy"),
-    path("legal/content-policy", views.legal_content_policy, name="legal_content_policy"),
+    path("legal/tos/", views.legal_tos, name="legal_tos"),
+    path("legal/privacy/", views.legal_privacy, name="legal_privacy"),
+    path("legal/content-policy/", views.legal_content_policy, name="legal_content_policy"),
     # Report
-    path("report/<int:ad_id>", views.report_ad, name="report_ad"),
+    path("report/<int:ad_id>/", views.report_ad, name="report_ad"),
     # Cookies
     path("api/cookie-consent/", cookie_consent, name="cookie_consent"),
     # Favicon à la racine pour Google

@@ -3,9 +3,9 @@
 {% block title %}{{ ad.title }} – {% if ad.category == 'escorte_girl' %}Bizi Girl{% elif ad.category == 'escorte_boy' %}Escort Boy{% else %}Transgenre{% endif %} {{ ad.city.name }} · KIABA{% endblock %}
 {% block description %}{{ ad.title }} – {% if ad.category == 'escorte_girl' %}Bizi & escort girl{% elif ad.category == 'escorte_boy' %}Escort boy{% else %}Escorte transgenre{% endif %} à {{ ad.city.name }}, Côte d'Ivoire.{% if ad.subcategories %} Services : {{ ad.subcategories|join:", " }}.{% endif %} Annonce vérifiée sur KIABA – contactez par WhatsApp, SMS ou appel.{% endblock %}
 {% block keywords %}{{ ad.title|lower }}, bizi {{ ad.city.name|lower }}, escorte {{ ad.city.name|lower }}, {{ ad.get_category_display|lower }}, {% if ad.subcategories %}{{ ad.subcategories|join:", " }}, {% endif %}prostituée {{ ad.city.name|lower }}, massage sexuel, sodomie, finition, kiaba, annonces adultes côte d'ivoire{% endblock %}
-{% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
-{% block hreflang_default %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
-{% block canonical_url %}https://ci-kiaba.com/ads/{{ ad.slug }}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
+{% block hreflang_default %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
 {% block structured_data %}
 <script type="application/ld+json">
 {

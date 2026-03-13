@@ -39,8 +39,9 @@ def process_ad_media_image(self, media_id: int):
 @shared_task
 def expire_ads():
     """
-    Supprime définitivement les annonces dont la date d'expiration est dépassée.
-    Envoie l'email d'expiration puis supprime l'annonce et ses médias du storage.
+    Archive les annonces dont la date d'expiration est dépassée (status → ARCHIVED).
+    On garde l'enregistrement en base pour retourner 410 Gone aux bots Google et
+    accélérer le désindexage, mais on supprime les fichiers média pour libérer le storage.
     """
     import logging
     from accounts.email_service import EmailService
@@ -53,9 +54,8 @@ def expire_ads():
 
     for ad in expired:
         try:
-            # Email d'expiration
             EmailService.send_email(
-                subject=f"Votre annonce '{ad.title}' a expiré et a été supprimée",
+                subject=f"Votre annonce '{ad.title}' a expiré",
                 to_emails=[ad.user.email],
                 template_name="account/email/ad_expiration",
                 context={
@@ -68,7 +68,7 @@ def expire_ads():
         except Exception as e:
             logger.warning("Email expiration annonce %s: %s", ad.id, e)
 
-        # Supprimer les fichiers media du storage
+        # Supprimer les fichiers media du storage (libérer l'espace)
         for media in ad.media.all():
             try:
                 if media.image:
@@ -77,11 +77,14 @@ def expire_ads():
                     media.thumbnail.delete(save=False)
             except Exception as e:
                 logger.warning("Erreur suppression fichier media %s: %s", media.id, e)
+        ad.media.all().delete()
 
-        ad.delete()
+        # Archiver l'annonce (ne pas supprimer : l'URL retournera 410 Gone pour Google)
+        ad.status = Ad.Status.ARCHIVED
+        ad.save(update_fields=["status", "updated_at"])
         count += 1
 
-    return f"{count} annonces supprimées"
+    return f"{count} annonces archivées"
 
 
 @shared_task

@@ -130,6 +130,15 @@ def search_suggestions(request: HttpRequest) -> JsonResponse:
 
 @cache_page(120)  # 2 min par annonce (contenu stable)
 def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    # Annonce archivée/expirée → 410 Gone (signal fort pour Google : désindexer cette URL)
+    if Ad.objects.filter(slug=slug, status=Ad.Status.ARCHIVED).exists():
+        from django.template.loader import render_to_string
+        return HttpResponse(
+            render_to_string("core/404.html", {"reason": "expired"}, request=request),
+            status=410,
+            content_type="text/html",
+        )
+
     ad = get_object_or_404(
         Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
         .select_related("city", "user", "user__profile")
