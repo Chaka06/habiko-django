@@ -34,7 +34,7 @@ def sitemap_https(request: HttpRequest) -> HttpResponse:
     request.META["HTTP_X_FORWARDED_PROTO"] = "https"
     # Forcer le host pour que toutes les URLs du sitemap soient en https://ci-kiaba.com/...
     request.META["HTTP_HOST"] = SITEMAP_DOMAIN
-    return sitemap(
+    response = sitemap(
         request,
         {
             "static": StaticSitemap,
@@ -44,6 +44,12 @@ def sitemap_https(request: HttpRequest) -> HttpResponse:
             "city_categories": CityCategorySitemap,
         }
     )
+    # Forcer le Content-Type XML et empêcher Cloudflare/CDN d'injecter des scripts
+    # (Rocket Loader, Polish, Apps Cloudflare modifient parfois les réponses sans vérifier le Content-Type)
+    response["Content-Type"] = "application/xml; charset=utf-8"
+    response["Cache-Control"] = "public, max-age=3600, no-transform"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 urlpatterns = [
     path("admin/", admin.site.urls),
