@@ -44,7 +44,7 @@ whitenoise==6.7.0
 gunicorn==23.0.0
 beautifulsoup4==4.12.3
 requests==2.31.0
-django-hcaptcha>=0.3.0
+django-hcaptcha==0.2.0
 sentry-sdk[django]==2.19.2
 # Note: CinetPay SDK est installé dans le Dockerfile depuis test PyPI
 # car il n'est pas disponible sur PyPI principal
