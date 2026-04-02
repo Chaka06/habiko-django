@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 PRICE_STANDARD = 600    # FCFA — annonce 5 jours
 PRICE_BOOST    = 1100   # FCFA — boost tête de liste 2h/jour (sur annonce existante)
 PRICE_BUNDLE   = 1500   # FCFA — standard + boost en une seule transaction
+PRICE_RENEWAL  = 600    # FCFA — renouvellement (+5 jours)
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -290,6 +291,39 @@ def boost_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
     })
 
 
+# ─── Renouveler une annonce existante ────────────────────────────────────────
+
+@login_required
+def renew_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
+    """
+    GET  → formulaire de confirmation renouvellement (600 FCFA / +5 jours)
+    POST → initie le paiement GeniusPay et redirige vers checkout
+    """
+    try:
+        ad = Ad.objects.get(pk=ad_id, user=request.user)
+    except Ad.DoesNotExist:
+        messages.error(request, "Annonce introuvable.")
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        payment = Payment.objects.create(
+            user=request.user,
+            ad=ad,
+            type=Payment.Type.RENEWAL,
+            amount=PRICE_RENEWAL,
+        )
+        checkout_url = _call_geniuspay(request, payment, "KIABA Renouvellement annonce")
+        if not checkout_url:
+            messages.error(request, "Erreur de connexion au service de paiement. Réessayez.")
+            return redirect("dashboard")
+        return redirect(checkout_url)
+
+    return render(request, "payments/renew_form.html", {
+        "ad": ad,
+        "price_renewal": PRICE_RENEWAL,
+    })
+
+
 # ─── Activation de l'annonce après paiement confirmé ─────────────────────────
 
 def _activate_ad_for_payment(payment: Payment) -> None:
@@ -324,6 +358,12 @@ def _activate_ad_for_payment(payment: Payment) -> None:
             if ad.status == Ad.Status.DRAFT:
                 ad.status = Ad.Status.PENDING
 
+        if payment.type == Payment.Type.RENEWAL:
+            base = ad.expires_at if (ad.expires_at and ad.expires_at > now) else now
+            ad.expires_at = base + timezone.timedelta(days=5)
+            if ad.status in (Ad.Status.DRAFT, Ad.Status.EXPIRED):
+                ad.status = Ad.Status.PENDING
+
         if payment.type in (Payment.Type.BOOST, Payment.Type.BUNDLE):
             ad.is_boosted      = True
             ad.boost_expires_at = (ad.expires_at or now) + timezone.timedelta(days=0)
@@ -338,7 +378,7 @@ def _activate_ad_for_payment(payment: Payment) -> None:
         ])
 
         # Déclencher l'approbation automatique pour les nouvelles annonces
-        if payment.type in (Payment.Type.STANDARD, Payment.Type.BUNDLE):
+        if payment.type in (Payment.Type.STANDARD, Payment.Type.BUNDLE, Payment.Type.RENEWAL):
             try:
                 from ads.tasks import auto_approve_ad
                 auto_approve_ad.apply_async(args=[ad.id], countdown=10)

@@ -144,11 +144,31 @@
                   </div>
                   <!-- Boutons d'action -->
                   <div class="flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto">
-                    {% if ad.status != 'draft' %}
+                    {% if ad.status == 'draft' %}
+                      <!-- Annonce non payée : bouton Payer -->
+                      <a href="{% url 'payments:pay_for_ad' ad.id %}" class="inline-flex items-center justify-center gap-1.5 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]">
+                        <i class="bx bx-credit-card text-base"></i>
+                        <span>Payer</span>
+                      </a>
+                    {% else %}
                       <a href="/ads/{{ ad.slug }}/" class="inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]">
                         <i class="bx bx-show text-base"></i>
                         <span>Voir</span>
                       </a>
+                      <!-- Boost : annonce approuvée, non boostée -->
+                      {% if ad.status == 'approved' and not ad.is_boosted %}
+                        <a href="{% url 'payments:boost_ad' ad.id %}" class="inline-flex items-center justify-center gap-1.5 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]">
+                          <i class="bx bx-rocket text-base"></i>
+                          <span>Booster</span>
+                        </a>
+                      {% endif %}
+                      <!-- Renouveler : annonce approuvée expirant dans moins de 2 jours -->
+                      {% if ad.status == 'approved' and ad.expires_at and ad.expires_at <= two_days_from_now %}
+                        <a href="{% url 'payments:renew_ad' ad.id %}" class="inline-flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]">
+                          <i class="bx bx-revision text-base"></i>
+                          <span>Renouveler</span>
+                        </a>
+                      {% endif %}
                     {% endif %}
                     <a href="/edit/{{ ad.id }}/" class="inline-flex items-center justify-center gap-1.5 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition font-medium text-sm shadow-md flex-1 sm:flex-none min-w-[100px]">
                       <i class="bx bx-edit text-base"></i>

@@ -393,7 +393,14 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         .order_by("-created_at")
         .prefetch_related("media")
     )
-    return render(request, "core/dashboard.html", {"ads": my_ads, "profile": profile})
+    now = timezone.now()
+    two_days_from_now = now + timezone.timedelta(days=2)
+    return render(request, "core/dashboard.html", {
+        "ads": my_ads,
+        "profile": profile,
+        "now": now,
+        "two_days_from_now": two_days_from_now,
+    })
 
 
 # Pages légales

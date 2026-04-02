@@ -11,6 +11,7 @@ class Payment(models.Model):
         STANDARD = "standard", "Annonce standard (600 FCFA / 5 jours)"
         BOOST    = "boost",    "Boost premium (1 100 FCFA — tête de liste 2h/jour)"
         BUNDLE   = "bundle",   "Standard + Boost (1 500 FCFA / 5 jours)"
+        RENEWAL  = "renewal",  "Renouvellement (600 FCFA / +5 jours)"
 
     class Status(models.TextChoices):
         PENDING   = "pending",   "En attente de confirmation"
