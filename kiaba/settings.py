@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "hcaptcha",
     # Local apps
     "accounts.apps.AccountsConfig",
     "ads",
@@ -845,6 +846,15 @@ CINETPAY_RETURN_URL = env(
 )
 
 # ─── PawaPay configuration ───────────────────────────────────────────────────
+# ── hCaptcha (protection anti-bot sur l'inscription) ─────────────────────────
+# Créer un compte sur https://dashboard.hcaptcha.com
+# Clé publique (sitekey) et clé secrète (secret)
+HCAPTCHA_SITEKEY = os.environ.get("HCAPTCHA_SITEKEY", "10000000-ffff-ffff-ffff-000000000001")  # clé test par défaut
+HCAPTCHA_SECRET  = os.environ.get("HCAPTCHA_SECRET",  "0x0000000000000000000000000000000000000000")  # secret test
+
+# ── Cron jobs (endpoints protégés appelés par Vercel Cron + cron-job.org) ─────
+CRON_SECRET = os.environ.get("CRON_SECRET", "").strip()
+
 # ── GeniusPay (agrégateur de paiement mobile money + carte) ──────────────────
 # Dashboard : https://pay.genius.ci  (sandbox) / https://pay.genius.ci (live)
 # Clés publique/secrète disponibles dans vos paramètres GeniusPay.
@@ -860,3 +870,92 @@ PAWAPAY_SANDBOX = _pawapay_sandbox not in ("false", "0", "no", "off")
 
 # Superuser initial (créé par create_initial_superuser) : mot de passe via env uniquement
 INITIAL_SUPERUSER_PASSWORD = os.environ.get("INITIAL_SUPERUSER_PASSWORD", "").strip() or None
+
+# ── Validation des credentials critiques au démarrage (prod uniquement) ────────
+if not DEBUG:
+    _missing = []
+    if not GENIUSPAY_API_KEY:
+        _missing.append("GENIUSPAY_API_KEY")
+    if not GENIUSPAY_API_SECRET:
+        _missing.append("GENIUSPAY_API_SECRET")
+    if not GENIUSPAY_WEBHOOK_SECRET:
+        _missing.append("GENIUSPAY_WEBHOOK_SECRET")
+    if _missing:
+        raise RuntimeError(
+            f"Variables d'environnement GeniusPay manquantes : {', '.join(_missing)}. "
+            "Les paiements sont impossibles sans ces clés."
+        )
+    _hcaptcha_test_key = "0x0000000000000000000000000000000000000000"
+    if HCAPTCHA_SECRET == _hcaptcha_test_key:
+        raise RuntimeError(
+            "HCAPTCHA_SECRET est la clé de test par défaut. "
+            "Définissez HCAPTCHA_SECRET en production pour activer la protection anti-bot."
+        )
+
+# ── Logging centralisé ────────────────────────────────────────────────────────
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        # Apps projet — INFO en prod pour tracer les paiements et crons
+        "ads":        {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "core":       {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "payments":   {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "accounts":   {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "moderation": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}
+
+# ── Sentry (monitoring d'erreurs en production) ───────────────────────────────
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
+if SENTRY_DSN and not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    import logging as _logging
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            LoggingIntegration(
+                level=_logging.INFO,
+                event_level=_logging.ERROR,
+            ),
+        ],
+        traces_sample_rate=0.1,   # 10% des requêtes tracées (performance)
+        send_default_pii=False,    # Ne pas envoyer d'infos personnelles (RGPD)
+        environment="production",
+    )
