@@ -99,91 +99,78 @@
       <div class="space-y-4">
         {% for ad in ads %}
           <div class="border rounded-lg p-4 hover:bg-gray-50 transition hover:shadow-md" data-ad-card="{{ ad.id }}">
-            <div class="flex flex-col sm:flex-row items-start gap-4">
+            <div class="flex gap-3">
               <!-- Miniature -->
-              <div class="w-full sm:w-24 h-32 sm:h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
                 {% if ad.media.all|length > 0 %}
                   {% with first=ad.media.all.0 %}
-                    <img src="{{ first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="96" height="128">
+                    <img src="{{ first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="96" height="96">
                   {% endwith %}
                 {% else %}
-                  <span class="text-gray-400 text-xs">Aucune photo</span>
+                  <span class="text-gray-400 text-xs text-center px-1">Aucune photo</span>
                 {% endif %}
               </div>
-              <!-- Infos -->
-              <div class="flex-1 w-full">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div class="flex-1 min-w-0">
-                    <h3 class="font-medium text-gray-900 line-clamp-2 mb-1">{{ ad.title }}</h3>
-                    <p class="text-sm text-gray-600">{{ ad.get_category_display }} • {{ ad.city.name }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                      Créée le {{ ad.created_at|date:"d/m/Y" }} •
-                      <span class="font-medium {% if ad.status == 'approved' %}text-green-600{% elif ad.status == 'pending' %}text-yellow-600{% elif ad.status == 'rejected' %}text-red-600{% else %}text-gray-500{% endif %}">
-                        {{ ad.get_status_display }}
-                      </span>
-                      {% if ad.status == 'approved' %}
-                        · <span title="Vues (consultation ≥ 5 s)">{{ ad.views_count }} vue{{ ad.views_count|pluralize }}</span>
-                        {% if ad.expires_at %}
-                          · Expire le {{ ad.expires_at|date:"d/m/Y" }}
-                        {% endif %}
-                      {% endif %}
-                    </p>
-                    <!-- Badges VIP / boost / premium -->
-                    <div class="flex flex-wrap gap-1.5 mt-2">
-                      {% if ad.is_boosted %}
-                        <span class="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
-                          👑 VIP
-                        </span>
-                      {% endif %}
-                      {% if ad.is_boosted and ad.boost_expires_at %}
-                        <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                          ⚡ Boost jusqu'au {{ ad.boost_expires_at|date:"d/m" }}
-                        </span>
-                      {% endif %}
-                      {% if ad.is_premium %}
-                        <span class="inline-flex items-center gap-1 bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                          🔝 En tête maintenant
-                        </span>
-                      {% endif %}
-                    </div>
-                  </div>
-                  <!-- Boutons d'action -->
-                  <div class="flex flex-col gap-2 w-full sm:w-28 mt-3 sm:mt-0 flex-shrink-0">
-                    {% if ad.status == 'draft' %}
-                      <a href="{% url 'payments:pay_for_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-pink-600 text-white px-3 py-2 rounded-lg hover:bg-pink-700 transition font-medium text-sm">
-                        <i class="bx bx-credit-card text-base"></i>
-                        <span>Payer</span>
-                      </a>
-                    {% else %}
-                      <a href="/ads/{{ ad.slug }}/" class="w-full inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
-                        <i class="bx bx-show text-base"></i>
-                        <span>Voir</span>
-                      </a>
-                      {% if ad.status == 'approved' and not ad.is_boosted %}
-                        <a href="{% url 'payments:boost_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition font-medium text-sm">
-                          <i class="bx bx-rocket text-base"></i>
-                          <span>Booster</span>
-                        </a>
-                      {% endif %}
-                      {% if ad.status == 'approved' and ad.expires_at and ad.expires_at <= two_days_from_now %}
-                        <a href="{% url 'payments:renew_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
-                          <i class="bx bx-revision text-base"></i>
-                          <span>Renouveler</span>
-                        </a>
-                      {% endif %}
+
+              <!-- Infos + boutons -->
+              <div class="flex-1 min-w-0 flex flex-col gap-2">
+                <!-- Détails -->
+                <div>
+                  <h3 class="font-medium text-gray-900 line-clamp-2 leading-snug">{{ ad.title }}</h3>
+                  <p class="text-sm text-gray-600 mt-0.5">{{ ad.get_category_display }} • {{ ad.city.name }}</p>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Créée le {{ ad.created_at|date:"d/m/Y" }} •
+                    <span class="font-medium {% if ad.status == 'approved' %}text-green-600{% elif ad.status == 'pending' %}text-yellow-600{% elif ad.status == 'rejected' %}text-red-600{% else %}text-gray-500{% endif %}">
+                      {{ ad.get_status_display }}
+                    </span>
+                    {% if ad.status == 'approved' %}
+                      · {{ ad.views_count }} vue{{ ad.views_count|pluralize }}
+                      {% if ad.expires_at %} · Expire le {{ ad.expires_at|date:"d/m/Y" }}{% endif %}
                     {% endif %}
-                    <a href="/edit/{{ ad.id }}/" class="w-full inline-flex items-center justify-center gap-1.5 bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition font-medium text-sm">
-                      <i class="bx bx-edit text-base"></i>
-                      <span>Modifier</span>
-                    </a>
-                    <button type="button"
-                      class="delete-ad-btn w-full inline-flex items-center justify-center gap-1.5 bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition font-medium text-sm"
-                      data-ad-id="{{ ad.id }}"
-                      data-ad-title="{{ ad.title|escapejs }}">
-                      <i class="bx bx-trash text-base"></i>
-                      <span>Supprimer</span>
-                    </button>
+                  </p>
+                  <!-- Badges -->
+                  <div class="flex flex-wrap gap-1.5 mt-1.5">
+                    {% if ad.is_boosted %}
+                      <span class="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full shadow-sm">👑 VIP</span>
+                    {% endif %}
+                    {% if ad.is_boosted and ad.boost_expires_at %}
+                      <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">⚡ Boost jusqu'au {{ ad.boost_expires_at|date:"d/m" }}</span>
+                    {% endif %}
+                    {% if ad.is_premium %}
+                      <span class="inline-flex items-center gap-1 bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">🔝 En tête</span>
+                    {% endif %}
                   </div>
+                </div>
+
+                <!-- Boutons en ligne, sous les détails -->
+                <div class="flex flex-wrap gap-2 mt-1">
+                  {% if ad.status == 'draft' %}
+                    <a href="{% url 'payments:pay_for_ad' ad.id %}" class="inline-flex items-center gap-1.5 bg-pink-600 text-white px-3 py-1.5 rounded-lg hover:bg-pink-700 transition text-xs font-medium">
+                      <i class="bx bx-credit-card"></i> Payer
+                    </a>
+                  {% else %}
+                    <a href="/ads/{{ ad.slug }}/" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-xs font-medium">
+                      <i class="bx bx-show"></i> Voir
+                    </a>
+                    {% if ad.status == 'approved' and not ad.is_boosted %}
+                      <a href="{% url 'payments:boost_ad' ad.id %}" class="inline-flex items-center gap-1.5 bg-yellow-500 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-600 transition text-xs font-medium">
+                        <i class="bx bx-rocket"></i> Booster
+                      </a>
+                    {% endif %}
+                    {% if ad.status == 'approved' and ad.expires_at and ad.expires_at <= two_days_from_now %}
+                      <a href="{% url 'payments:renew_ad' ad.id %}" class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition text-xs font-medium">
+                        <i class="bx bx-revision"></i> Renouveler
+                      </a>
+                    {% endif %}
+                  {% endif %}
+                  <a href="/edit/{{ ad.id }}/" class="inline-flex items-center gap-1.5 bg-gray-600 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition text-xs font-medium">
+                    <i class="bx bx-edit"></i> Modifier
+                  </a>
+                  <button type="button"
+                    class="delete-ad-btn inline-flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition text-xs font-medium"
+                    data-ad-id="{{ ad.id }}"
+                    data-ad-title="{{ ad.title|escapejs }}">
+                    <i class="bx bx-trash"></i> Supprimer
+                  </button>
                 </div>
               </div>
             </div>
