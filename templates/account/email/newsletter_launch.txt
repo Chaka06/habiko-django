@@ -1,0 +1,32 @@
+Bonjour,
+
+KIABA Rencontres évolue !
+
+Nous avons travaillé dur pour vous offrir une plateforme encore plus puissante.
+Voici les grandes nouveautés :
+
+NOUVELLES FONCTIONNALITÉS
+- Filigrane automatique sur vos photos pour protéger votre contenu
+- Badge VIP doré sur les annonces boostées
+- Remontée automatique toutes les 2h, 3h ou 4h
+- Badge URGENT pour attirer l'attention des visiteurs
+- Tableau de bord amélioré
+- Paiement sécurisé : Wave, Orange Money, MTN Money, Moov Money
+
+NOS FORFAITS
+- Starter      : 500 XOF / 5 jours
+- Boost Simple : 1 000 XOF / 7 jours  (remontée /4h)
+- Boost Pro    : 2 000 XOF / 14 jours (remontée /3h)
+- Boost VIP    : 3 500 XOF / 30 jours (remontée /2h + badge VIP)
+- Urgent       : 1 500 XOF / 7 jours  (badge URGENT rouge)
+- Pack Premium : 5 000 XOF / 30 jours (tête de liste + VIP + Urgent)
+
+Publier une annonce : {{ site_url }}/post/
+
+IMPORTANT : La publication est désormais payante à partir de 500 XOF pour 5 jours.
+Vos anciennes annonces restent visibles jusqu'à leur date d'expiration.
+
+Des questions ? {{ support_email }}
+
+---
+{{ site_name }} — {{ site_url }}

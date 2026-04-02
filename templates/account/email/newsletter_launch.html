@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KIABA évolue — Nouvelles fonctionnalités et forfaits</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: #fff; margin: 0; padding: 0; }
+    .wrapper { max-width: 600px; margin: 0 auto; background: #fff; }
+    /* ── Header : logo à droite ── */
+    .header { padding: 20px 20px 16px; text-align: right; border-bottom: 1px solid #f0f0f0; }
+    .header img { max-width: 110px; height: auto; }
+    /* ── Contenu ── */
+    .content { padding: 28px 24px 20px; }
+    h1 { font-size: 22px; font-weight: 700; color: #111; margin: 0 0 18px; text-align: center; }
+    p { font-size: 14px; margin: 12px 0; color: #333; }
+    .box { background: #f8f9fa; border-radius: 6px; padding: 18px 20px; margin: 20px 0; }
+    .box h3 { margin: 0 0 12px; font-size: 15px; color: #111; }
+    ul { margin: 8px 0 0; padding-left: 18px; }
+    li { font-size: 14px; margin: 6px 0; color: #333; }
+    .forfaits { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .forfaits th { background: #ec4899; color: #fff; padding: 9px 12px; text-align: left; }
+    .forfaits td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+    .forfaits tr:last-child td { border-bottom: none; }
+    .btn-wrap { text-align: center; margin: 28px 0; }
+    .btn { display: inline-block; background: #ec4899; color: #fff; text-decoration: none; padding: 13px 32px; border-radius: 6px; font-weight: 600; font-size: 15px; }
+    .notice { background: #fce7f3; border-left: 4px solid #ec4899; padding: 14px 16px; border-radius: 4px; margin: 20px 0; font-size: 13px; }
+    .notice strong { color: #111; }
+    /* ── Footer : logo centré petit ── */
+    .footer { border-top: 1px solid #e9ecef; padding: 24px 20px 20px; text-align: center; }
+    .footer img { max-width: 70px; height: auto; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto; }
+    .footer p { font-size: 12px; color: #888; margin: 4px 0; }
+    .footer a { color: #ec4899; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header : logo à droite -->
+  <div class="header">
+    <img src="{{ logo_url }}" alt="{{ site_name }}" />
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="content">
+    <h1>KIABA Rencontres évolue !</h1>
+
+    <p>Bonjour,</p>
+    <p>Nous avons travaillé dur pour vous offrir une plateforme encore plus puissante. Voici les grandes nouveautés :</p>
+
+    <div class="box">
+      <h3>Nouvelles fonctionnalités</h3>
+      <ul>
+        <li><strong>Filigrane automatique</strong> sur vos photos pour protéger votre contenu</li>
+        <li><strong>Badge VIP doré</strong> visible sur toutes les annonces boostées</li>
+        <li><strong>Remontée automatique</strong> en tête de liste toutes les 2h, 3h ou 4h</li>
+        <li><strong>Badge URGENT</strong> pour attirer l'attention des visiteurs</li>
+        <li><strong>Tableau de bord amélioré</strong> pour gérer vos annonces facilement</li>
+        <li><strong>Paiement sécurisé</strong> via Wave, Orange Money, MTN Money et Moov Money</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3>Nos forfaits</h3>
+      <table class="forfaits">
+        <tr><th>Forfait</th><th>Prix</th><th>Durée</th></tr>
+        <tr><td>Starter</td><td>500 XOF</td><td>5 jours</td></tr>
+        <tr><td>Boost Simple</td><td>1 000 XOF</td><td>7 jours — remontée /4h</td></tr>
+        <tr><td>Boost Pro</td><td>2 000 XOF</td><td>14 jours — remontée /3h</td></tr>
+        <tr><td>Boost VIP</td><td>3 500 XOF</td><td>30 jours — remontée /2h + VIP</td></tr>
+        <tr><td>Urgent</td><td>1 500 XOF</td><td>7 jours — badge URGENT</td></tr>
+        <tr><td><strong>Pack Premium</strong></td><td><strong>5 000 XOF</strong></td><td>30 jours — tête de liste + VIP + Urgent</td></tr>
+      </table>
+    </div>
+
+    <div class="btn-wrap">
+      <a href="{{ site_url }}/post/" class="btn">Publier mon annonce</a>
+    </div>
+
+    <div class="notice">
+      <strong>Important :</strong> La publication d'annonces est désormais payante à partir de
+      <strong>500 XOF pour 5 jours</strong>. Vos anciennes annonces restent visibles jusqu'à
+      leur date d'expiration.
+    </div>
+
+    <p style="text-align:center; font-size:13px; color:#888;">
+      Des questions ? <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+    </p>
+  </div>
+
+  <!-- Footer : logo centré petit -->
+  <div class="footer">
+    <img src="{{ logo_url }}" alt="{{ site_name }}" />
+    <p>Vous recevez cet email car vous êtes inscrit sur <strong>{{ site_name }}</strong>.</p>
+    <p><a href="{{ site_url }}">{{ site_url }}</a></p>
+  </div>
+
+</div>
+</body>
+</html>
