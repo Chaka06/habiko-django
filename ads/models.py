@@ -97,10 +97,12 @@ class Ad(models.Model):
     extended_until = models.DateTimeField(
         null=True, blank=True, help_text=_("Date de prolongation de l'annonce")
     )
-    # Boost payant (700 FCFA) — place l'annonce en tête de liste 2h/jour pendant 7 jours
-    is_boosted = models.BooleanField(default=False, help_text=_("Boost acheté (remontée quotidienne)"))
+    is_boosted = models.BooleanField(default=False, help_text=_("Boost acheté (remontée périodique)"))
     boost_expires_at = models.DateTimeField(
         null=True, blank=True, help_text=_("Date d'expiration du boost acheté")
+    )
+    boost_interval_hours = models.PositiveSmallIntegerField(
+        default=2, help_text=_("Intervalle de remontée en tête (heures) : 2h, 3h ou 4h selon forfait")
     )
 
     features = models.ManyToManyField(Feature, through="AdFeature", blank=True)

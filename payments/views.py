@@ -16,10 +16,27 @@ from . import geniuspay as geniuspay_svc
 logger = logging.getLogger(__name__)
 
 # ─── Tarifs ───────────────────────────────────────────────────────────────────
-PRICE_STANDARD = 600    # FCFA — annonce 5 jours
-PRICE_BOOST    = 1100   # FCFA — boost tête de liste 2h/jour (sur annonce existante)
-PRICE_BUNDLE   = 1500   # FCFA — standard + boost en une seule transaction
-PRICE_RENEWAL  = 600    # FCFA — renouvellement (+5 jours)
+# Publications initiales
+PRICE_STANDARD  = 1000   # FCFA — annonce 5 jours sans boost
+PRICE_BOOST     = 800    # FCFA — boost seul sur annonce existante (tête 2h)
+PRICE_BUNDLE    = 1800   # FCFA — standard 5j + boost tête 2h
+PRICE_FORTNIGHT = 3500   # FCFA — 15 jours + boost tête 4h
+PRICE_MONTHLY   = 6500   # FCFA — 30 jours + boost tête 3h
+# Renouvellements
+PRICE_RENEW_15   = 1000  # FCFA — +15 jours sans boost
+PRICE_RENEW_15B  = 2500  # FCFA — +15 jours + boost (1000 + 1500)
+PRICE_RENEW_MON  = 2000  # FCFA — +30 jours sans boost
+PRICE_RENEW_MONB = 4000  # FCFA — +30 jours + boost (2000 + 2000)
+
+# Intervalle de remontée en tête selon forfait (heures)
+BOOST_INTERVAL = {
+    Payment.Type.BOOST:      2,
+    Payment.Type.BUNDLE:     2,
+    Payment.Type.FORTNIGHT:  4,
+    Payment.Type.MONTHLY:    3,
+    Payment.Type.RENEW_15B:  4,
+    Payment.Type.RENEW_MONB: 3,
+}
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -67,7 +84,7 @@ def _call_geniuspay(request: HttpRequest, payment: Payment, description: str) ->
 
 @login_required
 def pay_form(request: HttpRequest) -> HttpResponse:
-    """Affiche le choix Standard (600) ou Bundle (1 500) pour une annonce en DRAFT."""
+    """Affiche les 4 forfaits de publication pour une annonce en DRAFT."""
     ad_id = request.session.get("pending_ad_id")
     if not ad_id:
         return redirect("post")
@@ -77,9 +94,11 @@ def pay_form(request: HttpRequest) -> HttpResponse:
         return redirect("post")
     return render(request, "payments/pay_form.html", {
         "ad": ad,
-        "price_standard": PRICE_STANDARD,
-        "price_boost": PRICE_BOOST,
-        "price_bundle": PRICE_BUNDLE,
+        "price_standard":  PRICE_STANDARD,
+        "price_boost":     PRICE_BOOST,
+        "price_bundle":    PRICE_BUNDLE,
+        "price_fortnight": PRICE_FORTNIGHT,
+        "price_monthly":   PRICE_MONTHLY,
     })
 
 
@@ -115,10 +134,14 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
     except Ad.DoesNotExist:
         return redirect("post")
 
-    want_boost = request.POST.get("want_boost") == "1"
-    pay_type  = Payment.Type.BUNDLE   if want_boost else Payment.Type.STANDARD
-    amount    = PRICE_BUNDLE          if want_boost else PRICE_STANDARD
-    desc      = "KIABA Standard+Boost" if want_boost else "KIABA Annonce"
+    forfait = request.POST.get("forfait", "standard")
+    FORFAIT_MAP = {
+        "standard":  (Payment.Type.STANDARD,  PRICE_STANDARD,  "KIABA Annonce 5j"),
+        "bundle":    (Payment.Type.BUNDLE,     PRICE_BUNDLE,    "KIABA Annonce 5j + Boost"),
+        "fortnight": (Payment.Type.FORTNIGHT,  PRICE_FORTNIGHT, "KIABA Pack 15j + Boost"),
+        "monthly":   (Payment.Type.MONTHLY,    PRICE_MONTHLY,   "KIABA Pack mensuel + Boost"),
+    }
+    pay_type, amount, desc = FORFAIT_MAP.get(forfait, FORFAIT_MAP["standard"])
 
     payment = Payment.objects.create(
         user=request.user,
@@ -296,8 +319,8 @@ def boost_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 @login_required
 def renew_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
     """
-    GET  → formulaire de confirmation renouvellement (600 FCFA / +5 jours)
-    POST → initie le paiement GeniusPay et redirige vers checkout
+    GET  → formulaire avec 4 options de renouvellement
+    POST → initie le paiement GeniusPay (forfait choisi via POST 'forfait')
     """
     try:
         ad = Ad.objects.get(pk=ad_id, user=request.user)
@@ -306,13 +329,21 @@ def renew_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         return redirect("dashboard")
 
     if request.method == "POST":
+        forfait = request.POST.get("forfait", "renew_15")
+        RENEW_MAP = {
+            "renew_15":   (Payment.Type.RENEW_15,   PRICE_RENEW_15,   "KIABA Renouvellement 15j"),
+            "renew_15b":  (Payment.Type.RENEW_15B,  PRICE_RENEW_15B,  "KIABA Renouvellement 15j + Boost"),
+            "renew_mon":  (Payment.Type.RENEW_MON,  PRICE_RENEW_MON,  "KIABA Renouvellement 1 mois"),
+            "renew_monb": (Payment.Type.RENEW_MONB, PRICE_RENEW_MONB, "KIABA Renouvellement 1 mois + Boost"),
+        }
+        pay_type, amount, desc = RENEW_MAP.get(forfait, RENEW_MAP["renew_15"])
         payment = Payment.objects.create(
             user=request.user,
             ad=ad,
-            type=Payment.Type.RENEWAL,
-            amount=PRICE_RENEWAL,
+            type=pay_type,
+            amount=amount,
         )
-        checkout_url = _call_geniuspay(request, payment, "KIABA Renouvellement annonce")
+        checkout_url = _call_geniuspay(request, payment, desc)
         if not checkout_url:
             messages.error(request, "Erreur de connexion au service de paiement. Réessayez.")
             return redirect("dashboard")
@@ -320,7 +351,10 @@ def renew_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 
     return render(request, "payments/renew_form.html", {
         "ad": ad,
-        "price_renewal": PRICE_RENEWAL,
+        "price_renew_15":   PRICE_RENEW_15,
+        "price_renew_15b":  PRICE_RENEW_15B,
+        "price_renew_mon":  PRICE_RENEW_MON,
+        "price_renew_monb": PRICE_RENEW_MONB,
     })
 
 
@@ -353,32 +387,54 @@ def _activate_ad_for_payment(payment: Payment) -> None:
         if not ad:
             return
 
-        if payment.type in (Payment.Type.STANDARD, Payment.Type.BUNDLE):
-            ad.expires_at = now + timezone.timedelta(days=5)
+        T = Payment.Type
+
+        # ── Durée selon forfait ───────────────────────────────────────────
+        DURATION = {
+            T.STANDARD:   5,
+            T.BUNDLE:     5,
+            T.FORTNIGHT:  15,
+            T.MONTHLY:    30,
+        }
+        RENEWAL_DURATION = {
+            T.RENEW_15:   15,
+            T.RENEW_15B:  15,
+            T.RENEW_MON:  30,
+            T.RENEW_MONB: 30,
+        }
+
+        if payment.type in DURATION:
+            ad.expires_at = now + timezone.timedelta(days=DURATION[payment.type])
             if ad.status == Ad.Status.DRAFT:
                 ad.status = Ad.Status.PENDING
 
-        if payment.type == Payment.Type.RENEWAL:
+        if payment.type in RENEWAL_DURATION:
             base = ad.expires_at if (ad.expires_at and ad.expires_at > now) else now
-            ad.expires_at = base + timezone.timedelta(days=5)
-            if ad.status in (Ad.Status.DRAFT, Ad.Status.EXPIRED):
+            ad.expires_at = base + timezone.timedelta(days=RENEWAL_DURATION[payment.type])
+            if ad.status in (Ad.Status.DRAFT, Ad.Status.ARCHIVED):
                 ad.status = Ad.Status.PENDING
 
-        if payment.type in (Payment.Type.BOOST, Payment.Type.BUNDLE):
-            ad.is_boosted      = True
-            ad.boost_expires_at = (ad.expires_at or now) + timezone.timedelta(days=0)
-            # Monter en tête de liste immédiatement pour 2 heures
-            ad.is_premium      = True
-            ad.premium_until   = now + timezone.timedelta(hours=2)
+        # ── Boost selon forfait ───────────────────────────────────────────
+        BOOSTED_TYPES = (T.BOOST, T.BUNDLE, T.FORTNIGHT, T.MONTHLY, T.RENEW_15B, T.RENEW_MONB)
+        if payment.type in BOOSTED_TYPES:
+            interval = BOOST_INTERVAL.get(payment.type, 2)
+            ad.is_boosted        = True
+            ad.boost_expires_at  = ad.expires_at or now
+            ad.boost_interval_hours = interval
+            # Monter immédiatement en tête pour X heures
+            ad.is_premium        = True
+            ad.premium_until     = now + timezone.timedelta(hours=interval)
 
         ad.save(update_fields=[
             "status", "expires_at",
-            "is_boosted", "boost_expires_at",
+            "is_boosted", "boost_expires_at", "boost_interval_hours",
             "is_premium", "premium_until",
         ])
 
-        # Déclencher l'approbation automatique pour les nouvelles annonces
-        if payment.type in (Payment.Type.STANDARD, Payment.Type.BUNDLE, Payment.Type.RENEWAL):
+        # Approbation automatique des nouvelles annonces
+        NEW_AD_TYPES = (T.STANDARD, T.BUNDLE, T.FORTNIGHT, T.MONTHLY,
+                        T.RENEW_15, T.RENEW_15B, T.RENEW_MON, T.RENEW_MONB)
+        if payment.type in NEW_AD_TYPES:
             try:
                 from ads.tasks import auto_approve_ad
                 auto_approve_ad.apply_async(args=[ad.id], countdown=10)
@@ -386,6 +442,7 @@ def _activate_ad_for_payment(payment: Payment) -> None:
                 logger.warning("auto_approve_ad task failed: %s", exc)
 
         logger.info(
-            "Payment %s (%s) COMPLETED → annonce %s status=%s boosted=%s",
-            payment.deposit_id, payment.type, ad.pk, ad.status, ad.is_boosted,
+            "Payment %s (%s) COMPLETED → annonce %s status=%s boosted=%s interval=%sh",
+            payment.deposit_id, payment.type, ad.pk, ad.status,
+            ad.is_boosted, getattr(ad, "boost_interval_hours", 2),
         )

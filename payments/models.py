@@ -8,10 +8,17 @@ class Payment(models.Model):
     """Paiement via GeniusPay (checkout mobile money ou carte)."""
 
     class Type(models.TextChoices):
-        STANDARD = "standard", "Annonce standard (600 FCFA / 5 jours)"
-        BOOST    = "boost",    "Boost premium (1 100 FCFA — tête de liste 2h/jour)"
-        BUNDLE   = "bundle",   "Standard + Boost (1 500 FCFA / 5 jours)"
-        RENEWAL  = "renewal",  "Renouvellement (600 FCFA / +5 jours)"
+        # ── Publications initiales ──────────────────────────────────────────
+        STANDARD   = "standard",   "Annonce standard (1 000 FCFA / 5 jours)"
+        BOOST      = "boost",      "Boost seul (800 FCFA — tête toutes les 2h)"
+        BUNDLE     = "bundle",     "Standard + Boost (1 800 FCFA / 5 jours)"
+        FORTNIGHT  = "fortnight",  "Pack 15 jours + Boost (3 500 FCFA / tête 4h)"
+        MONTHLY    = "monthly",    "Pack mensuel + Boost (6 500 FCFA / tête 3h)"
+        # ── Renouvellements ─────────────────────────────────────────────────
+        RENEW_15   = "renew_15",   "Renouvellement 15 jours (1 000 FCFA)"
+        RENEW_15B  = "renew_15b",  "Renouvellement 15 jours + Boost (2 500 FCFA)"
+        RENEW_MON  = "renew_mon",  "Renouvellement 1 mois (2 000 FCFA)"
+        RENEW_MONB = "renew_monb", "Renouvellement 1 mois + Boost (4 000 FCFA)"
 
     class Status(models.TextChoices):
         PENDING   = "pending",   "En attente de confirmation"
@@ -37,7 +44,7 @@ class Payment(models.Model):
         verbose_name=_("Annonce"),
     )
     type = models.CharField(
-        max_length=10,
+        max_length=12,
         choices=Type.choices,
         verbose_name=_("Type"),
     )
