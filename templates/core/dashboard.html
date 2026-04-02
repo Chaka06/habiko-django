@@ -148,36 +148,36 @@
                     </div>
                   </div>
                   <!-- Boutons d'action -->
-                  <div class="grid grid-cols-2 sm:flex sm:flex-col gap-2 w-full sm:w-36 mt-3 sm:mt-0 flex-shrink-0">
+                  <div class="flex flex-col gap-2 w-full sm:w-28 mt-3 sm:mt-0 flex-shrink-0">
                     {% if ad.status == 'draft' %}
-                      <a href="{% url 'payments:pay_for_ad' ad.id %}" class="col-span-2 inline-flex items-center justify-center gap-1.5 bg-pink-600 text-white px-3 py-2 rounded-lg hover:bg-pink-700 transition font-medium text-sm">
+                      <a href="{% url 'payments:pay_for_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-pink-600 text-white px-3 py-2 rounded-lg hover:bg-pink-700 transition font-medium text-sm">
                         <i class="bx bx-credit-card text-base"></i>
                         <span>Payer</span>
                       </a>
                     {% else %}
-                      <a href="/ads/{{ ad.slug }}/" class="inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                      <a href="/ads/{{ ad.slug }}/" class="w-full inline-flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
                         <i class="bx bx-show text-base"></i>
                         <span>Voir</span>
                       </a>
                       {% if ad.status == 'approved' and not ad.is_boosted %}
-                        <a href="{% url 'payments:boost_ad' ad.id %}" class="inline-flex items-center justify-center gap-1.5 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition font-medium text-sm">
+                        <a href="{% url 'payments:boost_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition font-medium text-sm">
                           <i class="bx bx-rocket text-base"></i>
                           <span>Booster</span>
                         </a>
                       {% endif %}
                       {% if ad.status == 'approved' and ad.expires_at and ad.expires_at <= two_days_from_now %}
-                        <a href="{% url 'payments:renew_ad' ad.id %}" class="inline-flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
+                        <a href="{% url 'payments:renew_ad' ad.id %}" class="w-full inline-flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">
                           <i class="bx bx-revision text-base"></i>
                           <span>Renouveler</span>
                         </a>
                       {% endif %}
                     {% endif %}
-                    <a href="/edit/{{ ad.id }}/" class="inline-flex items-center justify-center gap-1.5 bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition font-medium text-sm">
+                    <a href="/edit/{{ ad.id }}/" class="w-full inline-flex items-center justify-center gap-1.5 bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition font-medium text-sm">
                       <i class="bx bx-edit text-base"></i>
                       <span>Modifier</span>
                     </a>
                     <button type="button"
-                      class="delete-ad-btn inline-flex items-center justify-center gap-1.5 bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition font-medium text-sm"
+                      class="delete-ad-btn w-full inline-flex items-center justify-center gap-1.5 bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition font-medium text-sm"
                       data-ad-id="{{ ad.id }}"
                       data-ad-title="{{ ad.title|escapejs }}">
                       <i class="bx bx-trash text-base"></i>
