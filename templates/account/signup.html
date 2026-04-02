@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load hcaptcha %}
 {% block title %}Inscription · KIABA Rencontres{% endblock %}
 {% block description %}Créez votre compte gratuitement sur KIABA Rencontres - Site de petites annonces adultes et services d'escorte en Côte d'Ivoire.{% endblock %}
 {% block canonical_url %}https://ci-kiaba.com/auth/signup/{% endblock %}
@@ -92,6 +93,10 @@
         </div>
         {{ form.password2.errors }}
       </div>
+      <div>
+        {{ form.captcha }}
+        {{ form.captcha.errors }}
+      </div>
       <button type="submit" class="w-full bg-pink-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-pink-700 active:bg-pink-800 transition shadow-sm">
         Créer mon compte
       </button>
@@ -105,6 +110,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% hcaptcha_script %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.password-toggle').forEach(function (toggle) {

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load hcaptcha %}
 {% block title %}Connexion · KIABA Rencontres{% endblock %}
 {% block description %}Connectez-vous à votre compte KIABA Rencontres - Site de rencontres adultes et annonces d'escorte en Côte d'Ivoire.{% endblock %}
 {% block canonical_url %}https://ci-kiaba.com/auth/login/{% endblock %}
@@ -75,6 +76,10 @@
       <div class="flex items-center justify-end">
         <a href="{% url 'account_reset_password' %}" class="text-sm text-pink-600 hover:text-pink-700 font-medium">Mot de passe oublié ?</a>
       </div>
+      <div>
+        {{ form.captcha }}
+        {{ form.captcha.errors }}
+      </div>
       <button type="submit" class="w-full bg-pink-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-pink-700 active:bg-pink-800 transition shadow-sm">
         Se connecter
       </button>
@@ -88,6 +93,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{% hcaptcha_script %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.password-toggle').forEach(function (toggle) {
