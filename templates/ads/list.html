@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} – Escort Girl {{ selected_city.name }} · KIABA{% elif selected_city and selected_category == 'escorte_boy' %}Escort Boy {{ selected_city.name }} · KIABA Rencontres{% elif selected_city and selected_category == 'transgenre' %}Transgenre {{ selected_city.name }} – Bizi Trans · KIABA{% elif selected_city %}Bizi {{ selected_city.name }} – Annonces Adultes · KIABA{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort Girl Côte d'Ivoire · KIABA{% elif selected_category == 'escorte_boy' %}Escort Boy Côte d'Ivoire – Bizi Boy · KIABA{% elif selected_category == 'transgenre' %}Transgenre Escorte Côte d'Ivoire – Bizi Trans · KIABA{% else %}Bizi – Annonces Adultes Côte d'Ivoire · KIABA Rencontres{% endif %}{% endblock %}
+{% block description %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} : escort girls, prostituées et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA, site Nº1 Côte d'Ivoire.{% elif selected_city and selected_category == 'escorte_boy' %}Escort boys et bizi boy à {{ selected_city.name }}, Côte d'Ivoire. Massage sexuel, rencontres adultes. Annonces vérifiées sur KIABA Rencontres.{% elif selected_city and selected_category == 'transgenre' %}Escortes transgenres et bizi trans à {{ selected_city.name }}, Côte d'Ivoire. Services adultes : massage, finition, rencontres. Annonces vérifiées KIABA.{% elif selected_city %}Bizi {{ selected_city.name }} – escort girls, escort boys, transgenres et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA.{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort girls et prostituées en Côte d'Ivoire : massage sexuel, sodomie, finition, partouze. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA, site Nº1.{% elif selected_category == 'escorte_boy' %}Escort boys et bizi en Côte d'Ivoire : massage sexuel, rencontres adultes, finition. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA Rencontres.{% elif selected_category == 'transgenre' %}Escortes transgenres (bizi trans) en Côte d'Ivoire : massage sexuel, sodomie, services adultes. Annonces vérifiées sur KIABA, site Nº1.{% else %}KIABA – Site Nº1 Bizi & escortes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces adultes vérifiées : escort girls, escort boys, transgenres, massage sexuel, sodomie, finition.{% endif %}{% endblock %}
+{% block keywords %}{% if selected_city %}bizi {{ selected_city.name|lower }}, escorte {{ selected_city.name|lower }}, prostituée {{ selected_city.name|lower }}, rencontre adulte {{ selected_city.name|lower }}, {% endif %}{% if selected_category == 'escorte_girl' %}bizi, escort girl, prostituée, escorte erotique, sodomie, massage sexuel, finition, jedolo, baise, {% elif selected_category == 'escorte_boy' %}escort boy, bizi boy, massage sexuel, rencontre homme, {% elif selected_category == 'transgenre' %}transgenre, bizi trans, escorte trans, sodomie, massage sexuel, {% endif %}kiaba, bizi abidjan, escorte côte d'ivoire, annonces adultes, site sexe côte d'ivoire{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block hreflang_default %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+    "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:'escorte' }} à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
+    "description": "{% if selected_city %}Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces adultes en Côte d'Ivoire{% endif %}",
+  "url": "https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
+  "numberOfItems": "{{ ads|length }}",
+  "itemListElement": [
+    {% for ad in ads %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "name": "{{ ad.title|escapejs }}",
+      "url": "https://ci-kiaba.com/ads/{{ ad.slug }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+  {% for ad in ads %}
+    {% if forloop.first and ad.media.count %}
+      {% with media=ad.media.first %}
+        <link rel="preload" href="{% if media.thumbnail %}{{ media.thumbnail.url }}{% else %}{{ media.image.url }}{% endif %}" as="image" />
+      {% endwith %}
+    {% endif %}
+  {% endfor %}
+  {% if is_paginated %}
+    {% if page_obj.has_previous %}
+      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+    {% endif %}
+    {% if page_obj.has_next %}
+      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<!-- Breadcrumbs with Schema.org -->
+<nav class="mb-4 text-sm text-gray-600" aria-label="Breadcrumb">
+  <ol class="flex items-center space-x-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/" class="hover:text-gray-900" itemprop="item">
+        <span itemprop="name">Accueil</span>
+      </a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="https://ci-kiaba.com/ads" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">Annonces</span>
+      </a>
+      <meta itemprop="position" content="2" />
+    </li>
+    {% if selected_city %}
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="https://ci-kiaba.com/ads?city={{ selected_city.slug }}" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">{{ selected_city.name }}</span>
+      </a>
+      <meta itemprop="position" content="3" />
+    </li>
+    {% endif %}
+    {% if selected_category %}
+    <li class="text-gray-400">/</li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}&amp;category={{ selected_category }}{% else %}?category={{ selected_category }}{% endif %}" class="text-gray-900 font-medium" itemprop="item">
+        <span itemprop="name">{{ selected_category|title }}</span>
+      </a>
+      <meta itemprop="position" content="{% if selected_city %}4{% else %}3{% endif %}" />
+    </li>
+    {% endif %}
+  </ol>
+</nav>
+{% endblock %}
+
+
+{% block content %}
+{% static 'img/logo.png' as placeholder_img %}
+<div class="flex flex-col lg:flex-row gap-6">
+  <!-- Contenu principal -->
+  <div class="flex-1">
+<header class="mb-3 md:mb-4">
+  <h1 class="text-2xl font-bold text-gray-900">
+    {% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} – Escort Girl {{ selected_city.name }}, Côte d'Ivoire
+    {% elif selected_city and selected_category == 'escorte_boy' %}Escort Boy {{ selected_city.name }}, Côte d'Ivoire – KIABA
+    {% elif selected_city and selected_category == 'transgenre' %}Transgenre {{ selected_city.name }} – Bizi Trans, Côte d'Ivoire
+    {% elif selected_city %}Bizi {{ selected_city.name }} – Annonces Adultes Côte d'Ivoire · KIABA
+    {% elif selected_category == 'escorte_girl' %}Bizi CI – Escort Girl &amp; Prostituée Côte d'Ivoire · KIABA
+    {% elif selected_category == 'escorte_boy' %}Escort Boy &amp; Bizi Boy Côte d'Ivoire · KIABA Rencontres
+    {% elif selected_category == 'transgenre' %}Transgenre &amp; Bizi Trans Côte d'Ivoire · KIABA
+    {% else %}Bizi – Annonces Adultes Côte d'Ivoire · KIABA Rencontres{% endif %}
+  </h1>
+  <p class="text-sm text-gray-600 mt-1">
+    {% if selected_city and selected_category == 'escorte_girl' %}
+      Escort girls et prostituées à {{ selected_city.name }} : massage sexuel, sodomie, finition, bizi 24h. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city and selected_category == 'escorte_boy' %}
+      Escort boys à {{ selected_city.name }} : massage sexuel, rencontres adultes. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city and selected_category == 'transgenre' %}
+      Escortes transgenres à {{ selected_city.name }} : massage sexuel, services adultes, bizi trans. Contactez directement par WhatsApp ou appel.
+    {% elif selected_city %}
+      Escort girls, escort boys, transgenres et bizi à {{ selected_city.name }}, Côte d'Ivoire. Annonces adultes vérifiées.
+    {% elif selected_category == 'escorte_girl' %}
+      Escort girls et prostituées en Côte d'Ivoire : massage sexuel, sodomie, finition, partouze. Annonces vérifiées sur KIABA.
+    {% elif selected_category == 'escorte_boy' %}
+      Escort boys en Côte d'Ivoire : massage sexuel, rencontres adultes, finition. Annonces vérifiées sur KIABA.
+    {% elif selected_category == 'transgenre' %}
+      Escortes transgenres en Côte d'Ivoire : massage sexuel, services adultes, sodomie. Annonces vérifiées sur KIABA.
+    {% else %}
+      Site Nº1 Bizi & escortes en Côte d'Ivoire. Escort girls, escort boys, transgenres — massage sexuel, sodomie, finition, partouze.
+    {% endif %}
+  </p>
+</header>
+<section class="mb-4 md:mb-6">
+  <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
+    <div class="col-span-2 md:col-span-2 relative">
+      <label for="searchInput" class="block text-xs font-medium text-gray-600 mb-1">Recherche</label>
+      <input id="searchInput" name="q" type="text" placeholder="Mots, catégorie…" class="w-full border rounded-lg px-3 py-2" value="{{ request.GET.q }}" autocomplete="off">
+      <div id="searchSuggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-auto hidden"></div>
+    </div>
+    <div>
+      <label for="ads-filter-city" class="block text-xs font-medium text-gray-600 mb-1">Ville</label>
+      <select id="ads-filter-city" name="city" class="w-full border rounded-lg px-3 py-2">
+        <option value="">Toutes villes</option>
+        {% for c in cities %}
+          <option value="{{ c.slug }}" {% if request.GET.city == c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="ads-filter-category" class="block text-xs font-medium text-gray-600 mb-1">Catégorie</label>
+      <select id="ads-filter-category" name="category" class="w-full border rounded-lg px-3 py-2">
+        <option value="">Toutes</option>
+        {% for value, label in category_choices %}
+          <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-span-2 md:col-span-1 flex flex-col justify-end gap-2">
+      <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm inline-flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
+          <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414a1 1 0 0 0-.293.707V17l-4 4v-6.586a1 1 0 0 0-.293-.707L3.293 7.293A1 1 0 0 1 3 6.586V4z"/>
+        </svg>
+        <span>Filtrer</span>
+      </button>
+      <a href="/ads" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium inline-flex items-center justify-center transition" title="Réinitialiser les filtres">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="#ec4899">
+          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+        </svg>
+      </a>
+    </div>
+  </form>
+</section>
+
+<div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+  {% for ad in ads %}
+    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-40">
+      <div class="flex h-full">
+        <div class="w-40 flex-shrink-0 bg-slate-100">
+          {% if ad.media.count %}
+            {% with media=ad.media.first %}
+              {% if media.image %}
+              <img
+                {% if media.thumbnail %}
+                  src="{{ media.thumbnail.url }}"
+                {% else %}
+                  src="{{ media.image.url }}"
+                {% endif %}
+                data-placeholder="{{ placeholder_img }}"
+                onerror="this.onerror=null; this.src=this.dataset.placeholder;"
+                alt="{{ ad.title }} - {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Consultez cette annonce adulte sur KIABA Rencontres."
+                decoding="async"
+                class="w-full h-full object-cover"
+                {% if forloop.counter <= 3 %}
+                loading="eager"
+                {% if forloop.first %}fetchpriority="high"{% endif %}
+                {% else %}
+                loading="lazy"
+                {% endif %}
+                width="160"
+                height="160"
+              >
+              {% else %}
+            <img
+              src="{{ placeholder_img }}"
+              alt="Annonce adulte {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="160"
+              height="160"
+            >
+              {% endif %}
+            {% endwith %}
+          {% else %}
+            <img
+              src="{{ placeholder_img }}"
+              alt="Annonce adulte {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire - KIABA Rencontres"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="160"
+              height="160"
+            >
+          {% endif %}
+        </div>
+        <div class="flex-1 p-3 flex flex-col justify-between min-w-0 overflow-hidden">
+          <div class="min-w-0 flex-1">
+            <div class="font-medium text-slate-900 line-clamp-2 mb-1">{{ ad.title }}</div>
+            <div class="text-xs text-slate-600 mb-1 font-medium">{{ ad.get_category_display }}</div>
+            <div class="text-xs text-slate-500 mb-1">{{ ad.city.name }}</div>
+          </div>
+          <div class="flex justify-between items-end mt-1">
+            <div class="text-xs text-gray-700 font-semibold bg-gray-100 px-2 py-1 rounded">
+              {{ ad.created_at|date:"d/m/Y" }}
+            </div>
+            <div class="flex flex-wrap gap-1">
+              {% for tag in ad.subcategories|slice:":2" %}
+                <span class="px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100 text-xs truncate max-w-[85px] block" title="{{ tag }}">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+  {% empty %}
+    <div class="text-center text-slate-600 py-8">Aucune annonce trouvée.</div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+  <div class="mt-8 flex justify-center">
+    <nav class="flex items-center space-x-2" aria-label="Pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+           class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+          ← Précédent
+        </a>
+      {% else %}
+        <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+          ← Précédent
+        </span>
+      {% endif %}
+
+      <!-- Numéros de page -->
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+             class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+            {{ num }}
+          </a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" 
+           class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+          Suivant →
+        </a>
+      {% else %}
+        <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed">
+          Suivant →
+        </span>
+      {% endif %}
+    </nav>
+  </div>
+{% endif %}
+
+
+<!-- Bouton Créer une annonce en bas -->
+<section class="mt-8" style="background: linear-gradient(to right, #ec4899, #3b82f6); color: #fff; padding: 2rem 1rem; border-radius: 0.5rem; text-align: center;">
+  <div>
+    <a href="/post/" style="display: inline-flex; align-items: center; background-color: #ffffff; color: #db2777; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+      <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Créer une annonce
+    </a>
+    <p style="color: #ffffff; font-size: 0.875rem; margin-top: 0.75rem;">Publiez votre annonce gratuitement sur KIABA Rencontres</p>
+  </div>
+</section>
+
+<!-- Catégories & sous-catégories -->
+<section class="mt-8 bg-white border border-blue-100 rounded-xl overflow-hidden">
+  <a href="/ads?category=escorte_girl" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-semibold text-base border-b border-blue-100 transition group">
+    <span class="text-pink-400 group-hover:translate-x-1 transition-transform">›</span> Escorte girl
+  </a>
+  <a href="/ads?category=escorte_boy" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-semibold text-base border-b border-blue-100 transition group">
+    <span class="text-pink-400 group-hover:translate-x-1 transition-transform">›</span> Escorte boy
+  </a>
+  <a href="/ads?category=transgenre" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-semibold text-base border-b border-blue-100 transition group">
+    <span class="text-pink-400 group-hover:translate-x-1 transition-transform">›</span> Transgenre
+  </a>
+  <a href="/ads?q=Sex+vaginal" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-medium text-base border-b border-blue-100 transition group">
+    <span class="text-pink-300 group-hover:translate-x-1 transition-transform">›</span> Sex vaginal
+  </a>
+  <a href="/ads?q=Sex+anal" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-medium text-base border-b border-blue-100 transition group">
+    <span class="text-pink-300 group-hover:translate-x-1 transition-transform">›</span> Sex anal (sodomie)
+  </a>
+  <a href="/ads?q=Massage+sexuel" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-medium text-base border-b border-blue-100 transition group">
+    <span class="text-pink-300 group-hover:translate-x-1 transition-transform">›</span> Massage sexuel
+  </a>
+  <a href="/ads?q=Massage+du+corps" class="flex items-center gap-2 px-4 py-3 text-pink-600 hover:bg-pink-50 font-medium text-base transition group">
+    <span class="text-pink-300 group-hover:translate-x-1 transition-transform">›</span> Massage du corps
+  </a>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var searchInput = document.getElementById('searchInput');
+  var suggestionsEl = document.getElementById('searchSuggestions');
+  var form = document.getElementById('adsSearchForm');
+  if (!searchInput || !suggestionsEl || !form) return;
+  var debounceTimer;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    var q = (searchInput.value || '').trim();
+    if (q.length < 2) {
+      suggestionsEl.classList.add('hidden');
+      suggestionsEl.innerHTML = '';
+      return;
+    }
+    debounceTimer = setTimeout(function() {
+      fetch('/ads/api/search-suggestions/?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var list = data.suggestions || [];
+          if (list.length === 0) {
+            suggestionsEl.classList.add('hidden');
+            suggestionsEl.innerHTML = '';
+            return;
+          }
+          suggestionsEl.innerHTML = list.map(function(s) {
+            var typeLabel = s.type === 'category' ? 'Catégorie' : (s.type === 'subcategory' ? 'Sous-catégorie' : 'Annonce');
+            var val = (s.value || s.label || '').replace(/"/g, '&quot;');
+            var type = (s.type || '').replace(/"/g, '&quot;');
+            return '<button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-0 flex justify-between items-center gap-2" data-type="' + type + '" data-value="' + val + '"><span>' + (s.label || '').replace(/</g, '&lt;') + '</span><span class="text-xs text-gray-400">' + typeLabel + '</span></button>';
+          }).join('');
+          suggestionsEl.classList.remove('hidden');
+        })
+        .catch(function() { suggestionsEl.classList.add('hidden'); });
+    }, 280);
+  });
+  suggestionsEl.addEventListener('click', function(e) {
+    var btn = e.target && e.target.closest('button[data-value]');
+    if (btn) {
+      var type = btn.getAttribute('data-type');
+      var value = btn.getAttribute('data-value');
+      if (type === 'category') {
+        var catSelect = form.querySelector('select[name=category]');
+        if (catSelect) catSelect.value = value;
+        searchInput.value = '';
+      } else if (type === 'subcategory') {
+        searchInput.value = value;
+      } else {
+        searchInput.value = value;
+      }
+      suggestionsEl.classList.add('hidden');
+      suggestionsEl.innerHTML = '';
+      form.submit();
+    }
+  });
+  document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !suggestionsEl.contains(e.target)) suggestionsEl.classList.add('hidden');
+  });
+  searchInput.addEventListener('focus', function() {
+    if (suggestionsEl.innerHTML) suggestionsEl.classList.remove('hidden');
+  });
+})();
+</script>
+{% endblock %}
+
+

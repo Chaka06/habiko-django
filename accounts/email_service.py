@@ -1,0 +1,367 @@
+"""
+Service d'envoi d'emails professionnel pour KIABA Rencontres
+Gère l'envoi d'emails avec templates HTML/text via Resend, SendGrid HTTP API ou SMTP
+"""
+
+import logging
+import os
+from typing import List, Optional, Dict, Any
+from django.utils.html import strip_tags
+
+logger = logging.getLogger(__name__)
+
+SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
+RESEND_API_URL = "https://api.resend.com/emails"
+
+
+class EmailService:
+    """Service centralisé pour l'envoi d'emails professionnels"""
+
+    # Nom d'expéditeur standardisé
+    FROM_NAME = "KIABA Rencontres"
+
+    @classmethod
+    def get_from_email_value(cls) -> str:
+        """Retourne l'email depuis settings (lazy loading)"""
+        try:
+            from django.conf import settings
+
+            return settings.DEFAULT_FROM_EMAIL
+        except (ImportError, AttributeError):
+            return "KIABA Rencontres <support@ci-kiaba.com>"
+
+    @classmethod
+    def get_from_email(cls) -> str:
+        """Retourne l'email formaté avec le nom KIABA Rencontres"""
+        # Nettoyer l'email si il contient déjà le format
+        email = cls.get_from_email_value()
+        if "<" in email:
+            # Extraire juste l'email
+            import re
+
+            match = re.search(r"<(.+?)>", email)
+            if match:
+                email = match.group(1)
+        return f"{cls.FROM_NAME} <{email}>"
+
+    @classmethod
+    def send_email(
+        cls,
+        subject: str,
+        to_emails: List[str],
+        template_name: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None,
+        text_content: Optional[str] = None,
+        html_content: Optional[str] = None,
+        fail_silently: bool = False,
+    ) -> bool:
+        """
+        Envoie un email professionnel avec support HTML/text
+
+        Args:
+            subject: Sujet de l'email
+            to_emails: Liste des destinataires
+            template_name: Nom du template (sans extension, cherche .html et .txt)
+            context: Contexte pour les templates
+            text_content: Contenu texte brut (si pas de template)
+            html_content: Contenu HTML brut (si pas de template)
+            fail_silently: Si True, ne lève pas d'exception en cas d'erreur
+
+        Returns:
+            True si l'email a été envoyé avec succès, False sinon
+        """
+        if context is None:
+            context = {}
+
+        # Ajouter des valeurs par défaut au contexte (logo, site_name, etc.)
+        try:
+            from django.conf import settings
+
+            site_url = getattr(settings, "SITE_URL", "https://ci-kiaba.com")
+            static_url = getattr(settings, "STATIC_URL", "/static/")
+        except (ImportError, AttributeError):
+            site_url = "https://ci-kiaba.com"
+            static_url = "/static/"
+
+        # Toujours ajouter ces valeurs au contexte pour que le logo apparaisse
+        context["site_name"] = context.get("site_name", "KIABA Rencontres")
+        context["site_url"] = context.get("site_url", site_url)
+        context["support_email"] = context.get("support_email", "support@ci-kiaba.com")
+        # Logo du site en URL absolue (?v=3 = même que le site)
+        base = site_url.rstrip("/")
+        context["logo_url"] = context.get("logo_url", f"{base}/static/img/logo.png?v=3")
+
+        # Pour les emails de confirmation, construire activate_url si key est présent
+        # Allauth peut passer 'key' ou 'activate_url' dans le contexte
+        if "key" in context and "activate_url" not in context:
+            try:
+                from django.urls import reverse
+
+                key = context["key"]
+                # Construire l'URL complète avec le bon domaine
+                activate_url = f"{site_url}{reverse('account_confirm_email', args=[key])}"
+                context["activate_url"] = activate_url
+                logger.info(
+                    f"📧 activate_url construit dans EmailService depuis key: {activate_url}"
+                )
+            except Exception as e:
+                logger.warning(f"Impossible de construire activate_url dans EmailService: {e}")
+        elif "activate_url" in context:
+            # Si activate_url existe mais est relatif, le rendre absolu
+            # Ou si c'est une URL absolue avec un mauvais domaine, la remplacer
+            activate_url = context.get("activate_url", "")
+            if activate_url:
+                if not activate_url.startswith("http"):
+                    # URL relative, la rendre absolue
+                    context["activate_url"] = f"{site_url}{activate_url}"
+                    logger.info(
+                        f"📧 activate_url rendu absolu dans EmailService: {context['activate_url']}"
+                    )
+                elif (
+                    "localhost" in activate_url
+                    or "example.com" in activate_url
+                    or "127.0.0.1" in activate_url
+                ):
+                    # URL absolue avec mauvais domaine, extraire le chemin et reconstruire
+                    from urllib.parse import urlparse
+
+                    parsed = urlparse(activate_url)
+                    path = parsed.path
+                    context["activate_url"] = f"{site_url}{path}"
+                    logger.info(
+                        f"📧 activate_url corrigé dans EmailService (mauvais domaine): {context['activate_url']}"
+                    )
+
+        try:
+            from django.template.loader import render_to_string
+            from django.conf import settings
+
+            # Générer le contenu depuis les templates si fourni
+            if template_name:
+                try:
+                    html_content = render_to_string(f"{template_name}.html", context)
+                    text_content = render_to_string(f"{template_name}.txt", context)
+                except Exception as e:
+                    logger.warning(
+                        f"Template {template_name} non trouvé, utilisation du contenu brut: {e}"
+                    )
+                    if not text_content:
+                        text_content = html_content and strip_tags(html_content) or ""
+
+            # S'assurer qu'on a au moins du texte
+            if not text_content and html_content:
+                text_content = strip_tags(html_content)
+            elif not text_content:
+                text_content = subject
+
+            # --- Envoi via Resend API (recommandé pour Vercel - simple, gratuit) ---
+            resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
+            if resend_api_key:
+                try:
+                    import requests
+
+                    sender_email = cls.get_from_email_value()
+                    if "<" in sender_email:
+                        import re
+                        m = re.search(r"<(.+?)>", sender_email)
+                        sender_email = m.group(1) if m else sender_email
+                    payload = {
+                        "from": f"{cls.FROM_NAME} <{sender_email}>",
+                        "to": to_emails,
+                        "subject": subject,
+                        "text": text_content or subject,
+                    }
+                    if html_content:
+                        payload["html"] = html_content
+                    headers = {"Authorization": f"Bearer {resend_api_key}", "Content-Type": "application/json"}
+                    logger.info(f"📧 Envoi via Resend API à {', '.join(to_emails)} sujet='{subject}'")
+                    resp = requests.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(f"✅ Email envoyé via Resend à {', '.join(to_emails)}")
+                        return True
+                    logger.error(f"❌ Erreur Resend API ({resp.status_code}): {resp.text}")
+                except Exception as e:
+                    logger.error(f"❌ Erreur Resend API: {e}", exc_info=True)
+
+            # --- Envoi via SendGrid HTTP API (recommandé pour Render) ---
+            sendgrid_api_key = getattr(settings, "SENDGRID_API_KEY", None)
+            if not sendgrid_api_key:
+                # Essayer de récupérer depuis EMAIL_HOST_PASSWORD si c'est une clé SendGrid
+                email_password = getattr(settings, "EMAIL_HOST_PASSWORD", "")
+                if (
+                    email_password
+                    and email_password.startswith("SG.")
+                    and getattr(settings, "EMAIL_HOST", "") == "smtp.sendgrid.net"
+                ):
+                    sendgrid_api_key = email_password
+                    logger.info("📧 Clé API SendGrid détectée depuis EMAIL_HOST_PASSWORD")
+
+            if sendgrid_api_key and sendgrid_api_key.strip():
+                try:
+                    import requests
+
+                    sender_email = cls.get_from_email_value()
+                    # Extraire adresse email seule si besoin
+                    if "<" in sender_email:
+                        import re
+
+                        m = re.search(r"<(.+?)>", sender_email)
+                        if m:
+                            sender_email = m.group(1)
+
+                    payload = {
+                        "personalizations": [
+                            {"to": [{"email": email} for email in to_emails], "subject": subject}
+                        ],
+                        "from": {"email": sender_email, "name": cls.FROM_NAME},
+                        "content": [{"type": "text/plain", "value": text_content or subject}],
+                    }
+
+                    # Ajouter HTML si disponible
+                    if html_content:
+                        payload["content"].append({"type": "text/html", "value": html_content})
+
+                    headers = {
+                        "Authorization": f"Bearer {sendgrid_api_key}",
+                        "Content-Type": "application/json",
+                    }
+
+                    logger.info(
+                        f"📧 Envoi via SendGrid API à {', '.join(to_emails)} sujet='{subject}'"
+                    )
+                    # Timeout réduit pour ne pas bloquer l'application
+                    resp = requests.post(SENDGRID_API_URL, json=payload, headers=headers, timeout=5)
+                    if resp.status_code in (200, 201, 202):
+                        logger.info(
+                            f"✅ Email envoyé avec succès via SendGrid API à {', '.join(to_emails)}"
+                        )
+                        return True
+                    else:
+                        error_msg = resp.text
+                        logger.error(f"❌ Erreur SendGrid API ({resp.status_code}): {error_msg}")
+                        if resp.status_code == 401:
+                            logger.error("⚠️ Erreur 401 SendGrid API - La clé API est invalide")
+                        # Continue vers SMTP en fallback
+                except Exception as api_error:
+                    logger.error(
+                        f"❌ Erreur lors de l'envoi via SendGrid API à {', '.join(to_emails)}: {api_error}",
+                        exc_info=True,
+                    )
+                    # Continue vers SMTP en fallback
+
+            # --- Fallback SMTP (pour local ou autres environnements) ---
+            email_host = getattr(settings, "EMAIL_HOST", "") or ""
+            if os.environ.get("VERCEL") == "1" and not email_host.strip():
+                logger.warning(
+                    "⚠️ Vercel: aucun service email configuré. Ajoute RESEND_API_KEY ou SENDGRID_API_KEY "
+                    "dans les variables d'environnement Vercel pour activer les emails d'inscription."
+                )
+                return False
+            if not email_host.strip():
+                logger.warning("⚠️ EMAIL_HOST non configuré. Les emails ne seront pas envoyés.")
+                return False
+
+            from django.core.mail import EmailMultiAlternatives
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=cls.get_from_email(),
+                to=to_emails,
+            )
+            if html_content:
+                email.attach_alternative(html_content, "text/html")
+
+            email_headers = getattr(settings, "EMAIL_HEADERS", {})
+            for key, value in email_headers.items():
+                email.extra_headers[key] = value
+            email.extra_headers["Reply-To"] = "support@ci-kiaba.com"
+            email.extra_headers["Return-Path"] = "support@ci-kiaba.com"
+
+            try:
+                logger.info(
+                    f"📧 Envoi email via SMTP - Backend: {settings.EMAIL_BACKEND}, Host: {settings.EMAIL_HOST}, Port: {settings.EMAIL_PORT}"
+                )
+                logger.info(
+                    f"📧 De: {cls.get_from_email()}, Vers: {', '.join(to_emails)}, Sujet: {subject}"
+                )
+                result = email.send(fail_silently=fail_silently)
+                if result:
+                    logger.info(
+                        f"✅ Email envoyé avec succès via SMTP à {', '.join(to_emails)}: {subject}"
+                    )
+                else:
+                    logger.warning(
+                        f"⚠️ Email non envoyé (résultat: {result}) à {', '.join(to_emails)}"
+                    )
+                return bool(result)
+            except Exception as send_error:
+                logger.error(
+                    f"❌ Erreur SMTP lors de l'envoi à {', '.join(to_emails)}: {send_error}",
+                    exc_info=True,
+                )
+                if hasattr(send_error, "smtp_code"):
+                    logger.error(
+                        f"Code SMTP: {send_error.smtp_code}, Message: {send_error.smtp_error}"
+                    )
+                if hasattr(send_error, "args"):
+                    logger.error(f"Détails erreur: {send_error.args}")
+                logger.error(
+                    f"Configuration SMTP: BACKEND={settings.EMAIL_BACKEND}, HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, USER={settings.EMAIL_HOST_USER}, SSL={getattr(settings, 'EMAIL_USE_SSL', None)}, TLS={getattr(settings, 'EMAIL_USE_TLS', None)}"
+                )
+                if not fail_silently:
+                    raise
+                return False
+
+        except Exception as e:
+            logger.error(
+                f"❌ Erreur lors de la préparation de l'email à {', '.join(to_emails)}: {e}",
+                exc_info=True,
+            )
+            if not fail_silently:
+                raise
+            return False
+
+    @classmethod
+    def send_bulk_email(
+        cls,
+        subject: str,
+        recipients: List[Dict[str, Any]],
+        template_name: str,
+        base_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, bool]:
+        """
+        Envoie des emails en masse avec contexte personnalisé par destinataire
+
+        Args:
+            subject: Sujet de l'email
+            recipients: Liste de dicts avec 'email' et 'context'
+            template_name: Nom du template
+            base_context: Contexte de base partagé par tous
+
+        Returns:
+            Dict avec email -> True/False selon le succès
+        """
+        if base_context is None:
+            base_context = {}
+
+        results = {}
+
+        for recipient in recipients:
+            email = recipient["email"]
+            context = {**base_context, **recipient.get("context", {})}
+
+            try:
+                success = cls.send_email(
+                    subject=subject,
+                    to_emails=[email],
+                    template_name=template_name,
+                    context=context,
+                    fail_silently=True,
+                )
+                results[email] = success
+            except Exception as e:
+                logger.error(f"Erreur pour {email}: {e}")
+                results[email] = False
+
+        return results

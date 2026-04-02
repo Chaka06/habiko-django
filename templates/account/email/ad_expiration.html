@@ -1,0 +1,59 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Votre annonce a expiré - {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Votre annonce a expiré</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Votre annonce sur <strong>{{ site_name }}</strong> a expiré et n'est plus visible sur la plateforme.</p>
+
+<div class="warning-box">
+    <p style="margin: 0;"><strong>{% include "account/email/icons/warning.html" %} Annonce expirée</strong> - Les visiteurs ne peuvent plus consulter cette annonce ni vous contacter via celle-ci.</p>
+</div>
+
+<div class="details">
+    <h3>Détails de l'annonce expirée :</h3>
+    <dl>
+        <dt>{% include "account/email/icons/bullet.html" %} Titre :</dt>
+        <dd><strong>{{ ad.title }}</strong></dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Date de publication :</dt>
+        <dd>{{ ad.created_at|date:"d/m/Y à H:i" }}</dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Date d'expiration :</dt>
+        <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
+    </dl>
+</div>
+
+<div class="info-box">
+    <h3>{% include "account/email/icons/bullet.html" %} Que faire maintenant ?</h3>
+    <p>Votre bien est toujours disponible ? Vous avez deux options :</p>
+    <ul>
+        <li>{% include "account/email/icons/bullet.html" %} <strong>Republier l'annonce</strong> - Publiez à nouveau votre bien en quelques clics</li>
+        <li>{% include "account/email/icons/star.html" %} <strong>Créer une nouvelle annonce</strong> - Publiez une nouvelle annonce</li>
+        <li>{% include "account/email/icons/star.html" %} <strong>Booster votre prochaine annonce</strong> - Augmentez sa visibilité dès le départ</li>
+    </ul>
+</div>
+
+<div class="button-container">
+    <a href="{{ site_url }}/post/" class="button">Créer une nouvelle annonce</a>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;">Accéder à mon tableau de bord</a>
+</p>
+
+<div class="security-note">
+    <p style="margin: 0;"><strong>{% include "account/email/icons/bullet.html" %} Conseil :</strong> Pour éviter l'expiration de vos futures annonces, pensez à utiliser l'option <strong>"Prolongation"</strong> disponible dans votre tableau de bord avant la date d'expiration.</p>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Besoin d'aide ? Contactez-nous : <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+{% endblock %}

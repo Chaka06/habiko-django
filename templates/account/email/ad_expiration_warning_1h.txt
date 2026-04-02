@@ -1,0 +1,18 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+DERNIÈRE CHANCE — Votre annonce sur {{ site_name }} sera définitivement supprimée dans moins d'une heure.
+
+--- Détails de votre annonce ---
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Suppression à : {{ ad.expires_at|date:"H:i \l\e d/m/Y" }}
+
+Créez une nouvelle annonce maintenant :
+{{ site_url }}/post/
+
+Tableau de bord : {{ site_url }}/dashboard/
+
+---
+Des questions ? Contactez-nous : {{ support_email }}
+{{ site_url }}

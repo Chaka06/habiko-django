@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+  {% load static %}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- GA chargé après load pour ne pas bloquer LCP/TBT -->
+    {% if GA_MEASUREMENT_ID %}
+    <script>
+      (function(){
+        var gaId = "{{ GA_MEASUREMENT_ID|default:''|escapejs }}";
+        function loadGA() {
+          if (!gaId) return;
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', gaId);
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          document.head.appendChild(s);
+        }
+        if (document.readyState === 'complete') setTimeout(loadGA, 1);
+        else window.addEventListener('load', function(){ setTimeout(loadGA, 1); });
+      })();
+    </script>
+    {% endif %}
+    <title>{% block title %}KIABA : Annonces Rencontres, Massages, Escortes Côte d'Ivoire{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block description %}Site Nº1 des annonces rencontres, massages et escortes en Côte d'Ivoire, CI. Escort girls, escort boys, transgenres. Abidjan, Bouaké, Daloa.{% endblock %}"
+    />
+    <meta
+      name="keywords"
+      content="{% block keywords %}kiaba, bizi, bizzi, bizi abidjan, bizi 24, site de rencontre adulte, escort girl, escort girl abidjan, escort boy, transgenre, annonces adultes, escorte côte d'ivoire, escorte erotique, escorte erotic, prostitution abidjan, prostituée côte d'ivoire, prostituée abidjan, sodomie, baise abidjan, massage sexuel, massage partouze, finition, jedolo, kiaba rencontres, site sexe côte d'ivoire, abidjan, bouaké, daloa, yamoussoukro{% endblock %}"
+    />
+    <meta name="author" content="KIABA" />
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}" />
+    <meta name="language" content="fr" />
+    <meta name="geo.region" content="CI" />
+    <meta name="geo.country" content="Côte d'Ivoire" />
+    <meta name="geo.placename" content="Abidjan" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="adult" />
+    <meta name="RATING" content="RTA-5042-1996-1400-1577-RTA" />
+    <meta name="revisit-after" content="1 days" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="{% block og_url %}https://ci-kiaba.com{% endblock %}"
+    />
+    <meta
+      property="og:title"
+      content="{% block og_title %}KIABA : Annonces Rencontres, Massages, Escortes Côte d'Ivoire{% endblock %}"
+    />
+    <meta
+      property="og:description"
+      content="{% block og_description %}Site Nº1 des annonces rencontres, massages et escortes en Côte d'Ivoire, CI. Escort girls, escort boys, transgenres. Abidjan, Bouaké, Daloa.{% endblock %}"
+    />
+    <meta
+      property="og:image"
+      content="{% block og_image %}https://static-ca-cdn.eporner.com/gallery/Cv/eq/SEMW86aeqCv/4215924-fonds-ecran-images-sexy-femme-noire-nue-18_880x660.jpg{% endblock %}"
+    />
+    <meta property="og:site_name" content="KIABA" />
+    <meta property="og:locale" content="fr_CI" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="{% block twitter_url %}https://ci-kiaba.com{% endblock %}"
+    />
+    <meta
+      property="twitter:title"
+      content="{% block twitter_title %}KIABA : Annonces Rencontres, Massages, Escortes Côte d'Ivoire{% endblock %}"
+    />
+    <meta
+      property="twitter:description"
+      content="{% block twitter_description %}Site Nº1 des annonces rencontres, massages et escortes en Côte d'Ivoire, CI. Escort girls, escort boys, transgenres. Abidjan, Bouaké, Daloa.{% endblock %}"
+    />
+    <meta
+      property="twitter:image"
+      content="{% block twitter_image %}https://static-ca-cdn.eporner.com/gallery/Cv/eq/SEMW86aeqCv/4215924-fonds-ecran-images-sexy-femme-noire-nue-18_880x660.jpg{% endblock %}"
+    />
+
+    <!-- Canonical URL -->
+    <link
+      rel="canonical"
+      href="{% block canonical_url %}https://ci-kiaba.com{% endblock %}"
+    />
+
+    <!-- Hreflang Tags for SEO Local -->
+    <link
+      rel="alternate"
+      hreflang="fr-CI"
+      href="{% block hreflang_fr_ci %}https://ci-kiaba.com{% endblock %}"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="{% block hreflang_default %}https://ci-kiaba.com{% endblock %}"
+    />
+
+    <!-- Google Search Console Verification -->
+    <meta
+      name="google-site-verification"
+      content="D-jRaoys-yD6wLJMgBCGn9OBj4teSJK3QVN7k8QS394"
+    />
+    <!-- Preconnect origines utilisées -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://uagqyedwkyqbaowbornm.storage.supabase.co" crossorigin />
+    <!-- Preload image LCP critique (WebP prioritaire) -->
+    <link rel="preload" href="{% static 'img/logo.webp' %}?v=2" as="image" type="image/webp" />
+    <!-- Tailwind CSS purgé (27 KiB local vs 249 KiB CDN) : chargement synchrone pour CLS = 0 -->
+    <link rel="preload" href="{% static 'css/tailwind.min.css' %}?v=1" as="style" />
+    <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}?v=1" />
+    <!-- Boxicons CSS : différé (icônes uniquement sous la fold : dashboard, login) -->
+    <link rel="preload" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" /></noscript>
+
+    <!-- JSON-LD Structured Data - Organization & LocalBusiness (Amélioré selon Google) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "KIABA Rencontres",
+        "alternateName": "KIABA",
+        "url": "https://ci-kiaba.com",
+        "description": "Site de rencontres adultes et d'annonces d'escort girls, escort boys et transgenres en Côte d'Ivoire.",
+        "inLanguage": "fr-CI",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "https://ci-kiaba.com/#organization",
+          "name": "KIABA",
+          "legalName": "KIABA",
+          "url": "https://ci-kiaba.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://ci-kiaba.com/static/img/logo.png?v=3",
+            "width": 200,
+            "height": 60
+          },
+          "image": "https://ci-kiaba.com/static/img/logo.png?v=3",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "support@ci-kiaba.com",
+            "contactType": "customer service",
+            "areaServed": "CI",
+            "availableLanguage": ["fr", "fr-CI"]
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CI",
+            "addressLocality": "Abidjan",
+            "addressRegion": "Lagunes"
+          },
+          "sameAs": ["https://ci-kiaba.com"]
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://ci-kiaba.com/ads?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "@id": "https://ci-kiaba.com/#localbusiness",
+        "name": "KIABA Rencontres",
+        "alternateName": "KIABA",
+        "keywords": "kiaba, bizi, bizzi, bizi abidjan, bizi 24, escort girl, escort boy, transgenre, escorte erotique, prostituée côte d'ivoire, sodomie, massage sexuel, finition, jedolo, site de rencontre adulte, annonces adultes, escorte côte d'ivoire",
+        "description": "KIABA - Site de rencontres adultes et d'annonces d'escorte en Côte d'Ivoire.",
+        "url": "https://ci-kiaba.com",
+        "telephone": "+225",
+        "email": "support@ci-kiaba.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "",
+          "addressLocality": "Abidjan",
+          "addressRegion": "Lagunes",
+          "postalCode": "",
+          "addressCountry": "CI"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 5.36,
+          "longitude": -4.0083
+        },
+        "areaServed": [
+          {
+            "@type": "Country",
+            "name": "Côte d'Ivoire",
+            "sameAs": "https://en.wikipedia.org/wiki/Ivory_Coast"
+          },
+          {
+            "@type": "City",
+            "name": "Abidjan"
+          },
+          {
+            "@type": "City",
+            "name": "Bouaké"
+          },
+          {
+            "@type": "City",
+            "name": "Daloa"
+          }
+        ],
+        "priceRange": "Gratuit",
+        "openingHours": "Mo-Su 00:00-23:59",
+        "image": "https://ci-kiaba.com/static/img/logo.png?v=3",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://ci-kiaba.com/static/img/logo.png?v=3"
+        }
+      }
+    </script>
+
+    {% block structured_data %}{% endblock %}
+
+    <!-- Favicon - URL relative pour éviter erreur manifest static sur Vercel -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=4" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=4" />
+    <link rel="shortcut icon" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon.ico?v=4" />
+    <link rel="apple-touch-icon" href="/favicon.ico?v=4" />
+    <meta name="msapplication-TileColor" content="#ec4899" />
+    <meta name="msapplication-TileImage" content="/favicon.ico?v=4" />
+    <meta name="theme-color" content="#ec4899" />
+
+    {% block tailwind_css %}{% endblock %} {% block htmx_js %}
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    {% endblock %}
+
+    <!-- Google Fonts : non-bloquant (1.3KB CSS bloquait 750ms le rendu).
+         display=swap → texte en police système pendant le chargement, pas de FOIT.
+         Le swap de police (changement typographique seul) ne génère pas de CLS layout. -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"></noscript>
+
+    <style>
+      /* Styles critiques */
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      /* Pas de visibility hidden sur body : évite un gros CLS au « reveal » */
+      /* Modale de chargement : toujours au-dessus des champs (z-index max) */
+      #loadingModal { z-index: 2147483646 !important; }
+      #loadingModal.flex { background: rgba(0,0,0,0.15); pointer-events: auto; }
+      .loading-spinner {
+        width: 48px; height: 48px; border: 3px solid #e5e7eb; border-top-color: #ec4899;
+        border-radius: 50%; animation: loading-spin 0.8s linear infinite;
+      }
+      @keyframes loading-spin { to { transform: rotate(360deg); } }
+
+      .glass {
+        backdrop-filter: saturate(180%) blur(10px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+      .line-clamp-1 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+      }
+      .line-clamp-2 {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      /* Style pour les liens du footer au survol */
+      footer a:hover {
+        color: #ec4899 !important;
+      }
+
+      /* CTA Section - Copié exactement de age_gate.html */
+      .cta-section {
+        background: linear-gradient(to bottom right, #ec4899, #3b82f6);
+        color: #fff;
+        padding: 0.75rem 1rem;
+        text-align: center;
+      }
+      
+      @media (min-width: 768px) {
+        .cta-section {
+          padding: 1rem;
+        }
+      }
+      
+      .cta-container {
+        max-width: 80rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .cta-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      
+      @media (min-width: 768px) {
+        .cta-title {
+          font-size: 1.25rem;
+        }
+      }
+      
+      .cta-text {
+        color: #ffedd5;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+      }
+      
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        background-color: #fff;
+        color: #db2777;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+      
+      .cta-button:hover {
+        background-color: #fff7ed;
+      }
+      
+      .cta-icon {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* Bandeau KIABA (pub interne) */
+      .kiaba-banner {
+        background-color: #111827; /* gris très foncé, sobre */
+        border-radius: 0.75rem;
+        border: 1px solid rgba(236, 72, 153, 0.35); /* léger rappel rose */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .kiaba-banner-text,
+      .kiaba-banner-cta,
+      .kiaba-banner-logo {
+        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      /* Texte rose -> dégradé bleu animé */
+      .kiaba-banner-text {
+        background: linear-gradient(90deg, #ec4899, #3b82f6);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: kiabaTextShift 4s ease-in-out infinite;
+      }
+      @keyframes kiabaTextShift {
+        0% {
+          background-position: 0% 0%;
+        }
+        50% {
+          background-position: 100% 0%;
+        }
+        100% {
+          background-position: 0% 0%;
+        }
+      }
+      /* Logo qui tourne doucement */
+      .kiaba-banner-logo img {
+        animation: kiabaSpin 6s linear infinite;
+        transform-origin: center center;
+      }
+      @keyframes kiabaSpin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .kiaba-banner-cta {
+        background: linear-gradient(135deg, #ec4899, #3b82f6);
+        color: #ffffff;
+      }
+      .kiaba-banner-cta:hover {
+        background: linear-gradient(135deg, #db2777, #2563eb);
+      }
+
+      /* Modale de chargement (sans fond sombre) */
+      .loading-modal-content {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .loading-modal-content h3 {
+        color: #111827;
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      .loading-modal-content p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin: 0;
+      }
+
+      /* Image de fête sur le logo */
+      .logo-container {
+        position: relative;
+        display: inline-block;
+      }
+      .holiday-image {
+        position: absolute;
+        top: -18px;
+        left: -12px;
+        width: 56px;
+        height: auto;
+        z-index: 10;
+        animation: holidayWiggle 2s ease-in-out infinite;
+        transform-origin: bottom center;
+      }
+      @keyframes holidayWiggle {
+        0%, 100% { transform: rotate(-5deg); }
+        50% { transform: rotate(5deg); }
+      }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+    <!-- Empêche le zoom automatique iOS Safari sur les champs de formulaire (font-size < 16px) -->
+    <style>
+      @media (max-width: 768px) {
+        input, select, textarea { font-size: 16px !important; }
+      }
+    </style>
+  </head>
+  <body class="min-h-full bg-gradient-to-b from-pink-50 to-white">
+    {% block header %}
+    <header class="sticky top-0 z-40 glass border-b">
+      <div
+        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <a href="/" class="text-2xl font-semibold tracking-tight text-gray-900">
+      <div class="logo-container">
+            <picture>
+              <source srcset="{% static 'img/logo.webp' %}?v=2" type="image/webp" />
+              <img
+                src="{% static 'img/logo.png' %}?v=3"
+                alt="KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire"
+                class="h-12 md:h-16 w-auto"
+                loading="eager"
+                fetchpriority="high"
+                width="256"
+                height="106"
+              />
+            </picture>
+          </div>
+        </a>
+        <nav class="hidden md:flex items-center gap-3">
+          <a href="/post/" class="inline-flex items-center justify-center min-h-[48px] bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition font-medium gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Publier+
+          </a>
+          {% if user.is_authenticated %}
+          <a href="/dashboard/" class="inline-flex items-center justify-center min-w-[48px] min-h-[48px] p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition" title="Mon compte" aria-label="Mon compte">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          </a>
+          {% else %}
+          <a href="/auth/login/" class="inline-flex items-center justify-center min-h-[48px] bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Se connecter</a>
+          {% endif %}
+        </nav>
+        <div class="md:hidden flex items-center gap-2">
+          <a href="/post/" class="inline-flex items-center justify-center min-h-[48px] bg-pink-600 text-white px-3 py-2 rounded-lg text-sm font-medium gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Publier+
+          </a>
+          {% if user.is_authenticated %}
+          <a href="/dashboard/" class="inline-flex items-center justify-center min-w-[48px] min-h-[48px] p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Mon compte" aria-label="Mon compte">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          </a>
+          {% else %}
+          <a href="/auth/login/" class="inline-flex items-center justify-center min-h-[48px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Se connecter</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    {% endblock %}
+
+    {% block cta_section %}{% endblock %}
+    {% block counter_section %}{% endblock %}
+
+    <main
+      class="{% block main_class %}max-w-7xl mx-auto p-3 md:p-4{% endblock %}"
+    >
+      <!-- Breadcrumbs -->
+      {% block breadcrumbs %}{% endblock %} {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-50 border-t border-gray-200 mt-8">
+      <div class="max-w-7xl mx-auto p-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+          <!-- Navigation -->
+          <div>
+            <p class="font-semibold text-gray-900 mb-3">Navigation</p>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>
+                <a href="/ads" class="hover:text-pink-600 transition-colors"
+                  >Annonces</a
+                >
+              </li>
+              <li>
+                <a href="/post" class="hover:text-pink-600 transition-colors"
+                  >Publier une annonce</a
+                >
+              </li>
+              <li>
+                <a href="/legal/tos" class="hover:text-pink-600 transition-colors"
+                  >CGU</a
+                >
+              </li>
+              <li>
+                <a href="/legal/privacy" class="hover:text-pink-600 transition-colors"
+                  >Confidentialité</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/legal/content-policy"
+                  class="hover:text-pink-600 transition-colors"
+                  >Politique de contenu</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Villes populaires (SEO - maillage interne) -->
+          {% if popular_cities_footer %}
+          <div>
+            <p class="font-semibold text-gray-900 mb-3">Villes populaires</p>
+            <ul class="space-y-2 text-sm text-gray-600">
+              {% for city in popular_cities_footer %}
+              <li>
+                <a
+                  href="/ads?city={{ city.slug }}"
+                  class="hover:text-pink-600 transition-colors"
+                  >Annonces à {{ city.name }}</a
+                >
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <!-- Contact -->
+          <div>
+            <p class="font-semibold text-gray-900 mb-3">Contact</p>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li>
+                Email:
+                <a
+                  href="mailto:support@ci-kiaba.com"
+                  class="hover:text-pink-600 transition-colors"
+                  >support@ci-kiaba.com</a
+                >
+              </li>
+              <li>© 2025 KIABA Rencontres</li>
+              <li class="text-xs text-gray-500">Côte d'Ivoire</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Copyright -->
+        <div
+          class="border-t border-gray-200 pt-4 text-center text-xs text-gray-500"
+        >
+          <p>
+            © 2025 KIABA Rencontres - Site de rencontres adultes en Côte d'Ivoire
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Script pour gérer les modales de chargement -->
+    <script>
+      // Fonction pour afficher la modale de chargement
+      function showLoadingModal(title, message) {
+        const modal = document.getElementById('loadingModal');
+        if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+      }
+
+      // Fonction pour masquer la modale de chargement
+      function hideLoadingModal() {
+        const modal = document.getElementById('loadingModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      }
+
+      // Gérer la soumission des formulaires
+      document.addEventListener('DOMContentLoaded', function() {
+        // Détecter le formulaire de création d'annonce (formulaire spécifique avec id="postAdForm")
+        const postForm = document.getElementById('postAdForm');
+        if (postForm) {
+          postForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal("Création de l'annonce", "Votre annonce est en cours de création, veuillez patienter...");
+            }
+          });
+        }
+
+        // Formulaire de modification d'annonce
+        const editAdForm = document.getElementById('editAdForm');
+        if (editAdForm) {
+          editAdForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal("Modification de l'annonce", "Votre annonce est en cours de modification, veuillez patienter...");
+            }
+          });
+        }
+
+        // Gérer la soumission du formulaire de connexion
+        const loginForm = document.querySelector('form[action*="login"]');
+        if (loginForm) {
+          loginForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal('Connexion en cours', 'Authentification en cours, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer la soumission du formulaire d'inscription
+        const signupForm = document.querySelector('form[action*="signup"]');
+        if (signupForm) {
+          signupForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal('Inscription en cours', 'Création de votre compte, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer la soumission du formulaire de modification de profil
+        const profileEditForm = document.getElementById('profileEditForm');
+        if (profileEditForm) {
+          profileEditForm.addEventListener('submit', function(e) {
+            if (this.checkValidity()) {
+              showLoadingModal('Modification du profil', 'Votre profil est en cours de modification, veuillez patienter...');
+            }
+          });
+        }
+
+        // Gérer les liens de déconnexion
+        const logoutLinks = document.querySelectorAll('a[href*="logout"]');
+        logoutLinks.forEach(function(link) {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+            showLoadingModal('Déconnexion', 'Déconnexion en cours...');
+            
+            // Rediriger après un court délai pour que la modale s'affiche
+            setTimeout(function() {
+              window.location.href = url;
+            }, 300);
+          });
+        });
+
+        // Masquer la modale si la page se recharge (en cas d'erreur)
+        window.addEventListener('pageshow', function(event) {
+          if (event.persisted) {
+            hideLoadingModal();
+          }
+        });
+
+        // Masquer la modale si on revient en arrière
+        window.addEventListener('popstate', function() {
+          hideLoadingModal();
+        });
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Bannière de consentement aux cookies -->
+    <div id="cookieBanner" class="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-lg z-50 hidden">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex-1 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6 flex-shrink-0 text-pink-400">
+            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.1"/>
+            <circle cx="12" cy="12" r="10" stroke="currentColor"/>
+            <circle cx="8" cy="9" r="1.5" fill="currentColor"/>
+            <circle cx="16" cy="9" r="1.5" fill="currentColor"/>
+            <circle cx="8" cy="15" r="1.5" fill="currentColor"/>
+            <circle cx="16" cy="15" r="1.5" fill="currentColor"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+          </svg>
+          <p class="text-sm">
+            Nous utilisons des cookies pour améliorer votre expérience sur KIABA Rencontres. 
+            En continuant, vous acceptez notre utilisation des cookies. 
+            <a href="/legal/privacy" class="underline hover:text-pink-400">En savoir plus</a>
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button id="cookieAcceptAll" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Tout accepter
+          </button>
+          <button id="cookieRejectAll" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Refuser
+          </button>
+          <button id="cookieCustomize" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Personnaliser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de personnalisation des cookies -->
+    <div id="cookieModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Gestion des cookies</h2>
+        <p class="text-gray-600 mb-6">
+          Choisissez les cookies que vous souhaitez accepter. Les cookies essentiels sont nécessaires au fonctionnement du site.
+        </p>
+        
+        <div class="space-y-4 mb-6">
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies essentiels</h3>
+                <p class="text-sm text-gray-600">Nécessaires au fonctionnement du site (sessions, sécurité)</p>
+              </div>
+              <span class="text-blue-600 font-semibold">Toujours actifs</span>
+            </div>
+          </div>
+          
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies analytiques</h3>
+                <p class="text-sm text-gray-600">Nous aident à comprendre comment vous utilisez le site (Google Analytics)</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cookieAnalytics" class="sr-only peer" checked>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+              </label>
+            </div>
+          </div>
+          
+          <div class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">Cookies marketing</h3>
+                <p class="text-sm text-gray-600">Pour personnaliser les publicités (actuellement non utilisés)</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cookieMarketing" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 justify-end">
+          <button id="cookieSave" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+            Enregistrer les préférences
+          </button>
+          <button id="cookieCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium transition">
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Afficher la modale de chargement sur envoi de formulaire ou navigation lente -->
+    <script>
+      (function() {
+        var loadingModal = document.getElementById('loadingModal');
+        if (!loadingModal) return;
+        function showLoading() {
+          loadingModal.classList.remove('hidden');
+          loadingModal.classList.add('flex');
+        }
+        document.addEventListener('submit', function(e) {
+          var form = e.target;
+          if (form && form.tagName === 'FORM' && form.method.toLowerCase() === 'post') showLoading();
+        });
+        document.addEventListener('click', function(e) {
+          var a = e.target && (e.target.closest ? e.target.closest('a') : null);
+          if (!a || !a.href || a.target === '_blank') return;
+          var path = (a.pathname || (a.getAttribute('href') || '').split('?')[0]) || '';
+          if (/^\/(auth\/(login|signup)|dashboard\/|post\/|edit\/)/.test(path)) showLoading();
+        }, true);
+      })();
+    </script>
+
+    <!-- Script de gestion des cookies -->
+    <script>
+      (function() {
+        // Vérifier si le consentement existe déjà
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return null;
+        }
+
+        const cookieConsent = getCookie('cookie_consent');
+        const banner = document.getElementById('cookieBanner');
+        const modal = document.getElementById('cookieModal');
+
+        // Afficher la bannière UNIQUEMENT si pas de consentement (ni accepté, ni refusé)
+        // Si cookie_consent existe (même avec valeur "rejected"), ne pas afficher
+        if (!cookieConsent) {
+          banner.classList.remove('hidden');
+        } else {
+          // Consentement déjà donné ou refusé, ne jamais afficher
+          banner.classList.add('hidden');
+        }
+
+        // Gestion des boutons
+        document.getElementById('cookieAcceptAll')?.addEventListener('click', function() {
+          saveCookieConsent({ analytics: true, marketing: true });
+        });
+
+        document.getElementById('cookieRejectAll')?.addEventListener('click', function() {
+          // Même en refusant, on crée le cookie pour ne plus afficher la bannière
+          saveCookieConsent({ analytics: false, marketing: false });
+        });
+
+        document.getElementById('cookieCustomize')?.addEventListener('click', function() {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+
+        document.getElementById('cookieCancel')?.addEventListener('click', function() {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+
+        document.getElementById('cookieSave')?.addEventListener('click', function() {
+          const analytics = document.getElementById('cookieAnalytics').checked;
+          const marketing = document.getElementById('cookieMarketing').checked;
+          saveCookieConsent({ analytics, marketing });
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+
+        function saveCookieConsent(consent) {
+          fetch('/api/cookie-consent/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken') || ''
+            },
+            body: JSON.stringify({ consent })
+          })
+          .then(() => {
+            // Masquer la bannière immédiatement
+            banner.classList.add('hidden');
+            
+            // Sauvegarder aussi dans localStorage pour éviter les rechargements
+            localStorage.setItem('cookie_consent_saved', 'true');
+            
+          })
+          .catch(err => console.error('Erreur lors de la sauvegarde des préférences:', err));
+        }
+        
+        // Vérifier aussi localStorage au chargement
+        if (localStorage.getItem('cookie_consent_saved') === 'true') {
+          banner.classList.add('hidden');
+        }
+      })();
+    </script>
+
+    <!-- Modale 18+ : en fin de body pour être au-dessus de tout (header, search, etc.) -->
+    {% if ENABLE_AGE_GATE and not user.is_authenticated %}
+    <div id="ageGateModal" class="age-gate-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ageGateTitle">
+      <div class="age-gate-card">
+        <h2 id="ageGateTitle" class="age-gate-title">Accès réservé aux 18+</h2>
+        <p class="age-gate-text">En entrant, vous confirmez être majeur(e) et accepter notre politique de contenu (modération stricte).</p>
+        <div class="age-gate-actions">
+          <button type="button" id="ageGateConfirm" class="age-gate-btn">J'ai 18 ans ou plus</button>
+          <a href="/legal/content-policy" class="age-gate-link">Politique de contenu</a>
+        </div>
+      </div>
+    </div>
+    <style>
+      .age-gate-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 1rem;
+        min-height: 100vh;
+        min-width: 100vw;
+        box-sizing: border-box;
+      }
+      .age-gate-overlay.hidden { display: none !important; }
+      .age-gate-overlay:not(.hidden) { display: flex !important; }
+      .age-gate-card {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05);
+        max-width: 28rem;
+        width: 100%;
+        padding: 1.75rem 1.5rem;
+        text-align: center;
+        position: relative;
+        z-index: 2147483648;
+      }
+      @media (min-width: 768px) {
+        .age-gate-card { padding: 2rem 2.5rem; }
+      }
+      .age-gate-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 0.5rem 0;
+      }
+      @media (min-width: 768px) {
+        .age-gate-title { font-size: 1.5rem; }
+      }
+      .age-gate-text {
+        font-size: 0.9375rem;
+        color: #4b5563;
+        margin: 0 0 1.5rem 0;
+        line-height: 1.5;
+      }
+      .age-gate-actions { display: flex; flex-direction: column; gap: 0.75rem; align-items: center; }
+      .age-gate-btn {
+        width: 100%;
+        background: #db2777;
+        color: #fff;
+        font-weight: 600;
+        padding: 0.875rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s;
+      }
+      .age-gate-btn:hover { background: #be185d; }
+      .age-gate-link { font-size: 0.875rem; color: #6b7280; text-decoration: none; }
+      .age-gate-link:hover { color: #db2777; }
+    </style>
+    <script>
+      (function() {
+        var modal = document.getElementById('ageGateModal');
+        if (!modal) return;
+        if (sessionStorage.getItem('age_gate_ok')) {
+          return;
+        }
+        modal.classList.remove('hidden');
+        document.getElementById('ageGateConfirm').addEventListener('click', function() {
+          sessionStorage.setItem('age_gate_ok', '1');
+          modal.classList.add('hidden');
+        });
+      })();
+    </script>
+    {% endif %}
+
+    <!-- Modale de chargement (en fin de body = au-dessus de tout, z-index via CSS) -->
+    <div id="loadingModal" class="fixed inset-0 hidden items-center justify-center" aria-hidden="true" aria-live="polite">
+      <div class="bg-white rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center gap-4 min-w-[200px] border border-gray-200">
+        <div class="loading-spinner" role="status" aria-label="Chargement"></div>
+        <p class="text-gray-700 font-medium">Chargement...</p>
+      </div>
+    </div>
+  </body>
+</html>

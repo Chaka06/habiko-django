@@ -1,0 +1,6 @@
+{% for choice in form.subcategories %}
+  <label for="{{ choice.id_for_label }}" class="flex items-center space-x-2 text-sm p-2 border border-gray-300 rounded hover:bg-gray-50 cursor-pointer">
+    {{ choice.tag }}
+    <span>{{ choice.choice_label }}</span>
+  </label>
+{% endfor %}

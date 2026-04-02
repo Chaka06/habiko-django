@@ -1,0 +1,51 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Annonce supprimée - {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Annonce supprimée</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Votre annonce a été <strong>supprimée définitivement</strong> de la plateforme {{ site_name }} conformément à votre demande.</p>
+
+<div class="details">
+    <h3>Détails de l'annonce supprimée :</h3>
+    <dl>
+        <dt>{% include "account/email/icons/bullet.html" %} Titre :</dt>
+        <dd><strong>{{ ad_title }}</strong></dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Catégorie :</dt>
+        <dd>{{ ad_category }}</dd>
+
+        <dt>{% include "account/email/icons/error.html" %} Statut :</dt>
+        <dd><span style="color:#dc3545;font-weight:600;">Supprimée définitivement</span></dd>
+    </dl>
+</div>
+
+<div class="info-box">
+    <h3>{% include "account/email/icons/bullet.html" %} Que faire maintenant ?</h3>
+    <ul>
+        <li>{% include "account/email/icons/bullet.html" %} <strong>Publiez une nouvelle annonce</strong> si vous souhaitez à nouveau apparaître sur la plateforme</li>
+        <li>{% include "account/email/icons/bullet.html" %} <strong>Consultez votre tableau de bord</strong> pour gérer vos autres annonces</li>
+    </ul>
+</div>
+
+<div class="button-container">
+    <a href="{{ site_url }}/post/" class="button">Créer une nouvelle annonce</a>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;">Accéder à mon tableau de bord</a>
+</p>
+
+<div class="security-note">
+    <p style="margin: 0;">
+        <strong>{% include "account/email/icons/warning.html" %} Vous n'avez pas effectué cette suppression ?</strong>
+        <br><br>
+        Contactez-nous immédiatement : <a href="mailto:{{ support_email }}" style="color: #FF0000; font-weight: 600;">{{ support_email }}</a>
+    </p>
+</div>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Merci d'utiliser {{ site_name }}.</p>
+{% endblock %}

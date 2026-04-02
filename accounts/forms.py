@@ -1,0 +1,193 @@
+from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
+from allauth.account.forms import LoginForm, SignupForm
+from .models import Profile, RechargePackage, BoostOption, EmailOTP
+from .validators import E164_VALIDATOR
+from ads.models import City
+
+
+class ProfileEditForm(forms.ModelForm):
+    """Formulaire pour modifier le profil"""
+    avatar = forms.ImageField(
+        required=False,
+        label="Photo de profil",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none",
+            }
+        ),
+        help_text="Photo carrée (recommandé 400x400). Formats acceptés: JPG, PNG, WEBP.",
+    )
+    phone_e164 = forms.CharField(
+        max_length=20,
+        required=False,
+        validators=[E164_VALIDATOR],
+        widget=forms.TextInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "placeholder": "+225XXXXXXXXXX"
+        }),
+        label="Téléphone",
+        help_text="Format: +225XXXXXXXXXX",
+    )
+    whatsapp_e164 = forms.CharField(
+        max_length=20,
+        required=False,
+        validators=[E164_VALIDATOR],
+        widget=forms.TextInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "placeholder": "+225XXXXXXXXXX"
+        }),
+        label="WhatsApp",
+        help_text="Format: +225XXXXXXXXXX",
+    )
+    phone2_e164 = forms.CharField(
+        max_length=20,
+        required=False,
+        validators=[E164_VALIDATOR],
+        widget=forms.TextInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "placeholder": "+225XXXXXXXXXX (optionnel)"
+        }),
+        label="Téléphone 2 (optionnel)",
+        help_text="Deuxième numéro affiché sur vos annonces (appels, SMS).",
+    )
+    contact_prefs = forms.MultipleChoiceField(
+        choices=[
+            ("sms", "SMS"),
+            ("whatsapp", "WhatsApp"),
+            ("call", "Appel téléphonique"),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "space-y-2"}),
+        required=False,
+        label="Méthodes de contact préférées",
+    )
+
+    class Meta:
+        model = Profile
+        fields = ["display_name", "city", "bio_sanitized", "avatar"]
+        widgets = {
+            "display_name": forms.TextInput(attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg"
+            }),
+            "city": forms.Select(attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg"
+            }),
+            "bio_sanitized": forms.Textarea(attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+                "rows": 4
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["whatsapp_e164"].initial = self.instance.whatsapp_e164
+            self.fields["phone2_e164"].initial = getattr(self.instance, "phone2_e164", None) or ""
+            if self.instance.contact_prefs:
+                self.fields["contact_prefs"].initial = self.instance.contact_prefs
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """Formulaire personnalisé pour changer le mot de passe"""
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "autocomplete": "current-password"
+        }),
+        label="Ancien mot de passe",
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "autocomplete": "new-password"
+        }),
+        label="Nouveau mot de passe",
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+            "autocomplete": "new-password"
+        }),
+        label="Confirmer le nouveau mot de passe",
+    )
+
+
+class PasswordChangeOTPRequestForm(forms.Form):
+    """Formulaire pour demander un OTP pour changer le mot de passe"""
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        """Crée un OTP pour l'utilisateur"""
+        if not self.user:
+            raise ValueError("User is required")
+        return EmailOTP.create_otp(
+            self.user,
+            EmailOTP.Purpose.PASSWORD_CHANGE,
+            ttl_seconds=600
+        )
+
+
+class RechargeForm(forms.Form):
+    """Formulaire pour choisir une formule de recharge"""
+    package = forms.ModelChoiceField(
+        queryset=RechargePackage.objects.filter(is_active=True),
+        widget=forms.RadioSelect(attrs={"class": "space-y-2"}),
+        label="Choisissez une formule",
+        empty_label=None,
+    )
+
+
+class BoostForm(forms.Form):
+    """Formulaire pour booster une annonce"""
+    boost_option = forms.ModelChoiceField(
+        queryset=BoostOption.objects.filter(is_active=True),
+        widget=forms.Select(attrs={"class": "w-full px-3 py-2 border border-gray-300 rounded-lg"}),
+        label="Type de boost",
+        empty_label="-- Sélectionner --",
+    )
+    use_free_booster = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "mr-2"}),
+        label="Utiliser un booster gratuit (si disponible)",
+        help_text="Vous pouvez utiliser un booster gratuit au lieu de payer",
+    )
+
+
+class CustomLoginForm(LoginForm):
+    """
+    Formulaire de connexion personnalisé utilisé par allauth.
+    Pour l'instant, on garde le comportement par défaut et on se contente
+    éventuellement d'ajouter des classes CSS si besoin.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajout de classes Tailwind pour correspondre au design
+        self.fields["login"].widget.attrs.update(
+            {
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+                "placeholder": "Email",
+            }
+        )
+        self.fields["password"].widget.attrs.update(
+            {
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-lg",
+                "placeholder": "Mot de passe",
+            }
+        )
+
+
+class CustomSignupForm(SignupForm):
+    """
+    Formulaire d'inscription personnalisé utilisé par allauth.
+    On garde la logique par défaut, avec seulement un peu de style.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs.setdefault(
+                "class", "w-full px-3 py-2 border border-gray-300 rounded-lg"
+            )

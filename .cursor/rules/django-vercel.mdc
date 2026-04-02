@@ -1,0 +1,24 @@
+---
+description: Règles Django + Vercel pour éviter 500 et erreurs static/media
+globs: "**/*.html,**/settings.py,**/views.py"
+alwaysApply: false
+---
+
+# Django + Vercel : pièges à éviter
+
+## Templates (HTML)
+
+- **Ne jamais mettre de balises Django dans un commentaire HTML.** Le moteur de templates parse tout le fichier : `<!-- évite {% static %} -->` lève `TemplateSyntaxError: 'static' takes at least one argument`. Utiliser une formulation sans `{%` ou `%}`, ex. « évite le tag static ».
+- **Référencer uniquement des fichiers qui existent dans `static/`.** Avec un storage à manifeste, un fichier absent → `ValueError: Missing staticfiles manifest entry`. Fichiers sûrs : `img/logo.png`, `favicon.png` (ou utiliser `/favicon.ico` servi par la vue).
+- **Favicon :** utiliser l’URL relative `/favicon.ico?v=4` (servie par la vue), pas `{% static 'favicon.png' %}` sur Vercel.
+
+## Settings (kiaba/settings.py)
+
+- **Vercel :** `STORAGES["default"]` doit être S3/Supabase (pas FileSystemStorage) → sinon `Read-only file system` sur upload.
+- **Vercel :** `STORAGES["staticfiles"]` doit être `django.contrib.staticfiles.storage.StaticFilesStorage` (pas de manifest) → évite « Missing staticfiles manifest entry » car le manifest peut être incomplet après collectstatic sur Vercel.
+- **Django 5.1+ :** le stockage des médias se configure via `STORAGES["default"]`, pas `DEFAULT_FILE_STORAGE` (ignoré).
+
+## Résumé des réglages Vercel
+
+- Médias : Supabase S3 (`USE_SUPABASE_STORAGE` forcé à True, variables `SUPABASE_S3_*`).
+- Static : `StaticFilesStorage` (pas `CompressedManifestStaticFilesStorage`).

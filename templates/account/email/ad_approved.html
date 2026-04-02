@@ -1,0 +1,56 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}Annonce approuvée - {{ site_name }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">Annonce approuvée !</h1>
+
+<p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+
+<p>Excellente nouvelle ! Votre annonce a été <strong>approuvée</strong> par notre équipe de modération.</p>
+
+<div class="info-box">
+    <h3>{% include "account/email/icons/check.html" %} Validation réussie</h3>
+    <p style="margin-bottom: 0;">Votre annonce est maintenant <strong>visible publiquement</strong> sur {{ site_name }}. Les visiteurs peuvent la consulter et vous contacter.</p>
+</div>
+
+<div class="details">
+    <h3>Détails de l'annonce approuvée :</h3>
+    <dl>
+        <dt>{% include "account/email/icons/bullet.html" %} Titre :</dt>
+        <dd><strong>{{ ad.title }}</strong></dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Catégorie :</dt>
+        <dd>{{ ad.get_category_display }}</dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Ville :</dt>
+        <dd>{{ ad.city.name }}</dd>
+
+        <dt>{% include "account/email/icons/check.html" %} Statut :</dt>
+        <dd><span style="color: #28a745; font-weight: 600;">Approuvée</span></dd>
+
+        <dt>{% include "account/email/icons/bullet.html" %} Expiration :</dt>
+        <dd>{{ ad.expires_at|date:"d/m/Y à H:i" }}</dd>
+    </dl>
+</div>
+
+<div class="button-container">
+    <a href="{{ ad_url }}" class="button">Voir mon annonce</a>
+</div>
+
+<div class="info-box">
+    <h3>{% include "account/email/icons/bullet.html" %} Maximisez votre visibilité :</h3>
+    <ul>
+        <li>{% include "account/email/icons/star.html" %} <strong>Boostez votre annonce</strong> pour la placer en tête de liste</li>
+        <li>{% include "account/email/icons/star.html" %} Ajoutez le badge <strong>"URGENT"</strong> pour plus d'impact</li>
+        <li>{% include "account/email/icons/bullet.html" %} Complétez avec plus de photos si nécessaire</li>
+        <li>{% include "account/email/icons/bullet.html" %} Partagez votre annonce sur les réseaux sociaux</li>
+    </ul>
+</div>
+
+<p style="text-align: center; margin-top: 25px;">
+    <a href="{{ site_url }}/dashboard/" style="color: #FF0000; font-weight: 600;">Accéder à mon tableau de bord</a>
+</p>
+
+<p style="font-size: 13px; color: #666666; text-align: center;">Merci d'utiliser {{ site_name }} pour vos annonces immobilières !</p>
+{% endblock %}

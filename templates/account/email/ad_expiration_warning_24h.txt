@@ -1,0 +1,19 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+Votre annonce sur {{ site_name }} arrivera à expiration DEMAIN.
+Après cette date, elle sera automatiquement supprimée de la plateforme.
+
+--- Détails de votre annonce ---
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Expire le : {{ ad.expires_at|date:"d/m/Y à H:i" }}
+
+Pour continuer à être visible, créez une nouvelle annonce :
+{{ site_url }}/post/
+
+Tableau de bord : {{ site_url }}/dashboard/
+
+---
+Des questions ? Contactez-nous : {{ support_email }}
+{{ site_url }}

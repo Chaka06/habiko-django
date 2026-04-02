@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmation de paiement · KIABA{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+  <div class="max-w-md w-full text-center">
+
+    <!-- Icône état (changée par JS) -->
+    <div id="icon-pending" class="mb-6">
+      <div class="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto animate-pulse">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    </div>
+    <div id="icon-success" class="mb-6 hidden">
+      <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    </div>
+    <div id="icon-failed" class="mb-6 hidden">
+      <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Titre & message (mis à jour par JS) -->
+    <h1 id="status-title" class="text-2xl font-bold text-gray-900 mb-2">
+      {% if payment.status == 'completed' %}Paiement confirmé !
+      {% elif payment.status == 'failed' or forced_failed %}Paiement non abouti
+      {% else %}Confirmation en cours…{% endif %}
+    </h1>
+    <p id="status-msg" class="text-gray-500 text-sm mb-6">
+      {% if payment.status == 'completed' %}
+        Votre annonce est en cours de publication.
+      {% elif payment.status == 'failed' or forced_failed %}
+        Le paiement n'a pas pu être complété. Votre annonce reste en brouillon.
+      {% else %}
+        Nous vérifions la confirmation de votre paiement de
+        <strong class="text-gray-800">{{ payment.amount }} FCFA</strong>.<br>
+        Cela prend généralement quelques secondes.
+      {% endif %}
+    </p>
+
+    <!-- Barre de progression (masquée une fois résolu) -->
+    {% if payment.status == 'pending' and not forced_failed %}
+    <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2 mb-6">
+      <div id="progress-fill" class="bg-pink-500 h-2 rounded-full transition-all duration-1000" style="width:10%"></div>
+    </div>
+    <p id="retry-msg" class="text-xs text-gray-400 mb-6">Vérification automatique en cours…</p>
+    {% endif %}
+
+    <!-- Bouton selon état initial rendu côté serveur -->
+    {% if payment.status == 'completed' %}
+      <div>
+        <a href="{% if payment.ad %}/ads/{{ payment.ad.slug }}/{% else %}/dashboard/{% endif %}"
+           class="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition mb-3">
+          Voir mon annonce
+        </a>
+      </div>
+    {% elif payment.status == 'failed' or forced_failed %}
+      <div class="space-y-3">
+        <a href="{% url 'dashboard' %}"
+           class="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition">
+          Retour au tableau de bord
+        </a>
+        <p class="text-xs text-gray-400">Votre annonce reste en brouillon. Vous pouvez relancer le paiement depuis votre tableau de bord.</p>
+      </div>
+    {% else %}
+      <!-- État pending — remplacé par JS -->
+      <div id="btn-pending" class="space-y-3">
+        <button onclick="checkNow()" id="btn-check"
+           class="block w-full border border-gray-300 text-gray-700 font-medium py-2.5 rounded-lg hover:bg-gray-50 transition text-sm">
+          Vérifier maintenant
+        </button>
+        <a href="{% url 'dashboard' %}" class="block text-xs text-gray-400 hover:text-gray-600">
+          Revenir au tableau de bord
+        </a>
+      </div>
+      <div id="btn-success" class="hidden">
+        <a id="ad-link" href="/dashboard/"
+           class="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition">
+          Voir mon annonce
+        </a>
+      </div>
+      <div id="btn-failed" class="hidden space-y-3">
+        <a href="{% url 'dashboard' %}"
+           class="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition">
+          Retour au tableau de bord
+        </a>
+        <p class="text-xs text-gray-400">Votre annonce reste en brouillon. Relancez le paiement depuis votre tableau de bord.</p>
+      </div>
+    {% endif %}
+
+    <!-- Info GeniusPay -->
+    <p class="text-xs text-gray-400 mt-6">
+      Paiement traité par <strong>GeniusPay</strong> · Référence : {{ payment.deposit_id }}
+    </p>
+  </div>
+</div>
+
+{% if payment.status == 'pending' and not forced_failed %}
+<script>
+(function () {
+  var statusUrl = "{% url 'payments:status' payment.deposit_id %}";
+  var attempts = 0;
+  var maxAttempts = 30; // 2 minutes (4s × 30)
+
+  function setProgress(pct) {
+    var fill = document.getElementById("progress-fill");
+    if (fill) fill.style.width = pct + "%";
+  }
+
+  function showSuccess(adSlug) {
+    document.getElementById("icon-pending").classList.add("hidden");
+    document.getElementById("icon-success").classList.remove("hidden");
+    document.getElementById("status-title").textContent = "Paiement confirmé !";
+    document.getElementById("status-msg").textContent = "Votre annonce est en cours de publication.";
+    document.getElementById("btn-pending").classList.add("hidden");
+    document.getElementById("btn-success").classList.remove("hidden");
+    document.getElementById("progress-bar").classList.add("hidden");
+    document.getElementById("retry-msg").classList.add("hidden");
+    if (adSlug) {
+      document.getElementById("ad-link").href = "/ads/" + adSlug + "/";
+    }
+    setProgress(100);
+    setTimeout(function () {
+      window.location.href = adSlug ? "/ads/" + adSlug + "/" : "/dashboard/";
+    }, 3000);
+  }
+
+  function showFailed() {
+    document.getElementById("icon-pending").classList.add("hidden");
+    document.getElementById("icon-failed").classList.remove("hidden");
+    document.getElementById("status-title").textContent = "Paiement non abouti";
+    document.getElementById("status-msg").textContent = "Le paiement n'a pas pu être complété. Votre annonce reste en brouillon.";
+    document.getElementById("btn-pending").classList.add("hidden");
+    document.getElementById("btn-failed").classList.remove("hidden");
+    document.getElementById("progress-bar").classList.add("hidden");
+    document.getElementById("retry-msg").classList.add("hidden");
+  }
+
+  function check() {
+    attempts++;
+    var pct = Math.min(10 + (attempts / maxAttempts) * 85, 95);
+    setProgress(pct);
+    var retryMsg = document.getElementById("retry-msg");
+    if (retryMsg) retryMsg.textContent = "Vérification " + attempts + "/" + maxAttempts + " – Patientez…";
+
+    fetch(statusUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.status === "completed") {
+          clearInterval(interval);
+          showSuccess(data.ad_slug);
+        } else if (data.status === "failed" || data.status === "cancelled") {
+          clearInterval(interval);
+          showFailed();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          if (retryMsg) retryMsg.textContent = "Vérification terminée. Consultez votre tableau de bord.";
+        }
+      })
+      .catch(function () {});
+  }
+
+  window.checkNow = function () { check(); };
+
+  var interval = setInterval(check, 4000);
+})();
+</script>
+{% endif %}
+{% endblock %}

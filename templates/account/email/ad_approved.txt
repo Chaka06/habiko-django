@@ -1,0 +1,40 @@
+Bonjour {{ user.get_full_name|default:user.username }},
+
+=================================================================
+ANNONCE APPROUVÉE SUR {{ site_name|upper }}
+=================================================================
+
+Excellente nouvelle ! Votre annonce a été approuvée par notre équipe de modération.
+
+Votre annonce est maintenant VISIBLE PUBLIQUEMENT sur {{ site_name }}. 
+Les visiteurs peuvent la consulter et vous contacter.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAILS DE L'ANNONCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Titre : {{ ad.title }}
+Catégorie : {{ ad.get_category_display }}
+Ville : {{ ad.city.name }}
+Statut : APPROUVÉE
+Expiration : {{ ad.expires_at|date:"d/m/Y à H:i" }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Voir votre annonce : {{ ad_url }}
+
+MAXIMISEZ VOTRE VISIBILITÉ :
+✓ Boostez votre annonce pour la placer en tête de liste
+✓ Ajoutez le badge "URGENT" pour plus d'impact
+✓ Complétez avec plus de photos si nécessaire
+✓ Partagez votre annonce sur les réseaux sociaux
+
+Accéder à votre tableau de bord : {{ site_url }}/dashboard/
+
+Merci d'utiliser {{ site_name }} pour vos annonces immobilières !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cet email a été envoyé par {{ site_name }}
+Pour nous contacter : {{ support_email }}
+{{ site_url }}

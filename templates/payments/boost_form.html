@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Booster mon annonce – Paiement GeniusPay · KIABA{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 py-6 px-4">
+  <div class="max-w-md mx-auto space-y-4">
+
+    <!-- En-tête -->
+    <div class="text-center">
+      <h1 class="text-xl font-bold text-gray-900">Booster mon annonce ⚡</h1>
+      <p class="text-gray-500 mt-1 text-sm">Remontée en tête de liste toutes les 2 heures</p>
+    </div>
+
+    <!-- Résumé de l'annonce -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase font-semibold tracking-wide mb-1">Annonce à booster</p>
+      <p class="font-semibold text-gray-900 leading-snug">{{ ad.title }}</p>
+      <p class="text-sm text-gray-500 mt-0.5">{{ ad.city }}</p>
+    </div>
+
+    <!-- Détails du boost -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-2xl">⚡</span>
+        <div>
+          <p class="font-bold text-yellow-800 text-sm">Boost Premium — {{ price_boost }} FCFA</p>
+          <p class="text-xs text-yellow-700">Remontée en tête de liste toutes les 2 heures</p>
+        </div>
+      </div>
+      <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
+        <li>Annonce en <strong>tête de liste</strong> toutes les 2 heures</li>
+        <li>Visibilité maximale pour toute la durée de l'annonce</li>
+        <li>Activation immédiate après paiement</li>
+      </ul>
+    </div>
+
+    <!-- Moyens de paiement acceptés -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-4">
+      <p class="text-sm font-semibold text-gray-800 mb-3">Moyens de paiement acceptés</p>
+      <div class="flex items-center gap-3 flex-wrap">
+        <img src="https://www.greenpayci.com/img/logo/mtn-momo.png" alt="MTN MoMo" class="h-8 object-contain" loading="lazy">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMJp_FzxYLHHFQVbNcO38mNyppZL8MruSmwA&s" alt="Orange Money" class="h-8 object-contain" loading="lazy">
+        <img src="https://www.finextra.com/finextra-images/top_pics/xl/81c5cb874171f3560810f9dc12ecdc5e8f85193d.png" alt="Wave" class="h-8 object-contain" loading="lazy">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_oO0OKHN4zOlbVzs6iXrmSuZVV-UrqvmGUg&s" alt="Moov Money" class="h-8 object-contain" loading="lazy">
+      </div>
+      <p class="text-xs text-gray-400 mt-2">Vous choisissez votre opérateur sur la page sécurisée GeniusPay.</p>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Bouton CTA -->
+      <button
+        type="submit"
+        class="w-full bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white font-semibold py-4 rounded-2xl transition text-base shadow-sm flex items-center justify-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Booster pour {{ price_boost }} FCFA
+      </button>
+
+      <p class="text-center text-xs text-gray-400 leading-relaxed">
+        Vous serez redirigé vers la page de paiement sécurisée GeniusPay.
+      </p>
+
+      <div class="text-center">
+        <a href="{% url 'dashboard' %}" class="text-sm text-gray-400 hover:text-gray-600">Annuler</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
