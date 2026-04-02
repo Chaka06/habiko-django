@@ -16,22 +16,5 @@
       "dest": "api/index.py"
     }
   ],
-  "crons": [
-    {
-      "path": "/cron/expire-ads/",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/cron/notify-24h/",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/cron/notify-1h/",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/cron/promote-boosts/",
-      "schedule": "0 */2 * * *"
-    }
-  ]
+  "crons": []
 }
