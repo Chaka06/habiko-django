@@ -1,3 +1,5 @@
+import logging
+
 from celery import shared_task
 from django.utils import timezone
 from django.db import transaction
@@ -5,6 +7,8 @@ from django.db.models import Q
 from django.core.mail import send_mail
 from .models import Ad, AdMedia
 from accounts.tasks import send_ad_published_email
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3)
@@ -43,11 +47,9 @@ def expire_ads():
     On garde l'enregistrement en base pour retourner 410 Gone aux bots Google et
     accélérer le désindexage, mais on supprime les fichiers média pour libérer le storage.
     """
-    import logging
     from accounts.email_service import EmailService
     from django.conf import settings
 
-    logger = logging.getLogger(__name__)
     now = timezone.now()
     expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED).select_related("user", "city").prefetch_related("media")
     count = 0
@@ -93,11 +95,9 @@ def notify_expiring_soon_24h():
     Envoie un email d'avertissement J-1 aux utilisateurs dont l'annonce expire
     dans les prochaines 23h–25h. Le flag expiry_notified_24h évite les doublons.
     """
-    import logging
     from accounts.email_service import EmailService
     from django.conf import settings
 
-    logger = logging.getLogger(__name__)
     now = timezone.now()
     window_start = now + timezone.timedelta(hours=23)
     window_end = now + timezone.timedelta(hours=25)
@@ -138,11 +138,9 @@ def notify_expiring_soon_1h():
     Envoie un email d'avertissement H-1 aux utilisateurs dont l'annonce expire
     dans les prochaines 45min–75min. Le flag expiry_notified_1h évite les doublons.
     """
-    import logging
     from accounts.email_service import EmailService
     from django.conf import settings
 
-    logger = logging.getLogger(__name__)
     now = timezone.now()
     window_start = now + timezone.timedelta(minutes=45)
     window_end = now + timezone.timedelta(minutes=75)
@@ -193,8 +191,7 @@ def promote_boosted_ads():
         is_premium=True,
         premium_until=now + timezone.timedelta(hours=2),
     )
-    import logging
-    logging.getLogger(__name__).info("promote_boosted_ads: %d annonces remontées", updated)
+    logger.info("promote_boosted_ads: %d annonces remontées", updated)
     return f"{updated} annonces boostées remontées en tête de liste"
 
 
@@ -226,13 +223,13 @@ def auto_approve_ad(self, ad_id: int):
         # Envoyer l'email de confirmation
         send_ad_published_email.delay(ad.id)
 
-        print(f"Annonce {ad.id} approuvée automatiquement")
+        logger.info("Annonce %s approuvée automatiquement", ad.id)
         return f"Annonce {ad.id} approuvée"
     except Ad.DoesNotExist:
-        print(f"Annonce {ad_id} non trouvée ou déjà approuvée")
+        logger.warning("auto_approve_ad: annonce %s non trouvée ou déjà approuvée", ad_id)
         return f"Annonce {ad_id} non trouvée"
     except Exception as e:
-        print(f"Erreur lors de l'approbation automatique de l'annonce {ad_id}: {e}")
+        logger.exception("Erreur approbation automatique annonce %s: %s", ad_id, e)
         return f"Erreur: {e}"
 
 

@@ -422,12 +422,63 @@ def legal_content_policy(request: HttpRequest) -> HttpResponse:
 
 
 def report_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
+    from moderation.models import Report
+
     ad = Ad.objects.filter(id=ad_id, status=Ad.Status.APPROVED).first()
     if not ad:
         return render(request, "core/404.html", status=404)
+
     if request.method == "POST":
-        # Squelette: on affiche un merci (la persistance est gérée ailleurs)
+        reason  = request.POST.get("reason", "other")
+        details = request.POST.get("details", "").strip()[:1000]
+
+        # Valider la raison
+        valid_reasons = {r.value for r in Report.Reason}
+        if reason not in valid_reasons:
+            reason = Report.Reason.OTHER
+
+        # Récupérer l'IP réelle (Vercel / proxy)
+        ip = (
+            request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
+            or request.META.get("REMOTE_ADDR")
+        )
+
+        Report.objects.create(
+            ad=ad,
+            reporter=request.user if request.user.is_authenticated else None,
+            reason=reason,
+            details=details,
+            ip_address=ip or None,
+        )
+        logger.info("Signalement créé: annonce=%s raison=%s ip=%s", ad.id, reason, ip)
+
+        # Alerter les admins par email
+        try:
+            admin_emails = list(
+                User.objects.filter(is_staff=True, is_active=True)
+                .exclude(email="")
+                .values_list("email", flat=True)
+            )
+            if admin_emails:
+                EmailService.send_email(
+                    subject=f"[KIABA] Signalement — annonce #{ad.id} ({reason})",
+                    to_emails=admin_emails,
+                    template_name="account/email/report_notification",
+                    context={
+                        "ad": ad,
+                        "reason": reason,
+                        "details": details,
+                        "ip": ip,
+                        "reporter": request.user if request.user.is_authenticated else None,
+                        "admin_url": f"{settings.SITE_URL}/admin/moderation/report/",
+                    },
+                    fail_silently=True,
+                )
+        except Exception as exc:
+            logger.warning("Email signalement admin failed: %s", exc)
+
         return render(request, "core/report.html", {"ad": ad, "submitted": True})
+
     return render(request, "core/report.html", {"ad": ad, "submitted": False})
 
 

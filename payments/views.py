@@ -117,14 +117,30 @@ def pay_for_existing_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 
 # ─── Initier un paiement (POST depuis le formulaire) ─────────────────────────
 
+def _payment_rate_limited(user_id: int) -> bool:
+    """Retourne True si l'utilisateur dépasse 5 initiations de paiement par minute."""
+    from django.core.cache import cache
+    key = f"pay_ratelimit:{user_id}"
+    count = cache.get(key, 0)
+    if count >= 5:
+        return True
+    cache.set(key, count + 1, timeout=60)
+    return False
+
+
 @login_required
 @require_POST
 def initiate_payment(request: HttpRequest) -> HttpResponse:
     """
     Crée un paiement GeniusPay et redirige vers la page de checkout.
     Attendu en session : 'pending_ad_id'.
-    Attendu en POST    : 'want_boost' (0 = standard, 1 = bundle).
+    Attendu en POST    : 'forfait' (standard | bundle | fortnight | monthly).
     """
+    if _payment_rate_limited(request.user.pk):
+        logger.warning("initiate_payment: rate limit atteint pour user %s", request.user.pk)
+        messages.error(request, "Trop de tentatives. Attendez une minute avant de réessayer.")
+        return redirect("payments:pay_form")
+
     ad_id = request.session.pop("pending_ad_id", None)
     if not ad_id:
         return redirect("post")
@@ -134,14 +150,19 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
     except Ad.DoesNotExist:
         return redirect("post")
 
-    forfait = request.POST.get("forfait", "standard")
+    forfait = request.POST.get("forfait", "")
     FORFAIT_MAP = {
         "standard":  (Payment.Type.STANDARD,  PRICE_STANDARD,  "KIABA Annonce 5j"),
         "bundle":    (Payment.Type.BUNDLE,     PRICE_BUNDLE,    "KIABA Annonce 5j + Boost"),
         "fortnight": (Payment.Type.FORTNIGHT,  PRICE_FORTNIGHT, "KIABA Pack 15j + Boost"),
         "monthly":   (Payment.Type.MONTHLY,    PRICE_MONTHLY,   "KIABA Pack mensuel + Boost"),
     }
-    pay_type, amount, desc = FORFAIT_MAP.get(forfait, FORFAIT_MAP["standard"])
+    if forfait not in FORFAIT_MAP:
+        logger.warning("initiate_payment: forfait invalide '%s' pour user %s", forfait, request.user.pk)
+        request.session["pending_ad_id"] = ad_id
+        messages.error(request, "Forfait invalide. Veuillez choisir une option.")
+        return redirect("payments:pay_form")
+    pay_type, amount, desc = FORFAIT_MAP[forfait]
 
     payment = Payment.objects.create(
         user=request.user,
@@ -240,6 +261,8 @@ def geniuspay_webhook(request: HttpRequest) -> HttpResponse:
     if not reference:
         return HttpResponse("OK", status=200)
 
+    from django.db import transaction
+
     # Retrouver le Payment via la référence GeniusPay
     try:
         payment = Payment.objects.get(geniuspay_reference=reference)
@@ -261,18 +284,20 @@ def geniuspay_webhook(request: HttpRequest) -> HttpResponse:
             logger.warning("GeniusPay webhook: référence inconnue %s", reference)
             return HttpResponse("OK", status=200)
 
-    # Idempotence : ne rien faire si déjà traité
-    if payment.status != Payment.Status.PENDING:
-        return HttpResponse("OK", status=200)
+    # Idempotence avec lock pour éviter les double-traitements (webhooks dupliqués)
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().get(pk=payment.pk)
+        if payment.status != Payment.Status.PENDING:
+            return HttpResponse("OK", status=200)
 
-    payment.gateway_response = body
+        payment.gateway_response = body
 
-    if event == "payment.success" or gp_status == "completed":
-        _activate_ad_for_payment(payment)
-    elif event in ("payment.failed", "payment.cancelled", "payment.expired") or gp_status in ("failed", "cancelled", "expired"):
-        payment.status = Payment.Status.FAILED
-        payment.save(update_fields=["status", "gateway_response"])
-        logger.info("GeniusPay paiement échoué/annulé: %s (%s)", reference, event)
+        if event == "payment.success" or gp_status == "completed":
+            _activate_ad_for_payment(payment)
+        elif event in ("payment.failed", "payment.cancelled", "payment.expired") or gp_status in ("failed", "cancelled", "expired"):
+            payment.status = Payment.Status.FAILED
+            payment.save(update_fields=["status", "gateway_response"])
+            logger.info("GeniusPay paiement échoué/annulé: %s (%s)", reference, event)
 
     return HttpResponse("OK", status=200)
 
@@ -329,14 +354,18 @@ def renew_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         return redirect("dashboard")
 
     if request.method == "POST":
-        forfait = request.POST.get("forfait", "renew_15")
+        forfait = request.POST.get("forfait", "")
         RENEW_MAP = {
             "renew_15":   (Payment.Type.RENEW_15,   PRICE_RENEW_15,   "KIABA Renouvellement 15j"),
             "renew_15b":  (Payment.Type.RENEW_15B,  PRICE_RENEW_15B,  "KIABA Renouvellement 15j + Boost"),
             "renew_mon":  (Payment.Type.RENEW_MON,  PRICE_RENEW_MON,  "KIABA Renouvellement 1 mois"),
             "renew_monb": (Payment.Type.RENEW_MONB, PRICE_RENEW_MONB, "KIABA Renouvellement 1 mois + Boost"),
         }
-        pay_type, amount, desc = RENEW_MAP.get(forfait, RENEW_MAP["renew_15"])
+        if forfait not in RENEW_MAP:
+            logger.warning("renew_ad: forfait invalide '%s' pour user %s", forfait, request.user.pk)
+            messages.error(request, "Forfait invalide. Veuillez choisir une option.")
+            return redirect("payments:renew_ad", ad_id=ad_id)
+        pay_type, amount, desc = RENEW_MAP[forfait]
         payment = Payment.objects.create(
             user=request.user,
             ad=ad,

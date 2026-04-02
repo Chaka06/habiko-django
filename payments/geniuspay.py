@@ -122,9 +122,12 @@ def verify_webhook_signature(timestamp: str, payload_bytes: bytes, signature: st
     """
     secret = getattr(settings, "GENIUSPAY_WEBHOOK_SECRET", "")
     if not secret:
-        # En développement (pas de secret configuré), on accepte sans vérifier
-        logger.warning("GENIUSPAY_WEBHOOK_SECRET non configuré — signature non vérifiée")
-        return True
+        if settings.DEBUG:
+            logger.warning("GENIUSPAY_WEBHOOK_SECRET non configuré — signature non vérifiée (DEBUG)")
+            return True
+        # En production, refuser tout webhook sans secret configuré
+        logger.error("GENIUSPAY_WEBHOOK_SECRET non configuré en production — webhook rejeté")
+        return False
 
     try:
         # Anti-replay : timestamp max 5 minutes

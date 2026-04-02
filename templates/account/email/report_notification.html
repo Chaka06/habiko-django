@@ -1,0 +1,35 @@
+{% extends "account/email/base_email.html" %}
+
+{% block email_title %}[KIABA] Signalement — annonce #{{ ad.id }}{% endblock %}
+
+{% block email_content %}
+<h1 class="main-title">⚠️ Nouveau signalement</h1>
+
+<p>Un signalement vient d'être soumis sur la plateforme KIABA.</p>
+
+<div class="details">
+    <h3>Détails du signalement :</h3>
+    <dl>
+        <dt>Annonce :</dt>
+        <dd><strong>#{{ ad.id }} — {{ ad.title }}</strong></dd>
+
+        <dt>Raison :</dt>
+        <dd><strong>{{ reason }}</strong></dd>
+
+        {% if details %}
+        <dt>Précisions :</dt>
+        <dd>{{ details }}</dd>
+        {% endif %}
+
+        <dt>Signalé par :</dt>
+        <dd>{% if reporter %}{{ reporter.email }} ({{ reporter.username }}){% else %}Anonyme{% endif %}</dd>
+
+        <dt>IP :</dt>
+        <dd>{{ ip|default:"inconnue" }}</dd>
+    </dl>
+</div>
+
+<div class="button-container">
+    <a href="{{ admin_url }}" class="button">Voir dans l'admin</a>
+</div>
+{% endblock %}

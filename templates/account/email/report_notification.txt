@@ -1,0 +1,9 @@
+KIABA — Nouveau signalement
+
+Annonce : #{{ ad.id }} — {{ ad.title }}
+Raison  : {{ reason }}
+{% if details %}Précisions : {{ details }}{% endif %}
+Signalé par : {% if reporter %}{{ reporter.email }}{% else %}Anonyme{% endif %}
+IP : {{ ip|default:"inconnue" }}
+
+Traiter dans l'admin : {{ admin_url }}
