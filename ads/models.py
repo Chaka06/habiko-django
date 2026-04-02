@@ -442,13 +442,8 @@ class AdMedia(models.Model):
                 if getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", True):
                     from ads.tasks import process_ad_media_image
                     transaction.on_commit(lambda: process_ad_media_image.delay(self.pk))
-                else:
-                    try:
-                        processed = self._add_watermark_and_thumbnail()
-                        if processed:
-                            self.save(update_fields=["image", "thumbnail"])
-                    except Exception as e:
-                        logger.warning("Filigrane/thumbnail non appliqué (image tout de même enregistrée): %s", e)
+                # Sans Redis (Vercel), on sauvegarde l'image brute sans traitement synchrone
+                # pour ne pas bloquer la requête HTTP (~13s évités).
 
             # Ensure only one primary
             if self.is_primary:

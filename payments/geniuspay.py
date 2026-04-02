@@ -79,7 +79,7 @@ def create_payment(
         f"{_BASE_URL}/payments",
         json=payload,
         headers=_headers(),
-        timeout=15,
+        timeout=8,
     )
     resp.raise_for_status()
     body = resp.json()
