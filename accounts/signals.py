@@ -5,7 +5,6 @@ from django.conf import settings
 
 from .models import CustomUser
 from .tasks import (
-    send_login_notification_email,
     send_password_change_email,
     send_account_created_email,
 )
@@ -29,17 +28,8 @@ def on_user_logged_in(sender, user, request, **kwargs):  # pragma: no cover
         logger = logging.getLogger(__name__)
         logger.error(f"Erreur lors de la création du profil: {e}", exc_info=True)
     
-    try:
-        # Envoyer l'email immédiatement en production
-        from django.conf import settings
-
-        if not settings.DEBUG:
-            send_login_notification_email.delay(user.id)
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Erreur lors de l'envoi de l'email de notification: {e}", exc_info=True)
-        # Let login proceed; task retries will handle transient errors
+    # L'email de notification de connexion est géré dans l'adaptateur (get_login_redirect_url)
+    # pour éviter le double envoi signal + adapter.
 
 
 @receiver(pre_save, sender=CustomUser)

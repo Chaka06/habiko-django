@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5, "countdown": 60},
+    retry_kwargs={"max_retries": 2, "countdown": 60},
     retry_backoff=True,
     retry_backoff_max=600,
     retry_jitter=True,
@@ -53,35 +53,39 @@ def send_profile_validation_email(self, profile_id):
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5, "countdown": 60},
+    retry_kwargs={"max_retries": 2, "countdown": 60},
     retry_backoff=True,
     retry_backoff_max=600,
     retry_jitter=True,
 )
 def send_account_created_email(self, user_id):
-    """Envoyer un email de confirmation de création de compte avec lien de confirmation"""
+    """Envoyer un email de bienvenue à la création de compte."""
     try:
         from .models import CustomUser
         from allauth.account.models import EmailConfirmation, EmailAddress
-        from django.urls import reverse
         from django.conf import settings
 
         user = CustomUser.objects.get(id=user_id)
 
-        # Obtenir le lien de confirmation d'email
+        # Ne pas envoyer si l'email est vide
+        if not user.email:
+            return f"Utilisateur {user_id} sans email, skip."
+
+        # Vérifier si c'est un compte social (Google) : EmailAddress déjà verified
+        is_social = EmailAddress.objects.filter(user=user, verified=True).exists()
+
+        # Obtenir le lien de confirmation (uniquement pour les inscriptions classiques)
         confirmation_url = None
-        try:
-            # Récupérer l'adresse email non confirmée
-            email_address = EmailAddress.objects.filter(user=user, verified=False).first()
-            if email_address:
-                # Créer ou récupérer la confirmation
-                confirmation = EmailConfirmation.create(email_address)
-                confirmation_url = confirmation.get_confirm_url()
-                # Construire l'URL complète
-                if not confirmation_url.startswith("http"):
-                    confirmation_url = f"{settings.SITE_URL}{confirmation_url}"
-        except Exception as e:
-            logger.warning(f"Impossible de créer le lien de confirmation: {e}")
+        if not is_social:
+            try:
+                email_address = EmailAddress.objects.filter(user=user, verified=False).first()
+                if email_address:
+                    confirmation = EmailConfirmation.create(email_address)
+                    confirmation_url = confirmation.get_confirm_url()
+                    if not confirmation_url.startswith("http"):
+                        confirmation_url = f"{settings.SITE_URL}{confirmation_url}"
+            except Exception as e:
+                logger.warning(f"Impossible de créer le lien de confirmation: {e}")
 
         subject = "Compte créé avec succès sur KIABA Rencontres"
 
@@ -141,7 +145,7 @@ L'équipe KIABA Rencontres
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5, "countdown": 60},
+    retry_kwargs={"max_retries": 2, "countdown": 60},
     retry_backoff=True,
     retry_backoff_max=600,
     retry_jitter=True,
@@ -215,7 +219,7 @@ def send_login_notification_email(user_id):
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5, "countdown": 60},
+    retry_kwargs={"max_retries": 2, "countdown": 60},
     retry_backoff=True,
     retry_backoff_max=600,
     retry_jitter=True,
@@ -253,7 +257,7 @@ def send_password_change_email(self, user_id):
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5, "countdown": 60},
+    retry_kwargs={"max_retries": 2, "countdown": 60},
     retry_backoff=True,
     retry_backoff_max=600,
     retry_jitter=True,
