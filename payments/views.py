@@ -83,13 +83,17 @@ def _call_geniuspay(
     """
     success_url, error_url = _build_return_url(request, payment.deposit_id)
     try:
+        # GeniusPay ne supporte le mode direct (payment_url) que pour Wave.
+        # Pour Orange/MTN/Moov, on n'envoie PAS payment_method afin d'obtenir
+        # le checkout_url (page GeniusPay où l'utilisateur choisit son opérateur).
+        is_wave = (payment_method == "wave")
         data = geniuspay_svc.create_payment(
             amount=payment.amount,
             description=description,
             success_url=success_url,
             error_url=error_url,
-            payment_method=payment_method or None,
-            mmo_provider=mmo_provider or None,
+            payment_method="wave" if is_wave else None,
+            mmo_provider=None,
             metadata={
                 "deposit_id": str(payment.deposit_id),
                 "type": payment.type,
@@ -99,16 +103,13 @@ def _call_geniuspay(
         payment.geniuspay_reference = data.get("reference", "")
         payment.gateway_response = data
         payment.save(update_fields=["geniuspay_reference", "gateway_response"])
-        # GeniusPay retourne toujours payment_url=Wave quel que soit l'opérateur.
-        # Pour Wave : utiliser payment_url (lien direct Wave).
-        # Pour Orange/MTN/Moov : utiliser checkout_url (page GeniusPay pré-sélectionnée).
-        if payment_method == "wave":
+        if is_wave:
             final_url = data.get("payment_url") or data.get("checkout_url")
         else:
             final_url = data.get("checkout_url") or data.get("payment_url")
         logger.info(
-            "GeniusPay _call: payment_method=%s mmo_provider=%s → url=%s",
-            payment_method, mmo_provider, final_url,
+            "GeniusPay _call: payment_method=%s is_wave=%s → url=%s",
+            payment_method, is_wave, final_url,
         )
         return final_url
     except Exception as exc:
