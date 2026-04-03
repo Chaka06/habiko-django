@@ -107,9 +107,9 @@
   <div class="flex-1">
 <article class="bg-white border rounded-xl p-4 md:p-6 shadow-sm">
   <header class="mb-4 md:mb-6">
-    <div class="flex items-start gap-3 mb-3">
-      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex-1">{{ ad.title }}</h1>
-      <div class="flex gap-2 flex-wrap flex-shrink-0">
+    <div class="mb-3">
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ ad.title }}</h1>
+      <div class="flex gap-2 flex-wrap">
         {% if ad.is_boosted and ad.boost_interval_hours == 3 %}
           <span class="inline-flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-full shadow-sm" style="background:linear-gradient(135deg,#fde68a,#f59e0b);color:#92400e;border:1px solid #f59e0b;">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"/></svg>
