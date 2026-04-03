@@ -99,7 +99,12 @@ def _call_geniuspay(
         payment.geniuspay_reference = data.get("reference", "")
         payment.gateway_response = data
         payment.save(update_fields=["geniuspay_reference", "gateway_response"])
-        return data.get("payment_url") or data.get("checkout_url")
+        final_url = data.get("payment_url") or data.get("checkout_url")
+        logger.info(
+            "GeniusPay _call: payment_method=%s mmo_provider=%s → url=%s",
+            payment_method, mmo_provider, final_url,
+        )
+        return final_url
     except Exception as exc:
         logger.exception("GeniusPay create_payment failed for payment %s: %s", payment.pk, exc)
         payment.status = Payment.Status.FAILED

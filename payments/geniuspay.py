@@ -72,7 +72,7 @@ def create_payment(
     if metadata:
         payload["metadata"] = metadata
 
-    logger.info("GeniusPay create_payment: %s XOF — %s", amount, description[:60])
+    logger.info("GeniusPay create_payment payload: %s", payload)
 
     resp = requests.post(
         f"{_BASE_URL}/payments",
@@ -84,9 +84,11 @@ def create_payment(
     body = resp.json()
     data = body.get("data", body)
     logger.info(
-        "GeniusPay payment created: reference=%s checkout_url=%s",
+        "GeniusPay response FULL: reference=%s payment_url=%s checkout_url=%s keys=%s",
         data.get("reference"),
-        bool(data.get("checkout_url")),
+        data.get("payment_url"),
+        data.get("checkout_url"),
+        list(data.keys()),
     )
     return data
 
