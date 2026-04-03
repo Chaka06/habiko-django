@@ -99,7 +99,13 @@ def _call_geniuspay(
         payment.geniuspay_reference = data.get("reference", "")
         payment.gateway_response = data
         payment.save(update_fields=["geniuspay_reference", "gateway_response"])
-        final_url = data.get("payment_url") or data.get("checkout_url")
+        # GeniusPay retourne toujours payment_url=Wave quel que soit l'opérateur.
+        # Pour Wave : utiliser payment_url (lien direct Wave).
+        # Pour Orange/MTN/Moov : utiliser checkout_url (page GeniusPay pré-sélectionnée).
+        if payment_method == "wave":
+            final_url = data.get("payment_url") or data.get("checkout_url")
+        else:
+            final_url = data.get("checkout_url") or data.get("payment_url")
         logger.info(
             "GeniusPay _call: payment_method=%s mmo_provider=%s → url=%s",
             payment_method, mmo_provider, final_url,
