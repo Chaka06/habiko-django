@@ -10,8 +10,28 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from ads.models import Ad
-from .models import Payment
+from .models import Payment, PromoCodeUsage
 from . import geniuspay as geniuspay_svc
+
+# ─── Codes promo ─────────────────────────────────────────────────────────────
+PROMO_CODES = {
+    "KIABA#2": 10,  # 10% de réduction
+}
+
+
+def _apply_promo(code: str, user, amount: int) -> tuple[int, int]:
+    """
+    Retourne (nouveau_montant, réduction_fcfa).
+    Lève ValueError si le code est invalide ou déjà utilisé.
+    """
+    code = code.strip().upper()
+    if code not in PROMO_CODES:
+        raise ValueError("Code promo invalide.")
+    if PromoCodeUsage.objects.filter(code=code, user=user).exists():
+        raise ValueError("Ce code promo a déjà été utilisé sur votre compte.")
+    pct = PROMO_CODES[code]
+    discount = int(amount * pct / 100)
+    return max(amount - discount, 1), discount
 
 logger = logging.getLogger(__name__)
 
@@ -164,12 +184,31 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
         return redirect("payments:pay_form")
     pay_type, amount, desc = FORFAIT_MAP[forfait]
 
+    # ── Code promo (optionnel) ─────────────────────────────────────────────
+    promo_code = request.POST.get("promo_code", "").strip().upper()
+    discount_fcfa = 0
+    if promo_code:
+        try:
+            amount, discount_fcfa = _apply_promo(promo_code, request.user, amount)
+        except ValueError as e:
+            request.session["pending_ad_id"] = ad_id
+            messages.error(request, str(e))
+            return redirect("payments:pay_form")
+
     payment = Payment.objects.create(
         user=request.user,
         ad=ad,
         type=pay_type,
         amount=amount,
     )
+
+    # Enregistrer l'usage du code promo après création du paiement
+    if promo_code and discount_fcfa > 0:
+        PromoCodeUsage.objects.get_or_create(
+            code=promo_code,
+            user=request.user,
+            defaults={"ad": ad, "discount_applied": discount_fcfa},
+        )
 
     checkout_url = _call_geniuspay(request, payment, desc)
     if not checkout_url:
@@ -300,6 +339,36 @@ def geniuspay_webhook(request: HttpRequest) -> HttpResponse:
             logger.info("GeniusPay paiement échoué/annulé: %s (%s)", reference, event)
 
     return HttpResponse("OK", status=200)
+
+
+# ─── Validation AJAX du code promo ───────────────────────────────────────────
+
+@login_required
+@require_POST
+def check_promo_code(request: HttpRequest) -> JsonResponse:
+    """Valide un code promo et retourne la réduction applicable."""
+    code = request.POST.get("code", "").strip().upper()
+    forfait = request.POST.get("forfait", "standard")
+
+    FORFAIT_PRICES = {
+        "standard":  PRICE_STANDARD,
+        "bundle":    PRICE_BUNDLE,
+        "fortnight": PRICE_FORTNIGHT,
+        "monthly":   PRICE_MONTHLY,
+    }
+    amount = FORFAIT_PRICES.get(forfait, PRICE_STANDARD)
+
+    try:
+        new_amount, discount = _apply_promo(code, request.user, amount)
+        return JsonResponse({
+            "valid": True,
+            "discount_pct": PROMO_CODES[code],
+            "discount_fcfa": discount,
+            "new_amount": new_amount,
+            "original_amount": amount,
+        })
+    except ValueError as e:
+        return JsonResponse({"valid": False, "error": str(e)})
 
 
 # ─── Booster une annonce existante ────────────────────────────────────────────

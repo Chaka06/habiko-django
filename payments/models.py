@@ -83,3 +83,36 @@ class Payment(models.Model):
 
     def __str__(self) -> str:
         return f"Payment({self.deposit_id}) {self.type} {self.status}"
+
+
+class PromoCodeUsage(models.Model):
+    """Trace l'utilisation d'un code promo par un utilisateur (1 seule fois par user)."""
+
+    code = models.CharField(max_length=50, verbose_name=_("Code promo"))
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="promo_usages",
+        verbose_name=_("Utilisateur"),
+    )
+    ad = models.ForeignKey(
+        "ads.Ad",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="promo_usages",
+        verbose_name=_("Annonce"),
+    )
+    discount_applied = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Réduction appliquée (FCFA)"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("code", "user")
+        verbose_name = _("Utilisation code promo")
+        verbose_name_plural = _("Utilisations codes promo")
+
+    def __str__(self) -> str:
+        return f"PromoUsage({self.code} by {self.user_id})"

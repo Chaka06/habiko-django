@@ -12,4 +12,5 @@ urlpatterns = [
     path("webhook/geniuspay/",        views.geniuspay_webhook,  name="webhook"),
     path("boost/<int:ad_id>/",        views.boost_ad,           name="boost_ad"),
     path("renew/<int:ad_id>/",        views.renew_ad,           name="renew_ad"),
+    path("promo/check/",              views.check_promo_code,   name="check_promo"),
 ]
