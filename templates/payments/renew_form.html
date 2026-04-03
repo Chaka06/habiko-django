@@ -28,7 +28,6 @@
       <div class="bg-white rounded-2xl border border-gray-200 p-4">
         <p class="text-sm font-semibold text-gray-800 mb-3">Choisissez votre forfait</p>
 
-        <!-- 15 jours sans boost -->
         <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-gray-100 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 transition mb-2">
           <input type="radio" name="forfait" value="renew_15" checked class="accent-blue-500 w-4 h-4 shrink-0">
           <div class="flex-1 min-w-0">
@@ -40,7 +39,6 @@
           </div>
         </label>
 
-        <!-- 15 jours + Boost -->
         <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-gray-100 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 transition mb-2">
           <input type="radio" name="forfait" value="renew_15b" class="accent-yellow-500 w-4 h-4 shrink-0">
           <div class="flex-1 min-w-0">
@@ -55,7 +53,6 @@
           </div>
         </label>
 
-        <!-- 1 mois sans boost -->
         <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-gray-100 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 transition mb-2">
           <input type="radio" name="forfait" value="renew_mon" class="accent-indigo-500 w-4 h-4 shrink-0">
           <div class="flex-1 min-w-0">
@@ -67,7 +64,6 @@
           </div>
         </label>
 
-        <!-- 1 mois + Boost -->
         <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-gray-100 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 transition">
           <input type="radio" name="forfait" value="renew_monb" class="accent-purple-500 w-4 h-4 shrink-0">
           <div class="flex-1 min-w-0">
@@ -83,46 +79,15 @@
         </label>
       </div>
 
-      <!-- Choix de l'opérateur -->
+      <!-- Moyens de paiement -->
       <div class="bg-white rounded-2xl border border-gray-200 p-4">
-        <p class="text-sm font-semibold text-gray-800 mb-3">
-          <svg class="w-4 h-4 inline-block mr-1 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-          </svg>
-          Choisissez votre moyen de paiement
-        </p>
-        <div class="grid grid-cols-2 gap-2">
-
-          <!-- Wave -->
-          <label style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;border:2px solid #e5e7eb;transition:border-color 0.15s;" id="lbl-wave">
-            <input type="radio" name="operator" value="wave" style="accent-color:#0ea5e9;width:15px;height:15px;flex-shrink:0;" onchange="updateOperatorStyle()">
-            <img src="https://www.finextra.com/finextra-images/top_pics/xl/81c5cb874171f3560810f9dc12ecdc5e8f85193d.png" alt="Wave" style="width:44px;height:32px;object-fit:contain;flex-shrink:0;" loading="lazy">
-            <span style="font-weight:700;font-size:0.8rem;color:#0ea5e9;white-space:nowrap;">Wave</span>
-          </label>
-
-          <!-- Orange Money -->
-          <label style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;border:2px solid #e5e7eb;transition:border-color 0.15s;" id="lbl-orange">
-            <input type="radio" name="operator" value="orange" style="accent-color:#f97316;width:15px;height:15px;flex-shrink:0;" onchange="updateOperatorStyle()">
-            <img src="https://www.financialafrik.com/wp-content/uploads/2018/10/orange-money.jpg" alt="Orange Money" style="width:44px;height:32px;object-fit:contain;flex-shrink:0;" loading="lazy">
-            <span style="font-weight:700;font-size:0.8rem;color:#f97316;white-space:nowrap;">Orange</span>
-          </label>
-
-          <!-- MTN MoMo -->
-          <label style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;border:2px solid #e5e7eb;transition:border-color 0.15s;" id="lbl-mtn">
-            <input type="radio" name="operator" value="mtn" style="accent-color:#eab308;width:15px;height:15px;flex-shrink:0;" onchange="updateOperatorStyle()">
-            <img src="https://hcmagazines.com/wp-content/uploads/2023/09/mtn-1.jpg" alt="MTN MoMo" style="width:44px;height:32px;object-fit:contain;flex-shrink:0;" loading="lazy">
-            <span style="font-weight:700;font-size:0.8rem;color:#ca8a04;white-space:nowrap;">MTN</span>
-          </label>
-
-          <!-- Moov Money -->
-          <label style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;border:2px solid #e5e7eb;transition:border-color 0.15s;" id="lbl-moov">
-            <input type="radio" name="operator" value="moov" style="accent-color:#3b82f6;width:15px;height:15px;flex-shrink:0;" onchange="updateOperatorStyle()">
-            <img src="https://paytech.sn/assets/images/moov_bj.png" alt="Moov Money" style="width:44px;height:32px;object-fit:contain;flex-shrink:0;" loading="lazy">
-            <span style="font-weight:700;font-size:0.8rem;color:#2563eb;white-space:nowrap;">Moov</span>
-          </label>
-
+        <p class="text-sm font-semibold text-gray-800 mb-3">Moyens de paiement acceptés</p>
+        <div class="flex items-center gap-3 flex-wrap">
+          <img src="https://www.finextra.com/finextra-images/top_pics/xl/81c5cb874171f3560810f9dc12ecdc5e8f85193d.png" alt="Wave" style="height:32px;object-fit:contain;" loading="lazy">
+          <img src="https://www.financialafrik.com/wp-content/uploads/2018/10/orange-money.jpg" alt="Orange Money" style="height:32px;object-fit:contain;" loading="lazy">
+          <img src="https://hcmagazines.com/wp-content/uploads/2023/09/mtn-1.jpg" alt="MTN MoMo" style="height:32px;object-fit:contain;" loading="lazy">
+          <img src="https://paytech.sn/assets/images/moov_bj.png" alt="Moov Money" style="height:32px;object-fit:contain;" loading="lazy">
         </div>
-        <p id="operatorError" style="display:none;color:#dc2626;font-size:0.75rem;margin-top:8px;">Veuillez choisir un moyen de paiement.</p>
       </div>
 
       <button type="submit" id="renewBtn" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-4 rounded-2xl transition text-base shadow-sm flex items-center justify-center gap-2">
@@ -133,7 +98,7 @@
       </button>
 
       <p class="text-center text-xs text-gray-400 leading-relaxed">
-        Paiement sécurisé. L'annonce est renouvelée automatiquement après confirmation.
+        Vous serez redirigé vers la page de paiement sécurisée GeniusPay.
       </p>
 
       <div class="text-center">
@@ -147,37 +112,7 @@
 
 {% block extra_js %}
 <script>
-var OPERATOR_COLORS = {
-  wave:   '#0ea5e9',
-  orange: '#f97316',
-  mtn:    '#eab308',
-  moov:   '#3b82f6',
-};
-
-function updateOperatorStyle() {
-  ['wave', 'orange', 'mtn', 'moov'].forEach(function(op) {
-    var lbl = document.getElementById('lbl-' + op);
-    var radio = lbl ? lbl.querySelector('input[type="radio"]') : null;
-    if (!lbl || !radio) return;
-    if (radio.checked) {
-      lbl.style.borderColor = OPERATOR_COLORS[op];
-      lbl.style.backgroundColor = OPERATOR_COLORS[op] + '18';
-    } else {
-      lbl.style.borderColor = '#e5e7eb';
-      lbl.style.backgroundColor = '';
-    }
-  });
-  document.getElementById('operatorError').style.display = 'none';
-}
-
-document.getElementById('renewForm').addEventListener('submit', function(e) {
-  var op = document.querySelector('input[name="operator"]:checked');
-  if (!op) {
-    e.preventDefault();
-    document.getElementById('operatorError').style.display = 'block';
-    document.getElementById('operatorError').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
+document.getElementById('renewForm').addEventListener('submit', function() {
   var btn = document.getElementById('renewBtn');
   btn.disabled = true;
   btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>Traitement en cours…';
