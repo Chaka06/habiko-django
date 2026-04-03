@@ -203,15 +203,15 @@
         </div>
         <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
           <div class="min-w-0">
-            <!-- Badge (1 seul, compact) -->
-            {% if ad.is_boosted and ad.boost_interval_hours == 3 %}
-              <span class="inline-block text-xs font-bold px-1.5 py-px rounded mb-1 leading-tight" style="background:linear-gradient(90deg,#fde68a,#f59e0b);color:#7c2d12;">👑 VIP</span>
-            {% elif ad.is_boosted %}
-              <span class="inline-block bg-yellow-400 text-yellow-900 text-xs font-bold px-1.5 py-px rounded mb-1 leading-tight">⚡ Boost</span>
-            {% elif ad.is_urgent %}
-              <span class="inline-block bg-red-600 text-white text-xs font-bold px-1.5 py-px rounded mb-1 leading-tight">🔥 Urgent</span>
-            {% elif ad.is_verified %}
-              <span class="inline-block bg-green-600 text-white text-xs font-bold px-1.5 py-px rounded mb-1 leading-tight">✓ Vérifié</span>
+            <!-- Badge (1 seul, rectangle rose bordure solide) -->
+            {% if ad.is_boosted or ad.is_urgent or ad.is_verified %}
+              <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff0f6;color:#be185d;border:2px solid #ec4899;border-radius:4px;">
+                {% if ad.is_boosted and ad.boost_interval_hours == 3 %}👑 VIP
+                {% elif ad.is_boosted %}⚡ Boost
+                {% elif ad.is_urgent %}🔥 Urgent
+                {% else %}✓ Vérifié
+                {% endif %}
+              </span>
             {% endif %}
             <!-- Titre : 2 lignes max, tronqué -->
             <p class="text-sm font-semibold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.title }}</p>
