@@ -69,10 +69,17 @@ def _build_return_url(request: HttpRequest, deposit_id) -> tuple[str, str]:
     return base, base + "?failed=1"
 
 
-def _call_geniuspay(request: HttpRequest, payment: Payment, description: str) -> str | None:
+def _call_geniuspay(
+    request: HttpRequest,
+    payment: Payment,
+    description: str,
+    payment_method: str = None,
+    mmo_provider: str = None,
+) -> str | None:
     """
-    Initie le paiement GeniusPay, met à jour le Payment et retourne le checkout_url.
-    Retourne None en cas d'erreur (le payment est marqué FAILED).
+    Initie le paiement GeniusPay et retourne le payment_url.
+    Si payment_method est fourni, redirige directement vers l'opérateur choisi
+    (Wave, Orange Money, MTN, Moov) — sans passer par la page checkout GeniusPay.
     """
     success_url, error_url = _build_return_url(request, payment.deposit_id)
     try:
@@ -81,18 +88,18 @@ def _call_geniuspay(request: HttpRequest, payment: Payment, description: str) ->
             description=description,
             success_url=success_url,
             error_url=error_url,
+            payment_method=payment_method or None,
+            mmo_provider=mmo_provider or None,
             metadata={
                 "deposit_id": str(payment.deposit_id),
                 "type": payment.type,
                 "ad_id": payment.ad_id,
             },
-            customer_name=request.user.username,
-            customer_email=request.user.email or None,
         )
         payment.geniuspay_reference = data.get("reference", "")
         payment.gateway_response = data
         payment.save(update_fields=["geniuspay_reference", "gateway_response"])
-        return data.get("checkout_url") or data.get("payment_url")
+        return data.get("payment_url") or data.get("checkout_url")
     except Exception as exc:
         logger.exception("GeniusPay create_payment failed for payment %s: %s", payment.pk, exc)
         payment.status = Payment.Status.FAILED
@@ -184,6 +191,20 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
         return redirect("payments:pay_form")
     pay_type, amount, desc = FORFAIT_MAP[forfait]
 
+    # ── Opérateur de paiement ─────────────────────────────────────────────
+    operator = request.POST.get("operator", "").strip()
+    OPERATOR_MAP = {
+        "wave":   {"payment_method": "wave",         "mmo_provider": None},
+        "orange": {"payment_method": "orange_money", "mmo_provider": None},
+        "mtn":    {"payment_method": "mtn_money",    "mmo_provider": None},
+        "moov":   {"payment_method": "pawapay",      "mmo_provider": "MOOV_CIV"},
+    }
+    if operator not in OPERATOR_MAP:
+        request.session["pending_ad_id"] = ad_id
+        messages.error(request, "Veuillez choisir un moyen de paiement.")
+        return redirect("payments:pay_form")
+    op_params = OPERATOR_MAP[operator]
+
     # ── Code promo (optionnel) ─────────────────────────────────────────────
     promo_code = request.POST.get("promo_code", "").strip().upper()
     discount_fcfa = 0
@@ -210,7 +231,11 @@ def initiate_payment(request: HttpRequest) -> HttpResponse:
             defaults={"ad": ad, "discount_applied": discount_fcfa},
         )
 
-    checkout_url = _call_geniuspay(request, payment, desc)
+    checkout_url = _call_geniuspay(
+        request, payment, desc,
+        payment_method=op_params["payment_method"],
+        mmo_provider=op_params["mmo_provider"],
+    )
     if not checkout_url:
         # Remettre l'annonce en session pour réessayer
         request.session["pending_ad_id"] = ad_id

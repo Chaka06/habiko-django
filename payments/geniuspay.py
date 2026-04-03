@@ -36,8 +36,9 @@ def create_payment(
     success_url: str,
     error_url: str,
     metadata: dict = None,
-    customer_name: str = None,
-    customer_email: str = None,
+    payment_method: str = None,
+    mmo_provider: str = None,
+    customer_phone: str = None,
 ) -> dict:
     """
     Crée un paiement GeniusPay en mode checkout.
@@ -62,14 +63,12 @@ def create_payment(
         "error_url": error_url,
     }
 
-    customer: dict = {}
-    if customer_name:
-        customer["name"] = customer_name
-    if customer_email:
-        customer["email"] = customer_email
-    if customer:
-        payload["customer"] = customer
-
+    if payment_method:
+        payload["payment_method"] = payment_method
+    if mmo_provider:
+        payload["mmo_provider"] = mmo_provider
+    if customer_phone:
+        payload["customer"] = {"phone": customer_phone}
     if metadata:
         payload["metadata"] = metadata
 
