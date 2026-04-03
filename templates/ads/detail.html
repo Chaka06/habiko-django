@@ -465,37 +465,30 @@
       <h2 class="text-2xl font-bold text-gray-900 mb-8">Annonces similaires à {{ ad.city.name }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for similar_ad in similar_ads %}
-          <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 h-40">
-            <div class="flex h-full">
-              <div class="w-40 flex-shrink-0 bg-slate-100">
+          <a href="/ads/{{ similar_ad.slug }}/" class="group block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+            <div style="display:flex;">
+              <div style="width:120px;height:120px;flex-shrink:0;background:#f1f5f9;">
                 {% with first_media=similar_ad.media.first %}
                 {% if first_media and first_media.image %}
-                  <img src="{% if first_media.thumbnail %}{{ first_media.thumbnail.url }}{% else %}{{ first_media.image.url }}{% endif %}" alt="{{ similar_ad.title }} - {{ similar_ad.get_category_display }} à {{ similar_ad.city.name }}, Côte d'Ivoire. Annonce similaire sur KIABA Rencontres." class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" width="160" height="160">
+                  <img src="{% if first_media.thumbnail %}{{ first_media.thumbnail.url }}{% else %}{{ first_media.image.url }}{% endif %}" alt="{{ similar_ad.title }}" style="width:120px;height:120px;object-fit:cover;display:block;" loading="lazy" width="120" height="120">
                 {% else %}
-                  <div class="w-full h-full bg-slate-200 flex items-center justify-center"><span class="text-slate-400 text-xs">Photo</span></div>
+                  <div style="width:120px;height:120px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;"><span style="color:#94a3b8;font-size:11px;">Photo</span></div>
                 {% endif %}
                 {% endwith %}
               </div>
-              <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
-                <div class="min-w-0">
+              <div style="flex:1;min-width:0;padding:10px 10px 8px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;">
+                <div style="overflow:hidden;">
                   {% if similar_ad.is_boosted or similar_ad.is_urgent or similar_ad.is_verified %}
-                    <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff0f6;color:#be185d;border:2px solid #ec4899;border-radius:4px;">
-                      {% if similar_ad.is_boosted and similar_ad.boost_interval_hours == 3 %}👑 VIP
-                      {% elif similar_ad.is_boosted %}⚡ Boost
-                      {% elif similar_ad.is_urgent %}🔥 Urgent
-                      {% else %}✓ Vérifié{% endif %}
-                    </span>
+                    <span style="display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;margin-bottom:5px;background:#fff0f6;color:#be185d;border:2px solid #ec4899;border-radius:4px;line-height:1.4;">{% if similar_ad.is_boosted and similar_ad.boost_interval_hours == 3 %}👑 VIP{% elif similar_ad.is_boosted %}⚡ Boost{% elif similar_ad.is_urgent %}🔥 Urgent{% else %}✓ Vérifié{% endif %}</span><br>
                   {% endif %}
-                  <p class="text-sm font-semibold text-gray-900 group-hover:text-pink-600 transition-colors leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ similar_ad.title }}</p>
-                  <p class="text-xs text-gray-500 truncate">{{ similar_ad.get_category_display }} · {{ similar_ad.city.name }}</p>
+                  <span style="display:block;font-size:13px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;margin-bottom:3px;">{{ similar_ad.title }}</span>
+                  <span style="display:block;font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ similar_ad.get_category_display }} · {{ similar_ad.city.name }}</span>
                 </div>
-                <div class="flex items-center justify-between gap-1 mt-1">
-                  <span class="text-xs text-gray-500 flex-shrink-0">{{ similar_ad.created_at|date:"d/m/Y" }}</span>
-                  {% with tag=similar_ad.subcategories|first %}
-                    {% if tag %}
-                      <span class="text-xs text-pink-700 bg-pink-50 border border-pink-100 px-1.5 py-px rounded-full truncate max-w-[90px]">{{ tag }}</span>
-                    {% endif %}
-                  {% endwith %}
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:6px;">
+                  <span style="font-size:11px;color:#94a3b8;flex-shrink:0;">{{ similar_ad.created_at|date:"d/m/Y" }}</span>
+                  {% with tag=similar_ad.subcategories|first %}{% if tag %}
+                    <span style="font-size:11px;color:#be185d;background:#fff0f6;border:1px solid #fbcfe8;padding:1px 7px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;">{{ tag }}</span>
+                  {% endif %}{% endwith %}
                 </div>
                 </div>
               </div>
