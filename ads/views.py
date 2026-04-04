@@ -178,7 +178,12 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
         .order_by("-same_city", "-created_at")[:5]
     )
 
-    response = render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
+    is_favorited = (
+        request.user.is_authenticated
+        and Favorite.objects.filter(user=request.user, ad=ad).exists()
+    )
+
+    response = render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads, "is_favorited": is_favorited})
 
     if not request.user.is_authenticated:
         cache.set(f"ad_detail:{slug}", response, 120)  # 2 min, anonymes seulement
