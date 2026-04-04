@@ -844,23 +844,36 @@
   var heart = document.getElementById('fav-heart');
   var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
   var csrfToken = csrfInput ? csrfInput.value : '';
+  var favorited = false;
+
+  function setFavorited(state) {
+    favorited = state;
+    if (state) {
+      heart.setAttribute('fill', '#ec4899');
+      heart.setAttribute('stroke', '#ec4899');
+      btn.title = 'Retirer des favoris';
+    } else {
+      heart.setAttribute('fill', 'none');
+      heart.setAttribute('stroke', '#ec4899');
+      btn.title = 'Ajouter aux favoris';
+    }
+  }
 
   btn.addEventListener('click', function() {
+    // UI optimiste : bascule immédiatement, sans attendre le serveur
+    setFavorited(!favorited);
     fetch('/ads/favorites/toggle/' + btn.dataset.adId + '/', {
       method: 'POST',
       headers: {'X-CSRFToken': csrfToken},
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.favorited) {
-        heart.setAttribute('fill', '#ec4899');
-        heart.setAttribute('stroke', '#ec4899');
-        btn.title = 'Retirer des favoris';
-      } else {
-        heart.setAttribute('fill', 'none');
-        heart.setAttribute('stroke', '#ec4899');
-        btn.title = 'Ajouter aux favoris';
-      }
+      // Correction si le serveur renvoie un état différent (ex: doublon)
+      if (data.favorited !== favorited) setFavorited(data.favorited);
+    })
+    .catch(function() {
+      // En cas d'erreur réseau, on revient à l'état précédent
+      setFavorited(!favorited);
     });
   });
 })();
