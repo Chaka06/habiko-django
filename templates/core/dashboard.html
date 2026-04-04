@@ -202,7 +202,7 @@
     {% endif %}
   </section>
 
-  <!-- Liens utiles : favoris + export RGPD -->
+  <!-- Liens utiles : favoris + historique paiements -->
   <section class="bg-white rounded-2xl p-4 md:p-6 border shadow-sm">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Mes données</h2>
     <div class="flex flex-col sm:flex-row gap-3">
@@ -212,11 +212,11 @@
         </svg>
         Mes favoris
       </a>
-      <a href="/rgpd/export/" class="inline-flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
+      <a href="{% url 'payments:history' %}" class="inline-flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
-        Télécharger mes données (RGPD)
+        Historique des paiements
       </a>
     </div>
   </section>

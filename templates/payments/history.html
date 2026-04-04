@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Historique des paiements · KIABA Rencontres{% endblock %}
+{% block description %}Consultez l'historique de vos paiements sur KIABA Rencontres.{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex, nofollow" />{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-4">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Historique des paiements</h1>
+    <a href="/dashboard/" class="text-sm text-gray-500 hover:text-gray-700 transition">← Mon compte</a>
+  </div>
+
+  {% if page_obj.object_list %}
+    <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Annonce</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Forfait</th>
+            <th class="text-right px-4 py-3 font-medium text-gray-600">Montant</th>
+            <th class="text-center px-4 py-3 font-medium text-gray-600">Statut</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for payment in page_obj %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ payment.created_at|date:"d/m/Y H:i" }}</td>
+            <td class="px-4 py-3 text-gray-900 max-w-[160px]">
+              {% if payment.ad %}
+                <a href="/ads/{{ payment.ad.slug }}/" class="text-pink-600 hover:underline truncate block">{{ payment.ad.title|truncatechars:30 }}</a>
+              {% else %}
+                <span class="text-gray-400 italic">Annonce supprimée</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 text-gray-700">{{ payment.get_type_display }}</td>
+            <td class="px-4 py-3 text-right font-medium text-gray-900 whitespace-nowrap">{{ payment.amount }} FCFA</td>
+            <td class="px-4 py-3 text-center">
+              {% if payment.status == 'completed' %}
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Confirmé</span>
+              {% elif payment.status == 'pending' %}
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">En attente</span>
+              {% elif payment.status == 'failed' %}
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">Échoué</span>
+              {% else %}
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">{{ payment.get_status_display }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <div class="flex justify-center gap-2">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm transition">← Précédent</a>
+        {% endif %}
+        <span class="px-3 py-2 text-sm text-gray-500">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm transition">Suivant →</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="text-center py-12 text-gray-500">
+      <p class="text-lg">Aucun paiement trouvé.</p>
+      <a href="/post/" class="mt-4 inline-block bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition font-medium">
+        Publier une annonce
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -9,50 +9,55 @@
   <h1 class="text-2xl font-bold text-gray-900">Mes favoris</h1>
 
   {% if favorites %}
-    <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+    <div class="space-y-3">
       {% static 'img/logo.png' as placeholder_img %}
       {% for fav in favorites %}
         {% with ad=fav.ad %}
-        <div class="relative">
-          <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-40">
-            <div class="flex h-full">
-              <div class="w-40 flex-shrink-0 bg-slate-100">
-                {% if ad.media.count %}
-                  {% with media=ad.media.first %}
-                    {% if media.thumbnail %}
-                      <img src="{{ media.thumbnail.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
-                    {% elif media.image %}
-                      <img src="{{ media.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
-                    {% endif %}
-                  {% endwith %}
-                {% else %}
-                  <img src="{{ placeholder_img }}" alt="Annonce" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
+        <div class="bg-white rounded-xl border border-pink-500 shadow-sm hover:shadow-md transition overflow-hidden" data-fav-card="{{ ad.id }}">
+          <a href="/ads/{{ ad.slug }}" class="flex gap-0">
+            <!-- Image -->
+            <div class="w-32 sm:w-40 flex-shrink-0 bg-slate-100">
+              {% if ad.media.count %}
+                {% with media=ad.media.first %}
+                  {% if media.thumbnail %}
+                    <img src="{{ media.thumbnail.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="160" height="128">
+                  {% elif media.image %}
+                    <img src="{{ media.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover" loading="lazy" width="160" height="128">
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                <img src="{{ placeholder_img }}" alt="Annonce" class="w-full h-full object-cover" loading="lazy" width="160" height="128">
+              {% endif %}
+            </div>
+            <!-- Infos -->
+            <div class="flex-1 p-3 flex flex-col justify-between min-w-0">
+              <div>
+                <p class="text-sm font-semibold text-slate-900 leading-snug mb-1">{{ ad.title }}</p>
+                <p class="text-xs text-slate-500">{{ ad.get_category_display }} · {{ ad.city.name }}</p>
+                {% if ad.subcategories %}
+                  <p class="text-xs text-sky-600 mt-1">{{ ad.subcategories|first }}</p>
                 {% endif %}
               </div>
-              <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
-                <div class="min-w-0">
-                  <p class="text-sm font-semibold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.title }}</p>
-                  <p class="text-xs text-slate-500 truncate">{{ ad.get_category_display }} · {{ ad.city.name }}</p>
-                </div>
-                <div class="flex items-center justify-between gap-1 mt-1">
-                  <span class="text-xs text-gray-500">{{ ad.created_at|date:"d/m/Y" }}</span>
-                  {% if ad.status == 'expired' %}
-                    <span class="text-xs text-orange-600 font-medium">Expirée</span>
-                  {% endif %}
-                </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-xs text-gray-400">Ajouté le {{ fav.created_at|date:"d/m/Y" }}</span>
+                {% if ad.status == 'expired' %}
+                  <span class="text-xs text-orange-500 font-medium">Expirée</span>
+                {% endif %}
               </div>
             </div>
           </a>
-          <!-- Bouton retirer des favoris -->
-          <button
-            class="fav-toggle absolute top-2 right-2 bg-white rounded-full p-1 shadow text-pink-500 hover:text-gray-400 transition"
-            data-ad-id="{{ ad.id }}"
-            title="Retirer des favoris"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-          </button>
+          <!-- Bouton retirer : en bas de la carte, pas de cercle -->
+          <div class="border-t border-gray-100 px-3 py-2 flex justify-end">
+            <button
+              class="fav-remove text-xs text-gray-400 hover:text-pink-600 transition flex items-center gap-1"
+              data-ad-id="{{ ad.id }}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="#ec4899" stroke="#ec4899" stroke-width="0">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              Retirer des favoris
+            </button>
+          </div>
         </div>
         {% endwith %}
       {% endfor %}
@@ -68,20 +73,20 @@
 </div>
 
 <script>
-document.querySelectorAll('.fav-toggle').forEach(btn => {
-  btn.addEventListener('click', async (e) => {
+document.querySelectorAll('.fav-remove').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
     e.preventDefault();
-    const adId = btn.dataset.adId;
-    const res = await fetch(`/ads/favorites/toggle/${adId}/`, {
+    var adId = btn.dataset.adId;
+    fetch('/ads/favorites/toggle/' + adId + '/', {
       method: 'POST',
       headers: {'X-CSRFToken': '{{ csrf_token }}'},
-    });
-    if (res.ok) {
-      btn.closest('.relative').remove();
-      if (!document.querySelector('.fav-toggle')) {
-        location.reload();
+    }).then(function(r) {
+      if (r.ok) {
+        var card = document.querySelector('[data-fav-card="' + adId + '"]');
+        if (card) card.remove();
+        if (!document.querySelector('[data-fav-card]')) location.reload();
       }
-    }
+    });
   });
 });
 </script>

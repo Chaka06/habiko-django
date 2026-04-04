@@ -547,3 +547,21 @@ def _activate_ad_for_payment(payment: Payment) -> None:
             payment.deposit_id, payment.type, ad.pk, ad.status,
             ad.is_boosted, getattr(ad, "boost_interval_hours", 2),
         )
+
+
+@login_required
+@require_GET
+def payment_history(request: HttpRequest) -> HttpResponse:
+    """Historique des paiements de l'utilisateur connecté."""
+    from django.core.paginator import Paginator
+    payments = (
+        Payment.objects.filter(user=request.user)
+        .select_related("ad")
+        .order_by("-created_at")
+    )
+    paginator = Paginator(payments, 20)
+    page_obj = paginator.get_page(request.GET.get("page", "1"))
+    return render(request, "payments/history.html", {
+        "page_obj": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
+    })
