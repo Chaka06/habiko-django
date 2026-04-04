@@ -348,7 +348,7 @@ def api_create_ad(request):
         category=category,
         subcategories=subcategories,
         city=city,
-        status=Ad.Status.PENDING,
+        status=Ad.Status.DRAFT,
         slug=slug,
     )
 
