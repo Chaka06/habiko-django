@@ -208,6 +208,9 @@ INSTALLED_APPS = [
     "moderation",
     "seo",
     "payments.apps.PaymentsConfig",
+    # API mobile
+    "rest_framework.authtoken",
+    "mobile_api",
 ]
 
 MIDDLEWARE = [
@@ -558,6 +561,7 @@ else:
 # DRF (prepare throttling for rate limiting contact clicks)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_THROTTLE_CLASSES": [

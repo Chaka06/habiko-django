@@ -59,6 +59,8 @@ urlpatterns = [
     path("ads/", include("ads.urls")),
     path("pay/", include("payments.urls", namespace="payments")),
     path("", include("seo.urls")),
+    # ── API REST mobile ────────────────────────────────────────────────────────
+    path("api/mobile/", include("mobile_api.urls")),
     path(
         "sitemap.xml",
         sitemap_https,
