@@ -23,6 +23,8 @@ urlpatterns = [
     path("favorites/check/<int:pk>/",  views.api_check_favorite,  name="api_check_favorite"),
 
     # ── Paiements ──────────────────────────────────────────────────────────────
-    path("payments/history/",      views.api_payment_history, name="api_payment_history"),
-    path("payments/promo/check/",  views.api_check_promo,     name="api_check_promo"),
+    path("payments/history/",               views.api_payment_history,        name="api_payment_history"),
+    path("payments/promo/check/",           views.api_check_promo,            name="api_check_promo"),
+    path("payments/initiate/",              views.api_mobile_initiate_payment, name="api_mobile_initiate_payment"),
+    path("payments/status/<str:deposit_id>/", views.api_mobile_payment_status, name="api_mobile_payment_status"),
 ]

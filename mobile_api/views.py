@@ -471,6 +471,154 @@ def api_payment_history(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_auth
+def api_mobile_initiate_payment(request):
+    """
+    Initie un paiement GeniusPay pour une annonce DRAFT.
+    Body JSON: { "ad_id": 42, "forfait": "standard"|"bundle"|"fortnight"|"monthly", "promo_code": "" }
+    Retourne: { "checkout_url": "...", "deposit_id": "...", "amount": 1000, "original_amount": 1000 }
+    """
+    from payments.models import Payment, PromoCodeUsage
+    from payments import geniuspay as gp_svc
+    from payments.views import PRICE_STANDARD, PRICE_BUNDLE, PRICE_FORTNIGHT, PRICE_MONTHLY
+
+    data = json_body(request)
+    ad_id = data.get("ad_id")
+    forfait = data.get("forfait", "")
+    promo_code = (data.get("promo_code") or "").strip().upper()
+
+    try:
+        ad = Ad.objects.get(pk=int(ad_id), user=request.api_user, status=Ad.Status.DRAFT)
+    except (Ad.DoesNotExist, TypeError, ValueError):
+        return JsonResponse({"detail": "Annonce introuvable ou déjà payée."}, status=404)
+
+    FORFAIT_MAP = {
+        "standard":  (Payment.Type.STANDARD,  PRICE_STANDARD,  "KIABA Annonce 5j"),
+        "bundle":    (Payment.Type.BUNDLE,     PRICE_BUNDLE,    "KIABA Annonce 5j + Boost"),
+        "fortnight": (Payment.Type.FORTNIGHT,  PRICE_FORTNIGHT, "KIABA Pack 15j + Boost"),
+        "monthly":   (Payment.Type.MONTHLY,    PRICE_MONTHLY,   "KIABA Pack mensuel + Boost"),
+    }
+    if forfait not in FORFAIT_MAP:
+        return JsonResponse({"detail": "Forfait invalide."}, status=400)
+
+    pay_type, amount, desc = FORFAIT_MAP[forfait]
+    original_amount = amount
+    discount_fcfa = 0
+
+    # Code promo
+    if promo_code:
+        from payments.models import PromoCode
+        try:
+            promo = PromoCode.objects.get(code=promo_code)
+            if not promo.is_valid():
+                return JsonResponse({"detail": "Code promo expiré ou épuisé."}, status=400)
+            if PromoCodeUsage.objects.filter(code=promo_code, user=request.api_user).exists():
+                return JsonResponse({"detail": "Code promo déjà utilisé sur votre compte."}, status=400)
+            discount_fcfa = int(amount * promo.discount_percent / 100)
+            amount = max(amount - discount_fcfa, 1)
+        except PromoCode.DoesNotExist:
+            return JsonResponse({"detail": "Code promo invalide."}, status=400)
+
+    # URL de retour (page web GeniusPay → site KIABA)
+    success_url = f"https://ci-kiaba.com/pay/return/{{deposit_id}}/"
+    error_url = f"https://ci-kiaba.com/pay/return/{{deposit_id}}/?failed=1"
+
+    payment = Payment.objects.create(
+        user=request.api_user,
+        ad=ad,
+        type=pay_type,
+        amount=amount,
+    )
+
+    # Remplir les URLs avec le deposit_id réel
+    success_url = f"https://ci-kiaba.com/pay/return/{payment.deposit_id}/"
+    error_url = f"https://ci-kiaba.com/pay/return/{payment.deposit_id}/?failed=1"
+
+    try:
+        gp_data = gp_svc.create_payment(
+            amount=payment.amount,
+            description=desc,
+            success_url=success_url,
+            error_url=error_url,
+            metadata={
+                "deposit_id": str(payment.deposit_id),
+                "type": payment.type,
+                "ad_id": ad.id,
+                "source": "mobile",
+            },
+        )
+        payment.geniuspay_reference = gp_data.get("reference", "")
+        payment.gateway_response = gp_data
+        payment.save(update_fields=["geniuspay_reference", "gateway_response"])
+
+        checkout_url = gp_data.get("checkout_url") or gp_data.get("payment_url")
+        if not checkout_url:
+            payment.status = Payment.Status.FAILED
+            payment.save(update_fields=["status"])
+            return JsonResponse({"detail": "Erreur du service de paiement. Réessayez."}, status=502)
+
+    except Exception as exc:
+        logger.exception("api_mobile_initiate_payment error: %s", exc)
+        payment.status = Payment.Status.FAILED
+        payment.save(update_fields=["status"])
+        return JsonResponse({"detail": "Impossible de contacter le service de paiement."}, status=502)
+
+    # Enregistrer l'usage du code promo
+    if promo_code and discount_fcfa > 0:
+        PromoCodeUsage.objects.get_or_create(
+            code=promo_code,
+            user=request.api_user,
+            defaults={"ad": ad, "discount_applied": discount_fcfa},
+        )
+
+    return JsonResponse({
+        "checkout_url": checkout_url,
+        "deposit_id": str(payment.deposit_id),
+        "amount": payment.amount,
+        "original_amount": original_amount,
+        "discount_fcfa": discount_fcfa,
+        "forfait": forfait,
+    }, status=201)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+@require_auth
+def api_mobile_payment_status(request, deposit_id):
+    """Retourne le statut d'un paiement mobile. Consulte GeniusPay si toujours PENDING."""
+    from payments.models import Payment
+    from payments import geniuspay as gp_svc
+
+    try:
+        payment = Payment.objects.select_related("ad").get(
+            deposit_id=deposit_id, user=request.api_user
+        )
+    except Payment.DoesNotExist:
+        return JsonResponse({"detail": "Paiement introuvable."}, status=404)
+
+    if payment.status == Payment.Status.PENDING and payment.geniuspay_reference:
+        try:
+            gp_data = gp_svc.get_payment(payment.geniuspay_reference)
+            gp_status = (gp_data.get("status") or "").lower()
+            if gp_status == "completed":
+                from payments.views import _activate_ad_for_payment
+                _activate_ad_for_payment(payment)
+                payment.refresh_from_db()
+            elif gp_status in ("failed", "cancelled", "expired"):
+                payment.status = Payment.Status.FAILED
+                payment.save(update_fields=["status"])
+        except Exception as exc:
+            logger.warning("api_mobile_payment_status polling error: %s", exc)
+
+    return JsonResponse({
+        "status": payment.status,
+        "ad_id": payment.ad_id,
+        "ad_slug": payment.ad.slug if payment.ad else None,
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def api_check_promo(request):
     from payments.models import PromoCode
     data = json_body(request)
