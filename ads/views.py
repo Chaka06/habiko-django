@@ -24,8 +24,11 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     # Les recherches libres (?q=…) sont uniques : pas de cache pour ne pas le polluer.
     # Les pages de navigation (city/category/page) sont mises en cache avec une clé
     # versionnée — invalider la version suffit à rafraîchir toutes les pages d'un coup.
+    # IMPORTANT : on ne met en cache que les réponses pour les utilisateurs anonymes.
+    # Le cache stocke le HTML rendu complet (base.html inclus) : si un anonyme visite
+    # en premier, le HTML "Se connecter" serait servi aux utilisateurs connectés.
     cache_key = None
-    if not q:
+    if not q and not request.user.is_authenticated:
         version = get_ad_list_version()
         cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{page}"
         cached = cache.get(cache_key)
@@ -139,8 +142,16 @@ def search_suggestions(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"suggestions": result})
 
 
-@cache_page(120)  # 2 min par annonce (contenu stable)
 def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    # Cache uniquement pour les utilisateurs anonymes.
+    # Le HTML rendu contient la nav (user.is_authenticated) : mettre en cache pour tous
+    # ferait apparaître "Se connecter" aux utilisateurs connectés.
+    if not request.user.is_authenticated:
+        cache_key = f"ad_detail:{slug}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     # Annonce archivée/expirée → 410 Gone (signal fort pour Google : désindexer cette URL)
     if Ad.objects.filter(slug=slug, status=Ad.Status.ARCHIVED).exists():
         from django.template.loader import render_to_string
@@ -167,7 +178,12 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
         .order_by("-same_city", "-created_at")[:5]
     )
 
-    return render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
+    response = render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads})
+
+    if not request.user.is_authenticated:
+        cache.set(f"ad_detail:{slug}", response, 120)  # 2 min, anonymes seulement
+
+    return response
 
 
 @csrf_exempt
