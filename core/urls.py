@@ -22,6 +22,7 @@ urlpatterns = [
     path("favicon.ico", views.favicon, name="favicon"),
     # Health check pour Vercel, Docker et les outils de monitoring
     path("health/", views.health_check, name="health_check"),
+    path("rgpd/export/", views.rgpd_export, name="rgpd_export"),
     # Cron jobs (appelés par Vercel Cron + cron-job.org)
     path("cron/expire-ads/",    cron_views.cron_expire_ads,    name="cron_expire_ads"),
     path("cron/notify-24h/",    cron_views.cron_notify_24h,    name="cron_notify_24h"),

@@ -85,6 +85,39 @@ class Payment(models.Model):
         return f"Payment({self.deposit_id}) {self.type} {self.status}"
 
 
+class PromoCode(models.Model):
+    """Code promo géré en base : modifiable sans redéploiement."""
+
+    code = models.CharField(max_length=50, unique=True, verbose_name=_("Code"))
+    discount_percent = models.PositiveSmallIntegerField(verbose_name=_("Réduction (%)"))
+    active = models.BooleanField(default=True, verbose_name=_("Actif"))
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Expire le"))
+    max_uses = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text=_("Nombre max d'utilisations au total. Vide = illimité."),
+        verbose_name=_("Max utilisations"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Code promo")
+        verbose_name_plural = _("Codes promo")
+
+    def is_valid(self) -> bool:
+        from django.utils import timezone
+        if not self.active:
+            return False
+        if self.expires_at and self.expires_at < timezone.now():
+            return False
+        if self.max_uses is not None:
+            if PromoCodeUsage.objects.filter(code=self.code).count() >= self.max_uses:
+                return False
+        return True
+
+    def __str__(self) -> str:
+        return f"{self.code} (-{self.discount_percent}%)"
+
+
 class PromoCodeUsage(models.Model):
     """Trace l'utilisation d'un code promo par un utilisateur (1 seule fois par user)."""
 

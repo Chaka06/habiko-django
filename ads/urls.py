@@ -5,6 +5,8 @@ from . import views, admin_views
 urlpatterns = [
     path("", views.ad_list, name="ad_list"),
     path("api/search-suggestions/", views.search_suggestions, name="ad_search_suggestions"),
+    path("favorites/", views.favorites_list, name="favorites_list"),
+    path("favorites/toggle/<int:ad_id>/", views.toggle_favorite, name="toggle_favorite"),
     path("<slug:slug>/", views.ad_detail, name="ad_detail"),
     path("<slug:slug>/record-view/", views.record_ad_view, name="record_ad_view"),
     # URLs pour actions admin

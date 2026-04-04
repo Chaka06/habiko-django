@@ -13,24 +13,22 @@ from ads.models import Ad
 from .models import Payment, PromoCodeUsage
 from . import geniuspay as geniuspay_svc
 
-# ─── Codes promo ─────────────────────────────────────────────────────────────
-PROMO_CODES = {
-    "KIABA#2": 10,  # 10% de réduction
-}
-
-
 def _apply_promo(code: str, user, amount: int) -> tuple[int, int]:
     """
     Retourne (nouveau_montant, réduction_fcfa).
-    Lève ValueError si le code est invalide ou déjà utilisé.
+    Lève ValueError si le code est invalide, expiré ou déjà utilisé.
     """
+    from .models import PromoCode
     code = code.strip().upper()
-    if code not in PROMO_CODES:
+    try:
+        promo = PromoCode.objects.get(code=code)
+    except PromoCode.DoesNotExist:
         raise ValueError("Code promo invalide.")
+    if not promo.is_valid():
+        raise ValueError("Ce code promo n'est plus valide ou a expiré.")
     if PromoCodeUsage.objects.filter(code=code, user=user).exists():
         raise ValueError("Ce code promo a déjà été utilisé sur votre compte.")
-    pct = PROMO_CODES[code]
-    discount = int(amount * pct / 100)
+    discount = int(amount * promo.discount_percent / 100)
     return max(amount - discount, 1), discount
 
 logger = logging.getLogger(__name__)
@@ -360,14 +358,18 @@ def check_promo_code(request: HttpRequest) -> JsonResponse:
     amount = FORFAIT_PRICES.get(forfait, PRICE_STANDARD)
 
     try:
+        from .models import PromoCode
+        promo = PromoCode.objects.get(code=code)
         new_amount, discount = _apply_promo(code, request.user, amount)
         return JsonResponse({
             "valid": True,
-            "discount_pct": PROMO_CODES[code],
+            "discount_pct": promo.discount_percent,
             "discount_fcfa": discount,
             "new_amount": new_amount,
             "original_amount": amount,
         })
+    except PromoCode.DoesNotExist:
+        return JsonResponse({"valid": False, "error": "Code promo invalide."})
     except ValueError as e:
         return JsonResponse({"valid": False, "error": str(e)})
 

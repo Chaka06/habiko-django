@@ -167,7 +167,8 @@
 
 <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
   {% for ad in ads %}
-    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-40">
+    <div class="relative">
+    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border {% if ad.status == 'expired' %}border-gray-300 opacity-70{% else %}border-pink-500{% endif %} overflow-hidden shadow-sm hover:shadow-md transition h-40">
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
@@ -203,20 +204,24 @@
         </div>
         <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
           <div class="min-w-0">
-            <!-- Badge (1 seul, rectangle rose bordure solide) -->
-            {% if ad.is_boosted or ad.is_urgent or ad.is_verified %}
+            <!-- Badge statut / boost -->
+            {% if ad.status == 'expired' %}
+              <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff7ed;color:#c2410c;border:2px solid #f97316;border-radius:4px;">Expirée</span>
+            {% elif ad.is_boosted or ad.is_urgent %}
               <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff0f6;color:#be185d;border:2px solid #ec4899;border-radius:4px;">
                 {% if ad.is_boosted and ad.boost_interval_hours == 3 %}👑 VIP
                 {% elif ad.is_boosted %}⚡ Boost
-                {% elif ad.is_urgent %}🔥 Urgent
-                {% else %}✓ Vérifié
+                {% else %}🔥 Urgent
                 {% endif %}
               </span>
             {% endif %}
             <!-- Titre : 2 lignes max, tronqué -->
             <p class="text-sm font-semibold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.title }}</p>
-            <!-- Catégorie tronquée -->
-            <p class="text-xs text-slate-500 truncate">{{ ad.get_category_display }} · {{ ad.city.name }}</p>
+            <!-- Catégorie + badge vendeur vérifié -->
+            <p class="text-xs text-slate-500 truncate">
+              {{ ad.get_category_display }} · {{ ad.city.name }}
+              {% if ad.user.is_verified %}<span class="ml-1 text-green-600 font-semibold">✓</span>{% endif %}
+            </p>
           </div>
           <!-- Bas de carte : date + 1 tag -->
           <div class="flex items-center justify-between gap-1 mt-1">
@@ -230,6 +235,19 @@
         </div>
       </div>
     </a>
+    <!-- Bouton favoris (utilisateurs connectés) -->
+    {% if user.is_authenticated %}
+      <button
+        class="fav-toggle absolute top-2 right-2 bg-white rounded-full p-1 shadow text-gray-300 hover:text-pink-500 transition"
+        data-ad-id="{{ ad.id }}"
+        title="Ajouter aux favoris"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </button>
+    {% endif %}
+    </div>
   {% empty %}
     <div class="text-center text-slate-600 py-8">Aucune annonce trouvée.</div>
   {% endfor %}
@@ -381,6 +399,37 @@
   });
 })();
 </script>
+
+{% if user.is_authenticated %}
+<script>
+(function() {
+  var csrfToken = '{{ csrf_token }}';
+  document.querySelectorAll('.fav-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var adId = btn.dataset.adId;
+      fetch('/ads/favorites/toggle/' + adId + '/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken},
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var svg = btn.querySelector('svg');
+        if (data.favorited) {
+          btn.classList.remove('text-gray-300');
+          btn.classList.add('text-pink-500');
+          btn.title = 'Retirer des favoris';
+        } else {
+          btn.classList.remove('text-pink-500');
+          btn.classList.add('text-gray-300');
+          btn.title = 'Ajouter aux favoris';
+        }
+      });
+    });
+  });
+})();
+</script>
+{% endif %}
 {% endblock %}
 
 

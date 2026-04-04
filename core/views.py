@@ -386,17 +386,24 @@ def dashboard(request: HttpRequest) -> HttpResponse:
             display_name=request.user.username
         )
     
-    # Afficher toutes les annonces de l'utilisateur (préchargement city + médias pour éviter 500)
-    my_ads = (
+    # Afficher les annonces de l'utilisateur — paginées par 20 pour éviter les pages lentes
+    from django.core.paginator import Paginator
+    qs = (
         Ad.objects.filter(user=request.user)
         .select_related("city")
         .order_by("-created_at")
         .prefetch_related("media")
     )
+    paginator = Paginator(qs, 20)
+    page = request.GET.get("page", "1")
+    my_ads = paginator.get_page(page)
+
     now = timezone.now()
     two_days_from_now = now + timezone.timedelta(days=2)
     return render(request, "core/dashboard.html", {
         "ads": my_ads,
+        "page_obj": my_ads,
+        "is_paginated": my_ads.has_other_pages(),
         "profile": profile,
         "now": now,
         "two_days_from_now": two_days_from_now,
@@ -480,6 +487,56 @@ def report_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
         return render(request, "core/report.html", {"ad": ad, "submitted": True})
 
     return render(request, "core/report.html", {"ad": ad, "submitted": False})
+
+
+@login_required
+def rgpd_export(request: HttpRequest) -> HttpResponse:
+    """
+    Export RGPD : téléchargement des données personnelles de l'utilisateur en JSON.
+    """
+    import json as _json
+    from django.http import HttpResponse as _HR
+    user = request.user
+    try:
+        profile = user.profile
+        profile_data = {
+            "display_name": profile.display_name,
+            "bio": profile.bio_sanitized,
+            "whatsapp": profile.whatsapp_e164,
+            "phone2": profile.phone2_e164,
+            "telegram": profile.telegram,
+            "city": profile.city.name if profile.city else None,
+            "country": profile.country,
+        }
+    except Exception:
+        profile_data = {}
+
+    ads_data = list(
+        Ad.objects.filter(user=user).values(
+            "id", "title", "category", "status", "created_at", "expires_at", "views_count"
+        )
+    )
+    # Rendre les datetimes sérialisables
+    for ad in ads_data:
+        for k in ("created_at", "expires_at"):
+            if ad.get(k):
+                ad[k] = ad[k].isoformat()
+
+    payload = {
+        "username": user.username,
+        "email": user.email,
+        "phone": user.phone_e164,
+        "date_joined": user.date_joined.isoformat(),
+        "profile": profile_data,
+        "ads": ads_data,
+    }
+
+    response = _HR(
+        _json.dumps(payload, ensure_ascii=False, indent=2),
+        content_type="application/json",
+    )
+    response["Content-Disposition"] = 'attachment; filename="kiaba-mes-donnees.json"'
+    return response
 
 
 def csrf_failure(request: HttpRequest, reason: str = "") -> HttpResponse:

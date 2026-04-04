@@ -464,6 +464,25 @@ class Availability(models.Model):
         return f"Availability({self.ad_id})"
 
 
+class Favorite(models.Model):
+    """Annonce mise en favoris par un utilisateur."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+    )
+    ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="favorites")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "ad")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:  # pragma: no cover
+        return f"Favorite({self.user_id}, {self.ad_id})"
+
+
 class AdFeature(models.Model):
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE)
     feature = models.ForeignKey(Feature, on_delete=models.CASCADE)

@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
-from .models import Ad, City
+from .models import Ad, City, Favorite
 from core.context_processors import get_ad_list_version
 
 AD_LIST_CACHE_TTL = 900  # 15 min
@@ -194,4 +195,23 @@ def record_ad_view(request: HttpRequest, slug: str) -> JsonResponse:
     return JsonResponse({"ok": True, "recorded": True})
 
 
-# Create your views here.
+@login_required
+@require_POST
+def toggle_favorite(request: HttpRequest, ad_id: int) -> JsonResponse:
+    """Ajoute ou retire une annonce des favoris de l'utilisateur (toggle)."""
+    ad = get_object_or_404(Ad, pk=ad_id, status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED])
+    fav, created = Favorite.objects.get_or_create(user=request.user, ad=ad)
+    if not created:
+        fav.delete()
+    return JsonResponse({"favorited": created, "ad_id": ad_id})
+
+
+@login_required
+def favorites_list(request: HttpRequest) -> HttpResponse:
+    """Page listant les annonces mises en favoris par l'utilisateur connecté."""
+    favs = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("ad", "ad__city", "ad__user", "ad__user__profile")
+        .prefetch_related("ad__media")
+    )
+    return render(request, "ads/favorites.html", {"favorites": favs})
