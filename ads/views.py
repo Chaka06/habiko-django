@@ -32,10 +32,20 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             return cached
 
     qs = (
-        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+        Ad.objects.filter(
+            status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED],
+            image_processing_done=True,
+        )
+        .annotate(
+            is_expired=Case(
+                When(status=Ad.Status.EXPIRED, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")
-        .order_by("-is_premium", "-is_urgent", "-created_at")
+        .order_by("is_expired", "-is_premium", "-is_urgent", "-created_at")
     )
     selected_city = None
     selected_category = None

@@ -88,3 +88,19 @@ def cron_promote_boosts(request: HttpRequest) -> JsonResponse:
     except Exception as e:
         logger.exception("cron_promote_boosts failed: %s", e)
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_GET
+def cron_purge_expired_ads(request: HttpRequest) -> JsonResponse:
+    """Supprime définitivement les annonces expirées depuis +15 jours. Fréquence : 1×/jour."""
+    if not _check_auth(request):
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+    try:
+        from ads.tasks import purge_expired_ads
+        result = purge_expired_ads()
+        logger.info("cron_purge_expired_ads: %s", result)
+        return JsonResponse({"ok": True, "result": str(result)})
+    except Exception as e:
+        logger.exception("cron_purge_expired_ads failed: %s", e)
+        return JsonResponse({"ok": False, "error": str(e)}, status=500)

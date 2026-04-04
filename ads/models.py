@@ -54,6 +54,7 @@ class Ad(models.Model):
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
         ARCHIVED = "archived", "Archived"
+        EXPIRED = "expired", "Expirée"
 
     # Sous-catégories communes aux annonces adultes / escortes
     SUBCATEGORY_CHOICES = [

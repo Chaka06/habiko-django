@@ -43,15 +43,15 @@ def process_ad_media_image(self, media_id: int):
 @shared_task
 def expire_ads():
     """
-    Archive les annonces dont la date d'expiration est dépassée (status → ARCHIVED).
-    On garde l'enregistrement en base pour retourner 410 Gone aux bots Google et
-    accélérer le désindexage, mais on supprime les fichiers média pour libérer le storage.
+    Passe en EXPIRED les annonces dont la date d'expiration est dépassée.
+    Les annonces restent visibles en bas de liste pendant 15 jours, puis sont
+    supprimées définitivement par purge_expired_ads().
     """
     from accounts.email_service import EmailService
     from django.conf import settings
 
     now = timezone.now()
-    expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED).select_related("user", "city").prefetch_related("media")
+    expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED).select_related("user", "city")
     count = 0
 
     for ad in expired:
@@ -70,7 +70,27 @@ def expire_ads():
         except Exception as e:
             logger.warning("Email expiration annonce %s: %s", ad.id, e)
 
-        # Supprimer les fichiers media du storage (libérer l'espace)
+        ad.status = Ad.Status.EXPIRED
+        ad.save(update_fields=["status", "updated_at"])
+        count += 1
+
+    return f"{count} annonces expirées"
+
+
+@shared_task
+def purge_expired_ads():
+    """
+    Supprime définitivement les annonces expirées depuis plus de 15 jours
+    (status=EXPIRED et expires_at <= now - 15j). Supprime aussi les fichiers media.
+    """
+    cutoff = timezone.now() - timezone.timedelta(days=15)
+    to_purge = (
+        Ad.objects.filter(status=Ad.Status.EXPIRED, expires_at__lte=cutoff)
+        .prefetch_related("media")
+    )
+    count = 0
+
+    for ad in to_purge:
         for media in ad.media.all():
             try:
                 if media.image:
@@ -79,14 +99,10 @@ def expire_ads():
                     media.thumbnail.delete(save=False)
             except Exception as e:
                 logger.warning("Erreur suppression fichier media %s: %s", media.id, e)
-        ad.media.all().delete()
-
-        # Archiver l'annonce (ne pas supprimer : l'URL retournera 410 Gone pour Google)
-        ad.status = Ad.Status.ARCHIVED
-        ad.save(update_fields=["status", "updated_at"])
+        ad.delete()
         count += 1
 
-    return f"{count} annonces archivées"
+    return f"{count} annonces supprimées définitivement"
 
 
 @shared_task

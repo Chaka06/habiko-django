@@ -756,6 +756,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "ads.tasks.expire_premium_ads",
         "schedule": 60 * 15,  # toutes les 15 minutes
     },
+    # Supprime définitivement les annonces expirées depuis +15 jours — 1×/jour
+    "purge-expired-ads-daily": {
+        "task": "ads.tasks.purge_expired_ads",
+        "schedule": 60 * 60 * 24,  # toutes les 24h
+    },
 }
 
 # Traitement des images (filigrane + miniature) en arrière-plan pour réponses rapides (post / edit annonce).
