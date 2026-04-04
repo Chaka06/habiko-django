@@ -11,6 +11,7 @@ urlpatterns = [
 
     # ── Annonces ───────────────────────────────────────────────────────────────
     path("ads/",                  views.api_ads_list,        name="api_ads_list"),
+    path("ads/create/",           views.api_create_ad,       name="api_create_ad"),
     path("ads/mine/",             views.api_my_ads,          name="api_my_ads"),
     path("ads/<int:pk>/",         views.api_ad_detail,       name="api_ad_detail"),
     path("ads/<int:pk>/delete/",  views.api_delete_ad,       name="api_delete_ad"),

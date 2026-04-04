@@ -99,15 +99,18 @@ def serialize_ad(ad, request=None):
             "is_verified": getattr(ad.user, "is_verified", False),
         }
 
+    # Téléphone : d'abord phone_e164 de l'utilisateur (champ principal du site web)
     phone = None
-    if hasattr(ad, "additional_data") and ad.additional_data:
-        phone = ad.additional_data.get("phone") or ad.additional_data.get("whatsapp")
-
-    # Chercher le téléphone dans le profil utilisateur
-    if not phone:
-        profile = getattr(ad.user, "userprofile", None)
-        if profile:
-            phone = getattr(profile, "whatsapp_e164", None) or getattr(profile, "phone2_e164", None)
+    if ad.user:
+        phone = getattr(ad.user, "phone_e164", None) or None
+        if not phone:
+            profile = getattr(ad.user, "userprofile", None)
+            if profile:
+                phone = (getattr(profile, "whatsapp_e164", None) or
+                         getattr(profile, "phone2_e164", None) or None)
+    # Fallback : additional_data
+    if not phone and ad.additional_data:
+        phone = ad.additional_data.get("phone") or ad.additional_data.get("whatsapp") or None
 
     return {
         "id": ad.id,
@@ -277,6 +280,88 @@ def api_ads_list(request):
         "previous": page.previous_page_number() if page.has_previous() else None,
         "results": results,
     })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@require_auth
+def api_create_ad(request):
+    """Créer une annonce via multipart/form-data (identique au formulaire web)."""
+    from django.utils.text import slugify
+    import uuid
+
+    user = request.api_user
+
+    title = request.POST.get("title", "").strip()
+    description = request.POST.get("description", "").strip()
+    category = request.POST.get("category", "").strip()
+    city_id = request.POST.get("city", "").strip()
+    phone1 = request.POST.get("phone1", "").strip()
+    phone2 = request.POST.get("phone2", "").strip()
+    contact_methods = request.POST.getlist("contact_methods")
+    subcategories = request.POST.getlist("subcategories")
+
+    if not title:
+        return JsonResponse({"detail": "Titre requis."}, status=400)
+    if not description or len(description) < 20:
+        return JsonResponse({"detail": "Description trop courte (min 20 caractères)."}, status=400)
+    if category not in [c[0] for c in Ad.Category.choices]:
+        return JsonResponse({"detail": "Catégorie invalide."}, status=400)
+    if not city_id:
+        return JsonResponse({"detail": "Ville requise."}, status=400)
+
+    try:
+        city = City.objects.get(pk=int(city_id))
+    except (City.DoesNotExist, ValueError):
+        return JsonResponse({"detail": "Ville introuvable."}, status=400)
+
+    # Sauvegarder les téléphones sur le profil utilisateur (même logique que le site web)
+    if phone1:
+        user.phone_e164 = phone1
+        user.save(update_fields=["phone_e164"])
+    if phone1 or phone2:
+        try:
+            profile = user.userprofile
+            if phone2:
+                profile.whatsapp_e164 = phone2
+                profile.phone2_e164 = phone2
+            elif phone1:
+                profile.whatsapp_e164 = phone1
+            if contact_methods:
+                profile.contact_prefs = contact_methods
+            profile.save()
+        except Exception:
+            pass
+
+    # Générer un slug unique
+    base_slug = slugify(title) or "annonce"
+    slug = base_slug
+    counter = 1
+    while Ad.objects.filter(slug=slug).exists():
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+    ad = Ad.objects.create(
+        user=user,
+        title=title,
+        description_sanitized=description,
+        category=category,
+        subcategories=subcategories,
+        city=city,
+        status=Ad.Status.PENDING,
+        slug=slug,
+    )
+
+    # Traiter les images
+    images = request.FILES.getlist("images")
+    if images:
+        from ads.models import AdMedia
+        for i, image in enumerate(images[:5]):
+            AdMedia.objects.create(ad=ad, image=image, is_primary=(i == 0))
+        ad.image_processing_done = False
+        ad.save(update_fields=["image_processing_done"])
+
+    return JsonResponse(serialize_ad(ad, request), status=201)
 
 
 @csrf_exempt
