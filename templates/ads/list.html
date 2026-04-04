@@ -167,8 +167,7 @@
 
 <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
   {% for ad in ads %}
-    <div class="relative h-40">
-    <a href="/ads/{{ ad.slug }}" class="group block bg-white rounded-xl border {% if ad.status == 'expired' %}border-gray-300 opacity-70{% else %}border-pink-500{% endif %} overflow-hidden shadow-sm hover:shadow-md transition h-full">
+    <a href="/ads/{{ ad.slug }}" class="group relative block bg-white rounded-xl border {% if ad.status == 'expired' %}border-gray-300 opacity-70{% else %}border-pink-500{% endif %} overflow-hidden shadow-sm hover:shadow-md transition h-40">
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
@@ -234,20 +233,23 @@
           </div>
         </div>
       </div>
+      <!-- Cœur favoris : positionné dans le coin bas-droit de la carte (overflow-hidden garantit qu'il reste dedans) -->
+      {% if user.is_authenticated %}
+        <button
+          class="fav-toggle absolute bottom-2 right-2 z-10 p-1 transition-all"
+          data-ad-id="{{ ad.id }}"
+          title="Ajouter aux favoris"
+          onclick="event.preventDefault(); event.stopPropagation();"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 drop-shadow" viewBox="0 0 24 24">
+            <path class="heart-path"
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              fill="white" stroke="#ec4899" stroke-width="1.5"
+            />
+          </svg>
+        </button>
+      {% endif %}
     </a>
-    <!-- Bouton favoris (utilisateurs connectés) -->
-    {% if user.is_authenticated %}
-      <button
-        class="fav-toggle absolute bottom-2 right-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-pink-400 text-pink-400 shadow-sm hover:bg-pink-500 hover:border-pink-500 hover:text-white transition-all"
-        data-ad-id="{{ ad.id }}"
-        title="Ajouter aux favoris"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-      </button>
-    {% endif %}
-    </div>
   {% empty %}
     <div class="text-center text-slate-600 py-8">Aucune annonce trouvée.</div>
   {% endfor %}
@@ -407,6 +409,7 @@
   document.querySelectorAll('.fav-toggle').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
+      e.stopPropagation();
       var adId = btn.dataset.adId;
       fetch('/ads/favorites/toggle/' + adId + '/', {
         method: 'POST',
@@ -414,13 +417,14 @@
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
+        var path = btn.querySelector('.heart-path');
         if (data.favorited) {
-          btn.classList.add('bg-pink-500', 'border-pink-500', 'text-white');
-          btn.classList.remove('bg-white', 'border-pink-400', 'text-pink-400');
+          path.setAttribute('fill', '#ec4899');
+          path.setAttribute('stroke', '#ec4899');
           btn.title = 'Retirer des favoris';
         } else {
-          btn.classList.add('bg-white', 'border-pink-400', 'text-pink-400');
-          btn.classList.remove('bg-pink-500', 'border-pink-500', 'text-white');
+          path.setAttribute('fill', 'white');
+          path.setAttribute('stroke', '#ec4899');
           btn.title = 'Ajouter aux favoris';
         }
       });
