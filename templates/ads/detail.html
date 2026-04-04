@@ -113,7 +113,7 @@
         {% if user.is_authenticated %}
         <button
           id="fav-btn"
-          class="flex-shrink-0 mt-1 p-2 rounded-full bg-pink-50 border border-pink-200 hover:bg-pink-100 transition-all"
+          class="flex-shrink-0 mt-1 transition-all"
           data-ad-id="{{ ad.id }}"
           title="Ajouter aux favoris"
         >
@@ -855,14 +855,10 @@
       if (data.favorited) {
         heart.setAttribute('fill', '#ec4899');
         heart.setAttribute('stroke', '#ec4899');
-        btn.classList.add('bg-pink-500', 'border-pink-500');
-        btn.classList.remove('bg-pink-50', 'border-pink-200', 'hover:bg-pink-100');
         btn.title = 'Retirer des favoris';
       } else {
         heart.setAttribute('fill', 'none');
         heart.setAttribute('stroke', '#ec4899');
-        btn.classList.add('bg-pink-50', 'border-pink-200', 'hover:bg-pink-100');
-        btn.classList.remove('bg-pink-500', 'border-pink-500');
         btn.title = 'Ajouter aux favoris';
       }
     });
