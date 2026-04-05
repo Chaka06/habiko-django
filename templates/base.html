@@ -993,7 +993,8 @@
     {% endif %}
 
     <!-- Modale de chargement (en fin de body = au-dessus de tout, z-index via CSS) -->
-    <!-- ── Modale publicitaire KIABA#2 ──────────────────────────────────── -->
+    <!-- ── Modale publicitaire KIABA#2 (accueil uniquement) ─────────────── -->
+    {% if request.path == '/' %}
     <style>
       #kp-modal {
         position: fixed; inset: 0; z-index: 99999;
@@ -1224,6 +1225,7 @@
         if(c2) c2.addEventListener('click', close);
       })();
     </script>
+    {% endif %}
     <!-- ── Fin modale promo ───────────────────────────────────────────────── -->
 
     <div id="loadingModal" class="fixed inset-0 hidden items-center justify-center" aria-hidden="true" aria-live="polite">
