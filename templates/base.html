@@ -555,17 +555,13 @@
     </div>
     <script>
       (function(){
-        var BANNER_KEY = 'kiaba_promo_KIABA2_dismissed';
         var banner = document.getElementById('kiaba-promo-banner');
         var closeBtn = document.getElementById('kiaba-promo-close');
         if (!banner) return;
-        if (!localStorage.getItem(BANNER_KEY)) {
-          banner.style.display = '';
-        }
+        banner.style.display = '';
         if (closeBtn) {
           closeBtn.addEventListener('click', function(){
             banner.style.display = 'none';
-            localStorage.setItem(BANNER_KEY, '1');
           });
         }
       })();
