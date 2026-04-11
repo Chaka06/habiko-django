@@ -124,6 +124,11 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         cities = list(City.objects.all())
         cache.set("all_cities", cities, 86400)  # 24h
 
+    total_approved_ads = cache.get("total_approved_ads_count")
+    if total_approved_ads is None:
+        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).count()
+        cache.set("total_approved_ads_count", total_approved_ads, 300)  # 5 min
+
     response = render(
         request,
         "ads/list.html",
@@ -136,6 +141,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "selected_category": selected_category,
             "category_choices": Ad.Category.choices,
             "seo_city_text": getattr(request, "_seo_city_text", ""),
+            "total_approved_ads": total_approved_ads,
         },
     )
 

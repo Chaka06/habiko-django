@@ -140,6 +140,11 @@
   {% if seo_city_text %}
   <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ seo_city_text }}</p>
   {% endif %}
+  {% if total_approved_ads %}
+  <p class="mt-3 text-sm font-semibold text-pink-600">
+    {{ total_approved_ads }} annonce{{ total_approved_ads|pluralize }} vérifiée{{ total_approved_ads|pluralize }} en ce moment
+  </p>
+  {% endif %}
 </header>
 <section class="mb-4 md:mb-6">
   <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
