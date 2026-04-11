@@ -3,9 +3,9 @@
 {% block title %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} – Escort Girl {{ selected_city.name }} · KIABA{% elif selected_city and selected_category == 'escorte_boy' %}Escort Boy {{ selected_city.name }} · KIABA Rencontres{% elif selected_city and selected_category == 'transgenre' %}Transgenre {{ selected_city.name }} – Bizi Trans · KIABA{% elif selected_city %}Bizi {{ selected_city.name }} – Annonces Adultes · KIABA{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort Girl Côte d'Ivoire · KIABA{% elif selected_category == 'escorte_boy' %}Escort Boy Côte d'Ivoire – Bizi Boy · KIABA{% elif selected_category == 'transgenre' %}Transgenre Escorte Côte d'Ivoire – Bizi Trans · KIABA{% else %}Bizi – Annonces Adultes Côte d'Ivoire · KIABA Rencontres{% endif %}{% endblock %}
 {% block description %}{% if selected_city and selected_category == 'escorte_girl' %}Bizi {{ selected_city.name }} : escort girls, prostituées et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA, site Nº1 Côte d'Ivoire.{% elif selected_city and selected_category == 'escorte_boy' %}Escort boys et bizi boy à {{ selected_city.name }}, Côte d'Ivoire. Massage sexuel, rencontres adultes. Annonces vérifiées sur KIABA Rencontres.{% elif selected_city and selected_category == 'transgenre' %}Escortes transgenres et bizi trans à {{ selected_city.name }}, Côte d'Ivoire. Services adultes : massage, finition, rencontres. Annonces vérifiées KIABA.{% elif selected_city %}Bizi {{ selected_city.name }} – escort girls, escort boys, transgenres et services adultes (massage sexuel, sodomie, finition). Annonces vérifiées sur KIABA.{% elif selected_category == 'escorte_girl' %}Bizi CI – Escort girls et prostituées en Côte d'Ivoire : massage sexuel, sodomie, finition, partouze. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA, site Nº1.{% elif selected_category == 'escorte_boy' %}Escort boys et bizi en Côte d'Ivoire : massage sexuel, rencontres adultes, finition. Plus de {{ total_approved_ads }} annonces vérifiées sur KIABA Rencontres.{% elif selected_category == 'transgenre' %}Escortes transgenres (bizi trans) en Côte d'Ivoire : massage sexuel, sodomie, services adultes. Annonces vérifiées sur KIABA, site Nº1.{% else %}KIABA – Site Nº1 Bizi & escortes en Côte d'Ivoire. Plus de {{ total_approved_ads }} annonces adultes vérifiées : escort girls, escort boys, transgenres, massage sexuel, sodomie, finition.{% endif %}{% endblock %}
 {% block keywords %}{% if selected_city %}bizi {{ selected_city.name|lower }}, escorte {{ selected_city.name|lower }}, prostituée {{ selected_city.name|lower }}, rencontre adulte {{ selected_city.name|lower }}, {% endif %}{% if selected_category == 'escorte_girl' %}bizi, escort girl, prostituée, escorte erotique, sodomie, massage sexuel, finition, jedolo, baise, {% elif selected_category == 'escorte_boy' %}escort boy, bizi boy, massage sexuel, rencontre homme, {% elif selected_category == 'transgenre' %}transgenre, bizi trans, escorte trans, sodomie, massage sexuel, {% endif %}kiaba, bizi abidjan, escorte côte d'ivoire, annonces adultes, site sexe côte d'ivoire{% endblock %}
-{% block canonical_url %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
-{% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
-{% block hreflang_default %}https://ci-kiaba.com/ads/{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com{% if selected_city and selected_category == 'escorte_girl' %}/ads/escort-girl-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'escorte_boy' %}/ads/escort-boy-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'transgenre' %}/ads/transgenre-{{ selected_city.slug }}/{% elif selected_city %}/ads/bizi-{{ selected_city.slug }}/{% elif selected_category == 'escorte_girl' %}/ads/escort-girl/{% elif selected_category == 'escorte_boy' %}/ads/escort-boy/{% elif selected_category == 'transgenre' %}/ads/transgenre/{% else %}/ads/{% endif %}{% endblock %}
+{% block hreflang_fr_ci %}https://ci-kiaba.com{% if selected_city and selected_category == 'escorte_girl' %}/ads/escort-girl-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'escorte_boy' %}/ads/escort-boy-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'transgenre' %}/ads/transgenre-{{ selected_city.slug }}/{% elif selected_city %}/ads/bizi-{{ selected_city.slug }}/{% elif selected_category == 'escorte_girl' %}/ads/escort-girl/{% elif selected_category == 'escorte_boy' %}/ads/escort-boy/{% elif selected_category == 'transgenre' %}/ads/transgenre/{% else %}/ads/{% endif %}{% endblock %}
+{% block hreflang_default %}https://ci-kiaba.com{% if selected_city and selected_category == 'escorte_girl' %}/ads/escort-girl-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'escorte_boy' %}/ads/escort-boy-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'transgenre' %}/ads/transgenre-{{ selected_city.slug }}/{% elif selected_city %}/ads/bizi-{{ selected_city.slug }}/{% elif selected_category == 'escorte_girl' %}/ads/escort-girl/{% elif selected_category == 'escorte_boy' %}/ads/escort-boy/{% elif selected_category == 'transgenre' %}/ads/transgenre/{% else %}/ads/{% endif %}{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -14,7 +14,7 @@
   "@type": "ItemList",
     "name": "{% if selected_city %}Annonces adultes {{ selected_category|default:'escorte' }} à {{ selected_city.name }}{% else %}Annonces adultes en Côte d'Ivoire{% endif %}",
     "description": "{% if selected_city %}Découvrez les meilleures annonces adultes {% if selected_category %}{{ selected_category|title }} {% endif %}à {{ selected_city.name }}, Côte d'Ivoire{% else %}Découvrez les meilleures annonces adultes en Côte d'Ivoire{% endif %}",
-  "url": "https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}{% endif %}{% if selected_category %}{% if selected_city %}&{% else %}?{% endif %}category={{ selected_category }}{% endif %}",
+  "url": "https://ci-kiaba.com{% if selected_city and selected_category == 'escorte_girl' %}/ads/escort-girl-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'escorte_boy' %}/ads/escort-boy-{{ selected_city.slug }}/{% elif selected_city and selected_category == 'transgenre' %}/ads/transgenre-{{ selected_city.slug }}/{% elif selected_city %}/ads/bizi-{{ selected_city.slug }}/{% elif selected_category == 'escorte_girl' %}/ads/escort-girl/{% elif selected_category == 'escorte_boy' %}/ads/escort-boy/{% elif selected_category == 'transgenre' %}/ads/transgenre/{% else %}/ads/{% endif %}",
   "numberOfItems": "{{ ads|length }}",
   "itemListElement": [
     {% for ad in ads %}
@@ -68,7 +68,7 @@
     {% if selected_city %}
     <li class="text-gray-400">/</li>
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <a href="https://ci-kiaba.com/ads?city={{ selected_city.slug }}" class="text-gray-900 font-medium" itemprop="item">
+      <a href="https://ci-kiaba.com/ads/bizi-{{ selected_city.slug }}/" class="text-gray-900 font-medium" itemprop="item">
         <span itemprop="name">{{ selected_city.name }}</span>
       </a>
       <meta itemprop="position" content="3" />
@@ -77,7 +77,21 @@
     {% if selected_category %}
     <li class="text-gray-400">/</li>
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <a href="https://ci-kiaba.com/ads{% if selected_city %}?city={{ selected_city.slug }}&amp;category={{ selected_category }}{% else %}?category={{ selected_category }}{% endif %}" class="text-gray-900 font-medium" itemprop="item">
+      {% if selected_city and selected_category == 'escorte_girl' %}
+        <a href="https://ci-kiaba.com/ads/escort-girl-{{ selected_city.slug }}/" class="text-gray-900 font-medium" itemprop="item">
+      {% elif selected_city and selected_category == 'escorte_boy' %}
+        <a href="https://ci-kiaba.com/ads/escort-boy-{{ selected_city.slug }}/" class="text-gray-900 font-medium" itemprop="item">
+      {% elif selected_city and selected_category == 'transgenre' %}
+        <a href="https://ci-kiaba.com/ads/transgenre-{{ selected_city.slug }}/" class="text-gray-900 font-medium" itemprop="item">
+      {% elif selected_category == 'escorte_girl' %}
+        <a href="https://ci-kiaba.com/ads/escort-girl/" class="text-gray-900 font-medium" itemprop="item">
+      {% elif selected_category == 'escorte_boy' %}
+        <a href="https://ci-kiaba.com/ads/escort-boy/" class="text-gray-900 font-medium" itemprop="item">
+      {% elif selected_category == 'transgenre' %}
+        <a href="https://ci-kiaba.com/ads/transgenre/" class="text-gray-900 font-medium" itemprop="item">
+      {% else %}
+        <a href="https://ci-kiaba.com/ads/" class="text-gray-900 font-medium" itemprop="item">
+      {% endif %}
         <span itemprop="name">{{ selected_category|title }}</span>
       </a>
       <meta itemprop="position" content="{% if selected_city %}4{% else %}3{% endif %}" />
@@ -123,6 +137,9 @@
       Site Nº1 Bizi & escortes en Côte d'Ivoire. Escort girls, escort boys, transgenres — massage sexuel, sodomie, finition, partouze.
     {% endif %}
   </p>
+  {% if seo_city_text %}
+  <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ seo_city_text }}</p>
+  {% endif %}
 </header>
 <section class="mb-4 md:mb-6">
   <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">

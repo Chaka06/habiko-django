@@ -5,8 +5,18 @@ from django.shortcuts import render
 def robots_txt(_: object) -> HttpResponse:
     # Format standard : pas de BOM, fin par newline. Sitemap URL absolue valide.
     content = (
+        "User-agent: Mediapartners-Google\n"
+        "Allow: /\n"
+        "\n"
+        "User-agent: Adsbot-Google\n"
+        "Allow: /\n"
+        "\n"
+        "User-agent: Adsbot-Google-Mobile\n"
+        "Allow: /\n"
+        "\n"
         "User-agent: *\n"
         "Allow: /accounts/u/\n"
+        "Allow: /ads/\n"
         "Disallow: /admin/\n"
         "Disallow: /auth/\n"
         "Disallow: /accounts/\n"

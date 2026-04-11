@@ -56,6 +56,14 @@ class AdSitemap(KiabaSitemapBase):
         return obj.updated_at
 
 
+# Mapping category value → clean URL slug (miroir de ads/urls.py)
+_CAT_TO_URL_SLUG = {
+    "escorte_girl": "escort-girl",
+    "escorte_boy": "escort-boy",
+    "transgenre": "transgenre",
+}
+
+
 class CitySitemap(KiabaSitemapBase):
     changefreq = "weekly"
     priority = 0.7
@@ -65,7 +73,7 @@ class CitySitemap(KiabaSitemapBase):
         return City.objects.all().order_by("name")
 
     def location(self, obj: City):
-        return f"/ads/?city={obj.slug}"
+        return f"/ads/bizi-{obj.slug}/"
 
 
 class CategorySitemap(KiabaSitemapBase):
@@ -77,7 +85,8 @@ class CategorySitemap(KiabaSitemapBase):
         return AD_CATEGORY_SLUGS
 
     def location(self, item):
-        return f"/ads/?category={item}"
+        url_slug = _CAT_TO_URL_SLUG.get(item, item)
+        return f"/ads/{url_slug}/"
 
 
 class CityCategorySitemap(KiabaSitemapBase):
@@ -103,4 +112,5 @@ class CityCategorySitemap(KiabaSitemapBase):
 
     def location(self, item):
         city_slug, category = item
-        return f"/ads/?city={city_slug}&category={category}"
+        url_slug = _CAT_TO_URL_SLUG.get(category, category)
+        return f"/ads/{url_slug}-{city_slug}/"

@@ -135,6 +135,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "selected_city": selected_city,
             "selected_category": selected_category,
             "category_choices": Ad.Category.choices,
+            "seo_city_text": getattr(request, "_seo_city_text", ""),
         },
     )
 
@@ -144,6 +145,56 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         cache.set(cache_key, response, 120)
 
     return response
+
+
+# Textes SEO longs par ville, inspirés de jedolo.com (contenu unique, localisé)
+_CITY_SEO_TEXTS = {
+    "abidjan": (
+        "Abidjan, capitale économique de la Côte d'Ivoire, concentre la majorité des "
+        "annonces bizi et escort. Que vous soyez à Cocody, Plateau, Yopougon, Marcory, "
+        "Treichville ou Koumassi, KIABA vous connecte directement avec des escort girls, "
+        "escort boys et transgenres disponibles 24h/24. Massage sexuel, finition, sodomie, "
+        "partouze — toutes les annonces sont vérifiées et publiées par leurs auteures."
+    ),
+    "bouake": (
+        "Bouaké, deuxième ville de Côte d'Ivoire, dispose d'un marché bizi actif. "
+        "Retrouvez sur KIABA les meilleures annonces escort girl et escort boy de Bouaké : "
+        "massage sexuel, rencontres adultes et services complets. Annonces vérifiées, "
+        "contact direct par WhatsApp ou appel."
+    ),
+    "daloa": (
+        "Daloa, capitale du Haut-Sassandra, accueille de nombreuses escort girls et bizi. "
+        "KIABA centralise toutes les annonces adultes de Daloa : escortes féminines, "
+        "escort boys, transgenres. Massage sexuel, finition, services complets disponibles."
+    ),
+    "yamoussoukro": (
+        "Yamoussoukro, capitale politique de la Côte d'Ivoire, dispose d'annonces escort "
+        "et bizi publiées sur KIABA. Escort girls, escort boys et transgenres disponibles "
+        "pour massage sexuel et rencontres adultes dans la ville."
+    ),
+    "korhogo": (
+        "Korhogo, chef-lieu du Nord ivoirien, est présente sur KIABA avec des annonces "
+        "bizi et escort girl. Services adultes : massage sexuel, finition, rencontres. "
+        "Contactez directement via WhatsApp ou appel."
+    ),
+}
+
+
+@require_GET
+def ad_list_seo(request: HttpRequest, city_slug: str = "", category: str = "") -> HttpResponse:
+    """Handler pour URLs SEO propres : /ads/escort-girl-abidjan/, /ads/bizi-abidjan/, etc."""
+    # Injecter city_slug et category dans GET sans modifier l'objet original
+    get = request.GET.copy()
+    if city_slug:
+        get.setdefault("city", city_slug)
+    if category:
+        get.setdefault("category", category)
+    request.GET = get
+    # Passer le texte SEO localisé si disponible
+    seo_text = _CITY_SEO_TEXTS.get(city_slug, "") if city_slug else ""
+    # On appelle ad_list mais on injecte seo_text via un attribut de requête
+    request._seo_city_text = seo_text
+    return ad_list(request)
 
 
 def search_suggestions(request: HttpRequest) -> JsonResponse:
