@@ -1,3 +1,6 @@
+import time as _time
+import random as _random
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -10,8 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Ad, City, Favorite
 from core.context_processors import get_ad_list_version
 
-AD_LIST_CACHE_TTL = 900  # 15 min
-
 
 @require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
@@ -21,61 +22,82 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     page = request.GET.get("page", "1")
     q = request.GET.get("q", "").strip()
 
-    # Les recherches libres (?q=…) sont uniques : pas de cache pour ne pas le polluer.
-    # Les pages de navigation (city/category/page) sont mises en cache avec une clé
-    # versionnée — invalider la version suffit à rafraîchir toutes les pages d'un coup.
-    # IMPORTANT : on ne met en cache que les réponses pour les utilisateurs anonymes.
-    # Le cache stocke le HTML rendu complet (base.html inclus) : si un anonyme visite
-    # en premier, le HTML "Se connecter" serait servi aux utilisateurs connectés.
+    # Bucket de 2 minutes : change toutes les 2 min → les annonces boostées
+    # changent de position toutes les 2 min (nouvelle clé de cache = nouveau rendu).
+    time_bucket = int(_time.time() / 120)
+
+    # Cache uniquement pour les utilisateurs anonymes (évite de servir la nav
+    # "Se connecter" aux utilisateurs connectés). La clé inclut time_bucket pour
+    # que la rotation 2 min invalide automatiquement le cache.
     cache_key = None
     if not q and not request.user.is_authenticated:
         version = get_ad_list_version()
-        cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{page}"
+        cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{page}:{time_bucket}"
         cached = cache.get(cache_key)
         if cached is not None:
             return cached
 
-    qs = (
-        Ad.objects.filter(
-            status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED],
-            image_processing_done=True,
-        )
-        .annotate(
-            is_expired=Case(
-                When(status=Ad.Status.EXPIRED, then=Value(1)),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-        )
+    common_qs = (
+        Ad.objects
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")
-        .order_by("is_expired", "-is_premium", "-is_urgent", "-created_at")
     )
+
+    def apply_filters(qs):
+        if city:
+            qs = qs.filter(city__slug=city)
+        if category:
+            qs = qs.filter(category=category)
+        if provider:
+            if provider.isdigit():
+                qs = qs.filter(user_id=int(provider))
+            else:
+                qs = qs.filter(user__username=provider)
+        if q:
+            q_search = Q(title__icontains=q) | Q(description_sanitized__icontains=q)
+            for sub in Ad.SUBCATEGORY_CHOICES:
+                if q.lower() in sub.lower():
+                    q_search |= Q(subcategories__contains=[sub])
+            qs = qs.filter(q_search)
+        return qs
+
+    # Annonces actives : boosted séparées des normales pour mélange aléatoire
+    active_qs = apply_filters(
+        common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+        .order_by("-created_at")
+    )
+    active_ads = list(active_qs)
+
+    boosted_ads = [a for a in active_ads if a.is_premium or a.is_boosted or a.is_urgent]
+    regular_ads = [a for a in active_ads if not (a.is_premium or a.is_boosted or a.is_urgent)]
+
+    # Insertion aléatoire des annonces boostées dans la liste normale.
+    # Le RNG est seedé par time_bucket : positions stables pendant 2 min,
+    # puis nouvelles positions pour la prochaine tranche.
+    rng = _random.Random(time_bucket)
+    final_list = regular_ads[:]
+    for ad in boosted_ads:
+        pos = rng.randint(0, len(final_list))
+        final_list.insert(pos, ad)
+
+    # Annonces expirées toujours en bas
+    expired_ads = list(apply_filters(
+        common_qs.filter(status=Ad.Status.EXPIRED, image_processing_done=True)
+        .order_by("-created_at")
+    ))
+    final_list.extend(expired_ads)
+
     selected_city = None
     selected_category = None
-
     if city:
         try:
             selected_city = City.objects.get(slug=city)
-            qs = qs.filter(city__slug=city)
         except City.DoesNotExist:
             pass
     if category:
         selected_category = category
-        qs = qs.filter(category=category)
-    if provider:
-        if provider.isdigit():
-            qs = qs.filter(user_id=int(provider))
-        else:
-            qs = qs.filter(user__username=provider)
-    if q:
-        q_search = Q(title__icontains=q) | Q(description_sanitized__icontains=q)
-        for sub in Ad.SUBCATEGORY_CHOICES:
-            if q.lower() in sub.lower():
-                q_search |= Q(subcategories__contains=[sub])
-        qs = qs.filter(q_search)
 
-    paginator = Paginator(qs, 10)
+    paginator = Paginator(final_list, 10)
     page_obj = paginator.get_page(page)
 
     cities = cache.get("all_cities")
@@ -98,7 +120,9 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     )
 
     if cache_key is not None:
-        cache.set(cache_key, response, AD_LIST_CACHE_TTL)
+        # TTL aligné sur le bucket de 2 min (120s) pour que le cache ne survive pas
+        # à la prochaine rotation de positions.
+        cache.set(cache_key, response, 120)
 
     return response
 
@@ -162,7 +186,7 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
         )
 
     ad = get_object_or_404(
-        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+        Ad.objects.filter(status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED], image_processing_done=True)
         .select_related("city", "user", "user__profile")
         .prefetch_related("media"),
         slug=slug,
@@ -170,7 +194,7 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
 
     # Annonces similaires : une seule requête (même catégorie, priorité même ville)
     similar_ads = (
-        Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True, category=ad.category)
+        Ad.objects.filter(status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED], image_processing_done=True, category=ad.category)
         .exclude(id=ad.id)
         .select_related("city", "user", "user__profile")
         .prefetch_related("media")

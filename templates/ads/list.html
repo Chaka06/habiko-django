@@ -167,7 +167,7 @@
 
 <div class="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
   {% for ad in ads %}
-    <a href="/ads/{{ ad.slug }}" class="group relative block bg-white rounded-xl border {% if ad.status == 'expired' %}border-gray-300 opacity-70{% else %}border-pink-500{% endif %} overflow-hidden shadow-sm hover:shadow-md transition h-40">
+    <a href="/ads/{{ ad.slug }}" class="group relative block rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-40" style="{% if ad.is_premium or ad.is_boosted or ad.is_urgent %}background:#fefce8;{% else %}background:#fff;{% endif %}">
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100">
           {% if ad.media.count %}
@@ -203,17 +203,6 @@
         </div>
         <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
           <div class="min-w-0">
-            <!-- Badge statut / boost -->
-            {% if ad.status == 'expired' %}
-              <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff7ed;color:#c2410c;border:2px solid #f97316;border-radius:4px;">Expirée</span>
-            {% elif ad.is_boosted or ad.is_urgent %}
-              <span class="inline-block text-xs font-bold px-2 py-px mb-1 leading-tight" style="background:#fff0f6;color:#be185d;border:2px solid #ec4899;border-radius:4px;">
-                {% if ad.is_boosted and ad.boost_interval_hours == 3 %}👑 VIP
-                {% elif ad.is_boosted %}⚡ Boost
-                {% else %}🔥 Urgent
-                {% endif %}
-              </span>
-            {% endif %}
             <!-- Titre : 2 lignes max, tronqué -->
             <p class="text-sm font-semibold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.title }}</p>
             <!-- Catégorie + badge vendeur vérifié -->

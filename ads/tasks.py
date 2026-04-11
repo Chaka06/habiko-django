@@ -44,7 +44,7 @@ def process_ad_media_image(self, media_id: int):
 def expire_ads():
     """
     Passe en EXPIRED les annonces dont la date d'expiration est dépassée.
-    Les annonces restent visibles en bas de liste pendant 15 jours, puis sont
+    Les annonces restent visibles en bas de liste pendant 50 jours, puis sont
     supprimées définitivement par purge_expired_ads().
     """
     from accounts.email_service import EmailService
@@ -80,10 +80,10 @@ def expire_ads():
 @shared_task
 def purge_expired_ads():
     """
-    Supprime définitivement les annonces expirées depuis plus de 15 jours
-    (status=EXPIRED et expires_at <= now - 15j). Supprime aussi les fichiers media.
+    Supprime définitivement les annonces expirées depuis plus de 50 jours
+    (status=EXPIRED et expires_at <= now - 50j). Supprime aussi les fichiers media.
     """
-    cutoff = timezone.now() - timezone.timedelta(days=15)
+    cutoff = timezone.now() - timezone.timedelta(days=50)
     to_purge = (
         Ad.objects.filter(status=Ad.Status.EXPIRED, expires_at__lte=cutoff)
         .prefetch_related("media")
