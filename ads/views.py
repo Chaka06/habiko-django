@@ -6,6 +6,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.cache import cache
+from django.db import connection
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
@@ -16,10 +17,19 @@ from core.context_processors import get_ad_list_version
 
 @require_GET
 def ad_list(request: HttpRequest) -> HttpResponse:
-    city = request.GET.get("city", "")
-    category = request.GET.get("category", "")
-    provider = request.GET.get("provider", "")
-    page = request.GET.get("page", "1")
+    city = request.GET.get("city", "").strip()
+    # Rejeter les catégories invalides pour éviter des requêtes inutiles
+    _raw_category = request.GET.get("category", "").strip()
+    _valid_categories = {v for v, _ in Ad.Category.choices}
+    category = _raw_category if _raw_category in _valid_categories else ""
+    # N'accepter le filtre provider que par username (évite l'énumération par user_id)
+    _raw_provider = request.GET.get("provider", "").strip()
+    provider = _raw_provider if _raw_provider and not _raw_provider.isdigit() else ""
+    # Borner le numéro de page pour éviter le chargement de toute la liste en RAM
+    try:
+        page = max(1, min(int(request.GET.get("page", "1")), 500))
+    except (ValueError, TypeError):
+        page = 1
     q = request.GET.get("q", "").strip()
 
     # Bucket de 2 minutes : change toutes les 2 min → les annonces boostées
@@ -49,15 +59,18 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         if category:
             qs = qs.filter(category=category)
         if provider:
-            if provider.isdigit():
-                qs = qs.filter(user_id=int(provider))
-            else:
-                qs = qs.filter(user__username=provider)
+            # Uniquement par username — l'ID est refusé en amont (prévient l'énumération)
+            qs = qs.filter(user__username=provider)
         if q:
             q_search = Q(title__icontains=q) | Q(description_sanitized__icontains=q)
+            # JSON array contains — supported on PostgreSQL, not SQLite
+            _supports_json_contains = connection.vendor == "postgresql"
             for sub in Ad.SUBCATEGORY_CHOICES:
                 if q.lower() in sub.lower():
-                    q_search |= Q(subcategories__contains=[sub])
+                    if _supports_json_contains:
+                        q_search |= Q(subcategories__contains=[sub])
+                    else:
+                        q_search |= Q(subcategories__icontains=sub)
             qs = qs.filter(q_search)
         return qs
 
@@ -71,14 +84,20 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     boosted_ads = [a for a in active_ads if a.is_premium or a.is_boosted or a.is_urgent]
     regular_ads = [a for a in active_ads if not (a.is_premium or a.is_boosted or a.is_urgent)]
 
-    # Insertion aléatoire des annonces boostées dans la liste normale.
-    # Le RNG est seedé par time_bucket : positions stables pendant 2 min,
-    # puis nouvelles positions pour la prochaine tranche.
+    # Mélange des annonces boostées dans la liste normale avec RNG seedé par
+    # time_bucket : positions stables 2 min, puis nouvelles positions.
+    # Algorithme O(n) : on choisit n positions cibles parmi len(regular)+len(boosted)
+    # puis on insère en une passe, sans list.insert() répété.
     rng = _random.Random(time_bucket)
-    final_list = regular_ads[:]
-    for ad in boosted_ads:
-        pos = rng.randint(0, len(final_list))
-        final_list.insert(pos, ad)
+    total = len(regular_ads) + len(boosted_ads)
+    if boosted_ads and total > 0:
+        # Choisir des positions distinctes pour les boostées, triées desc pour insérer
+        positions = sorted(rng.sample(range(total), min(len(boosted_ads), total)), reverse=True)
+        final_list = regular_ads[:]
+        for pos, ad in zip(positions, boosted_ads):
+            final_list.insert(pos, ad)
+    else:
+        final_list = regular_ads[:]
 
     # Annonces expirées toujours en bas
     expired_ads = list(apply_filters(

@@ -12,7 +12,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
-from ads.models import Ad, AdMedia, City, Report
+from ads.models import Ad, AdMedia, City
+from moderation.models import Report
 from accounts.models import Profile
 
 User = get_user_model()
@@ -69,9 +70,10 @@ class AgeGateTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_redirect_to_age_gate_without_cookie(self):
-        r = self.client.get("/")
-        self.assertRedirects(r, "/age-gate/", fetch_redirect_response=False)
+    def test_middleware_does_not_block_anonymous_request(self):
+        """Le middleware age-gate laisse passer les requêtes (la modale est gérée en JS)."""
+        r = self.client.get("/ads/")
+        self.assertEqual(r.status_code, 200)
 
     def test_access_root_with_cookie(self):
         self.client.cookies["age_gate_accepted"] = "1"
@@ -258,10 +260,10 @@ class PostAdViewTest(TestCase):
             Ad.objects.create(
                 user=self.user, title="Spam", description_sanitized="D",
                 category=Ad.Category.ESCORTE_GIRL, city=self.city,
-                created_at=timezone.now(),
             )
         r = self._post(title="4e annonce")
-        self.assertContains(r, "Limite")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.context["rate_limited"])
 
     def test_phone_used_by_other_account_blocked(self):
         u2 = make_user("u2", "u2@t.com")

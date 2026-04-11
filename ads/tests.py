@@ -257,19 +257,29 @@ class AdListViewTest(TestCase):
         self.assertNotContains(r, "Bouaké Ad")
 
     def test_filter_by_category(self):
-        make_ad(self.user, self.city, title="EscorteGirl", category=Ad.Category.ESCORTE_GIRL)
-        make_ad(self.user, self.city, title="Transgenre", category=Ad.Category.TRANSGENRE)
+        make_ad(self.user, self.city, title="Ad Escorte Unique XZ9", category=Ad.Category.ESCORTE_GIRL)
+        make_ad(self.user, self.city, title="Ad Trans Unique XZ9", category=Ad.Category.TRANSGENRE)
         r = self.client.get("/ads/?category=escorte_girl")
-        self.assertContains(r, "EscorteGirl")
-        self.assertNotContains(r, "Transgenre")
+        self.assertContains(r, "Ad Escorte Unique XZ9")
+        self.assertNotContains(r, "Ad Trans Unique XZ9")
 
-    def test_filter_by_provider_id(self):
+    def test_filter_by_provider_username(self):
         u2 = make_user("u2", "u2@test.com")
         make_ad(self.user, self.city, title="User1 Ad")
         make_ad(u2, self.city, title="User2 Ad")
-        r = self.client.get(f"/ads/?provider={self.user.pk}")
+        r = self.client.get(f"/ads/?provider={self.user.username}")
         self.assertContains(r, "User1 Ad")
         self.assertNotContains(r, "User2 Ad")
+
+    def test_filter_by_provider_id_ignored(self):
+        """Le filtre par ID numérique est désactivé (prévient l'énumération)."""
+        u2 = make_user("u2", "u2@test.com")
+        make_ad(self.user, self.city, title="User1 Ad")
+        make_ad(u2, self.city, title="User2 Ad")
+        # Passer un ID entier → ignoré → toutes les annonces actives visibles
+        r = self.client.get(f"/ads/?provider={self.user.pk}")
+        self.assertContains(r, "User1 Ad")
+        self.assertContains(r, "User2 Ad")
 
     def test_search_by_title(self):
         make_ad(self.user, self.city, title="Massage doux cocody")
@@ -446,13 +456,13 @@ class ToggleFavoriteTest(TestCase):
         self.ad = make_ad(self.user, self.city)
 
     def test_anonymous_redirects_to_login(self):
-        r = self.client.post(f"/ads/{self.ad.pk}/favorite/")
+        r = self.client.post(f"/ads/favorites/toggle/{self.ad.pk}/")
         self.assertEqual(r.status_code, 302)
         self.assertIn("login", r["Location"])
 
     def test_add_favorite(self):
         self.client.force_login(self.user)
-        r = self.client.post(f"/ads/{self.ad.pk}/favorite/")
+        r = self.client.post(f"/ads/favorites/toggle/{self.ad.pk}/")
         self.assertEqual(r.status_code, 200)
         data = json.loads(r.content)
         self.assertTrue(data["favorited"])
@@ -461,7 +471,7 @@ class ToggleFavoriteTest(TestCase):
     def test_remove_existing_favorite(self):
         Favorite.objects.create(user=self.user, ad=self.ad)
         self.client.force_login(self.user)
-        r = self.client.post(f"/ads/{self.ad.pk}/favorite/")
+        r = self.client.post(f"/ads/favorites/toggle/{self.ad.pk}/")
         data = json.loads(r.content)
         self.assertFalse(data["favorited"])
         self.assertFalse(Favorite.objects.filter(user=self.user, ad=self.ad).exists())
@@ -469,13 +479,13 @@ class ToggleFavoriteTest(TestCase):
     def test_toggle_expired_ad_works(self):
         expired = make_ad(self.user, self.city, title="Exp", status=Ad.Status.EXPIRED)
         self.client.force_login(self.user)
-        r = self.client.post(f"/ads/{expired.pk}/favorite/")
+        r = self.client.post(f"/ads/favorites/toggle/{expired.pk}/")
         self.assertEqual(r.status_code, 200)
 
     def test_toggle_draft_returns_404(self):
         draft = make_ad(self.user, self.city, title="Draft", status=Ad.Status.DRAFT)
         self.client.force_login(self.user)
-        r = self.client.post(f"/ads/{draft.pk}/favorite/")
+        r = self.client.post(f"/ads/favorites/toggle/{draft.pk}/")
         self.assertEqual(r.status_code, 404)
 
     def test_favorites_list_accessible(self):
@@ -498,30 +508,30 @@ class SearchSuggestionsTest(TestCase):
         self.city = make_city()
 
     def test_short_query_returns_empty(self):
-        r = self.client.get("/ads/suggestions/?q=a")
+        r = self.client.get("/ads/api/search-suggestions/?q=a")
         data = json.loads(r.content)
         self.assertEqual(data["suggestions"], [])
 
     def test_no_query_returns_empty(self):
-        r = self.client.get("/ads/suggestions/")
+        r = self.client.get("/ads/api/search-suggestions/")
         data = json.loads(r.content)
         self.assertEqual(data["suggestions"], [])
 
     def test_title_match_returned(self):
         make_ad(self.user, self.city, title="Massage relaxant cocody")
-        r = self.client.get("/ads/suggestions/?q=massage")
+        r = self.client.get("/ads/api/search-suggestions/?q=massage")
         data = json.loads(r.content)
         labels = [s["label"] for s in data["suggestions"]]
         self.assertTrue(any("assage" in l for l in labels))
 
     def test_category_match_returned(self):
-        r = self.client.get("/ads/suggestions/?q=escorte")
+        r = self.client.get("/ads/api/search-suggestions/?q=escorte")
         data = json.loads(r.content)
         types = [s["type"] for s in data["suggestions"]]
         self.assertIn("category", types)
 
     def test_subcategory_match_returned(self):
-        r = self.client.get("/ads/suggestions/?q=massage")
+        r = self.client.get("/ads/api/search-suggestions/?q=massage")
         data = json.loads(r.content)
         types = [s["type"] for s in data["suggestions"]]
         self.assertIn("subcategory", types)
@@ -529,7 +539,7 @@ class SearchSuggestionsTest(TestCase):
     def test_max_15_results(self):
         for i in range(20):
             make_ad(self.user, self.city, title=f"Annonce massage {i}")
-        r = self.client.get("/ads/suggestions/?q=massage")
+        r = self.client.get("/ads/api/search-suggestions/?q=massage")
         data = json.loads(r.content)
         self.assertLessEqual(len(data["suggestions"]), 15)
 
@@ -543,27 +553,27 @@ class ExpireAdsTaskTest(TestCase):
         self.user = make_user()
         self.city = make_city()
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_expires_overdue_approved_ad(self, mock_email):
         ad = make_ad(self.user, self.city, expires_at=timezone.now() - timedelta(hours=1))
         expire_ads()
         ad.refresh_from_db()
         self.assertEqual(ad.status, Ad.Status.EXPIRED)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_returns_count_string(self, mock_email):
         make_ad(self.user, self.city, expires_at=timezone.now() - timedelta(hours=1))
         result = expire_ads()
         self.assertIn("1", result)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_does_not_expire_future_ad(self, mock_email):
         ad = make_ad(self.user, self.city, expires_at=timezone.now() + timedelta(days=3))
         expire_ads()
         ad.refresh_from_db()
         self.assertEqual(ad.status, Ad.Status.APPROVED)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_does_not_expire_already_expired(self, mock_email):
         make_ad(self.user, self.city,
                 expires_at=timezone.now() - timedelta(days=2),
@@ -571,13 +581,13 @@ class ExpireAdsTaskTest(TestCase):
         result = expire_ads()
         self.assertIn("0", result)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_email_sent_on_expiry(self, mock_email):
         make_ad(self.user, self.city, expires_at=timezone.now() - timedelta(hours=1))
         expire_ads()
         mock_email.assert_called_once()
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_email_failure_does_not_block_expiry(self, mock_email):
         mock_email.side_effect = Exception("SMTP down")
         ad = make_ad(self.user, self.city, expires_at=timezone.now() - timedelta(hours=1))
@@ -585,7 +595,7 @@ class ExpireAdsTaskTest(TestCase):
         ad.refresh_from_db()
         self.assertEqual(ad.status, Ad.Status.EXPIRED)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_multiple_ads_expired_together(self, mock_email):
         for _ in range(3):
             make_ad(self.user, self.city, expires_at=timezone.now() - timedelta(hours=1))
@@ -639,7 +649,7 @@ class NotifyExpiringSoonTaskTest(TestCase):
         self.user = make_user()
         self.city = make_city()
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_24h_notification_sent_in_window(self, mock_email):
         ad = make_ad(self.user, self.city,
                      expires_at=timezone.now() + timedelta(hours=24),
@@ -649,7 +659,7 @@ class NotifyExpiringSoonTaskTest(TestCase):
         ad.refresh_from_db()
         self.assertTrue(ad.expiry_notified_24h)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_24h_notification_not_sent_twice(self, mock_email):
         make_ad(self.user, self.city,
                 expires_at=timezone.now() + timedelta(hours=24),
@@ -657,7 +667,7 @@ class NotifyExpiringSoonTaskTest(TestCase):
         notify_expiring_soon_24h()
         mock_email.assert_not_called()
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_1h_notification_sent_in_window(self, mock_email):
         ad = make_ad(self.user, self.city,
                      expires_at=timezone.now() + timedelta(minutes=60),
@@ -667,7 +677,7 @@ class NotifyExpiringSoonTaskTest(TestCase):
         ad.refresh_from_db()
         self.assertTrue(ad.expiry_notified_1h)
 
-    @patch("ads.tasks.EmailService.send_email")
+    @patch("accounts.email_service.EmailService.send_email")
     def test_1h_notification_not_sent_twice(self, mock_email):
         make_ad(self.user, self.city,
                 expires_at=timezone.now() + timedelta(minutes=60),

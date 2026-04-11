@@ -4,7 +4,7 @@ Couvre : modèles, vues, services, tâches, EmailOTP
 """
 from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -57,12 +57,12 @@ def make_boost_option(boost_type=BoostOption.BoostType.PREMIUM, price=1000, days
     )
 
 
-def make_package(name="Pack", amount=5000, ads_included=3, **kw):
+def make_package(name="Pack", amount=5000, ads_included=3, credit_amount=Decimal("0"), **kw):
     return RechargePackage.objects.create(
         name=name,
         amount=Decimal(str(amount)),
         ads_included=ads_included,
-        credit_amount=Decimal("0"),
+        credit_amount=credit_amount,
         **kw,
     )
 

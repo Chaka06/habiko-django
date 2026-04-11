@@ -1,7 +1,7 @@
 """
 Endpoints HTTP pour les cron jobs (Vercel Cron + cron-job.org).
 Chaque endpoint exécute une tâche planifiée directement (sans Celery worker).
-Protégé par CRON_SECRET dans le header Authorization ou en query param.
+Protégé par CRON_SECRET dans le header Authorization: Bearer <secret>.
 """
 import logging
 from django.conf import settings
@@ -15,15 +15,19 @@ CRON_SECRET = getattr(settings, "CRON_SECRET", "")
 
 
 def _check_auth(request: HttpRequest) -> bool:
-    """Vérifie le secret dans Authorization header ou ?secret= query param."""
+    """Vérifie le secret uniquement via le header Authorization: Bearer <secret>.
+    Le query param est volontairement refusé (visible dans les logs serveur/CDN).
+    """
     if not CRON_SECRET:
-        # Aucun secret configuré → accès toujours refusé (même en DEBUG)
         logger.error("CRON_SECRET non configuré — tous les appels cron sont rejetés")
         return False
     auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        return auth[7:] == CRON_SECRET
-    return request.GET.get("secret") == CRON_SECRET
+    if not auth.startswith("Bearer "):
+        return False
+    import hmac
+    provided = auth[7:].encode()
+    expected = CRON_SECRET.encode()
+    return hmac.compare_digest(provided, expected)
 
 
 @csrf_exempt

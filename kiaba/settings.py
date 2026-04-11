@@ -171,11 +171,11 @@ if RENDER_EXTERNAL_URL:
 # Ne s'affiche pas pour les utilisateurs connectés.
 ENABLE_AGE_GATE = True
 
-# Add Vercel host automatically if present
+# Ajouter uniquement le domaine Vercel exact (pas de wildcard *.vercel.app)
+# Le wildcard permettrait à n'importe quel compte Vercel de passer le host check.
 VERCEL_URL = os.environ.get("VERCEL_URL")
 if VERCEL_URL and VERCEL_URL not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(VERCEL_URL)
-    ALLOWED_HOSTS.append(f".{VERCEL_URL}")  # Pour les sous-domaines *.vercel.app
 
 # Application definition
 
@@ -283,7 +283,7 @@ WSGI_APPLICATION = "kiaba.wsgi.application"
 # Database (PostgreSQL)
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if "test" in sys.argv or env("DB_ENGINE") == "sqlite":
+if "test" in sys.argv or env("DB_ENGINE") == "sqlite" or "pytest" in sys.modules:
     # Utiliser SQLite pour tests/dev rapide
     DATABASES = {
         "default": {
@@ -509,7 +509,7 @@ logger.info(f"📁 MEDIA_ROOT final: {MEDIA_ROOT}")
 # Sur Vercel : pas de manifest pour staticfiles (évite "Missing staticfiles manifest entry" si collectstatic diffère).
 _staticfiles_backend = (
     "django.contrib.staticfiles.storage.StaticFilesStorage"
-    if VERCEL
+    if VERCEL or "pytest" in sys.modules
     else "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
 if USE_SUPABASE_STORAGE:
@@ -643,8 +643,19 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Forcer Django à considérer les requêtes comme sécurisées si le proxy indique HTTPS
 USE_TLS = not DEBUG
 
-# CORS (if needed for future API)
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+# CORS : explicite pour éviter une fuite si DEBUG est oublié en prod
+CORS_ALLOW_ALL_ORIGINS = False
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:8000",
+        "http://localhost:8001",
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "https://ci-kiaba.com",
+        "https://www.ci-kiaba.com",
+    ]
 
 """
 Email configuration - SMTP

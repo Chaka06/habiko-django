@@ -22,7 +22,12 @@ def role_required(*roles):
         @wraps(view_func)
         @login_required
         def _wrapped_view(request, *args, **kwargs):
-            if not hasattr(request.user, "role") or request.user.role not in roles:
+            # Les superusers Django ont accès à tout (créés via createsuperuser,
+            # ils ne possèdent pas forcément un champ 'role' défini).
+            if request.user.is_superuser:
+                return view_func(request, *args, **kwargs)
+            user_role = getattr(request.user, "role", None)
+            if not user_role or user_role not in roles:
                 messages.error(
                     request,
                     "Accès refusé. Vous n'avez pas les droits nécessaires pour accéder à cette page.",

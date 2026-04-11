@@ -90,7 +90,11 @@ def _call_geniuspay(
         payment.gateway_response = data
         payment.save(update_fields=["geniuspay_reference", "gateway_response"])
         final_url = data.get("checkout_url") or data.get("payment_url")
-        logger.info("GeniusPay _call: → url=%s", final_url)
+        logger.info(
+            "GeniusPay paiement initié: user_id=%s ad_id=%s type=%s montant=%s ref=%s",
+            payment.user_id, payment.ad_id, payment.type, payment.amount,
+            payment.geniuspay_reference,
+        )
         return final_url
     except Exception as exc:
         logger.exception("GeniusPay create_payment failed for payment %s: %s", payment.pk, exc)
@@ -104,12 +108,18 @@ def _call_geniuspay(
 @login_required
 def pay_form(request: HttpRequest) -> HttpResponse:
     """Affiche les 4 forfaits de publication pour une annonce en DRAFT."""
+    # On lit l'ad_id sans le supprimer de la session ici : c'est initiate_payment
+    # qui fait le pop() définitif. Conserver en session permet de recharger la page
+    # sans perdre le contexte, mais on valide toujours que l'annonce appartient
+    # à l'utilisateur courant (pas de fixation de session cross-user possible).
     ad_id = request.session.get("pending_ad_id")
     if not ad_id:
         return redirect("post")
     try:
         ad = Ad.objects.get(pk=ad_id, user=request.user, status=Ad.Status.DRAFT)
     except Ad.DoesNotExist:
+        # L'annonce n'appartient pas à cet utilisateur ou n'est plus DRAFT
+        request.session.pop("pending_ad_id", None)
         return redirect("post")
     return render(request, "payments/pay_form.html", {
         "ad": ad,
@@ -137,11 +147,22 @@ def pay_for_existing_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 # ─── Initier un paiement (POST depuis le formulaire) ─────────────────────────
 
 def _payment_rate_limited(user_id: int) -> bool:
-    """Retourne True si l'utilisateur dépasse 5 initiations de paiement par minute."""
+    """Retourne True si l'utilisateur dépasse 2 initiations de paiement par minute."""
     from django.core.cache import cache
     key = f"pay_ratelimit:{user_id}"
     count = cache.get(key, 0)
-    if count >= 5:
+    if count >= 2:
+        return True
+    cache.set(key, count + 1, timeout=60)
+    return False
+
+
+def _status_poll_rate_limited(user_id: int) -> bool:
+    """Retourne True si l'utilisateur dépasse 20 polls de statut par minute."""
+    from django.core.cache import cache
+    key = f"pay_status_ratelimit:{user_id}"
+    count = cache.get(key, 0)
+    if count >= 20:
         return True
     cache.set(key, count + 1, timeout=60)
     return False
@@ -248,6 +269,9 @@ def payment_return(request: HttpRequest, deposit_id) -> HttpResponse:
 @require_GET
 def payment_status(request: HttpRequest, deposit_id) -> JsonResponse:
     """Renvoie le statut du paiement ; consulte GeniusPay si toujours PENDING."""
+    if _status_poll_rate_limited(request.user.pk):
+        return JsonResponse({"error": "too_many_requests"}, status=429)
+
     payment = get_object_or_404(Payment, deposit_id=deposit_id, user=request.user)
 
     if payment.status == Payment.Status.PENDING and payment.geniuspay_reference:
@@ -322,10 +346,16 @@ def geniuspay_webhook(request: HttpRequest) -> HttpResponse:
             logger.warning("GeniusPay webhook: référence inconnue %s", reference)
             return HttpResponse("OK", status=200)
 
-    # Idempotence avec lock pour éviter les double-traitements (webhooks dupliqués)
+    # Idempotence avec lock pour éviter les double-traitements (webhooks dupliqués).
+    # select_for_update() garantit qu'un seul thread traite le paiement à la fois ;
+    # le second verra le statut déjà mis à jour et sortira immédiatement.
     with transaction.atomic():
         payment = Payment.objects.select_for_update().get(pk=payment.pk)
         if payment.status != Payment.Status.PENDING:
+            logger.info(
+                "GeniusPay webhook rejeu ignoré: ref=%s statut_actuel=%s",
+                reference, payment.status,
+            )
             return HttpResponse("OK", status=200)
 
         payment.gateway_response = body

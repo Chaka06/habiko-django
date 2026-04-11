@@ -151,12 +151,16 @@ class Ad(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base = slugify(self.title)[:150]
+            # Limite à 120 chars pour laisser de la place aux suffixes "-NNN"
+            # (le champ slug est max 180 chars → "-9999" = 5 chars, soit 125 max)
+            _max_base = 120
+            base = slugify(self.title)[:_max_base] or "annonce"
             candidate = base
             idx = 1
             while Ad.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
                 idx += 1
-                candidate = f"{base}-{idx}"
+                suffix = f"-{idx}"
+                candidate = base[: _max_base - len(suffix)] + suffix
             self.slug = candidate
         # Initialize contacts_clicks structure
         if not self.contacts_clicks:
