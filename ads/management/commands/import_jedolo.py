@@ -17,6 +17,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
+from PIL import Image
 
 from ads.models import Ad, AdMedia, City
 
@@ -127,14 +128,24 @@ def _fetch(url: str, session: requests.Session, retries: int = 3) -> BeautifulSo
     return None
 
 
-def _download_image(url: str, session: requests.Session) -> bytes | None:
+def _download_image(url: str, session: requests.Session, referer: str = BASE_URL) -> bytes | None:
+    headers = {**HEADERS, "Referer": referer}
     try:
-        r = session.get(url, headers=HEADERS, timeout=20, stream=True)
+        r = session.get(url, headers=headers, timeout=30, stream=True)
         r.raise_for_status()
+        # Vérifier que c'est bien une image (pas une page HTML d'erreur)
+        ct = r.headers.get("Content-Type", "")
+        if "html" in ct:
+            logger.warning("URL image retourne du HTML (accès bloqué ?) : %s", url)
+            return None
         buf = BytesIO()
         for chunk in r.iter_content(8192):
             buf.write(chunk)
-        return buf.getvalue()
+        data = buf.getvalue()
+        if len(data) < 1000:  # image trop petite = probablement une erreur
+            logger.warning("Image trop petite (%d octets), ignorée : %s", len(data), url)
+            return None
+        return data
     except Exception as e:
         logger.warning("Impossible de télécharger %s : %s", url, e)
         return None
@@ -216,11 +227,11 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
         "city_slug": city_slug,
         "image_urls": image_urls,
         "jedolo_id": jedolo_id,
-        "source_url": full_url,
+        "source_url": full_url,  # stockée en base pour le backfill
     }
 
 
-def _create_ad(data: dict, user, dry_run: bool = False) -> bool:
+def _create_ad(data: dict, user, dry_run: bool = False, session: requests.Session = None) -> bool:
     """Crée l'annonce + médias en base. Retourne True si créée."""
     # Déduplication par jedolo_id
     jedolo_id = data.get("jedolo_id")
@@ -242,17 +253,27 @@ def _create_ad(data: dict, user, dry_run: bool = False) -> bool:
         status=Ad.Status.APPROVED,
         image_processing_done=True,
         subcategories=[],
-        additional_data={"jedolo_id": jedolo_id, "source": "jedolo"},
+        additional_data={
+            "jedolo_id": jedolo_id,
+            "source": "jedolo",
+            "source_url": data.get("source_url", ""),
+        },
         expires_at=timezone.now() + timezone.timedelta(days=365),
     )
     ad.save()
 
     # Télécharger et attacher les images
-    session = requests.Session()
+    # On réutilise la session de scraping (cookies inclus) pour le CDN
+    dl_session = session or requests.Session()
+    source_url = data.get("source_url", BASE_URL)
     photo_count = 0
+    if not data["image_urls"]:
+        print(f"    ⚠ Aucune URL d'image trouvée pour cette annonce")
     for idx, img_url in enumerate(data["image_urls"]):
-        img_bytes = _download_image(img_url, session)
+        print(f"    → téléchargement image {idx+1}: {img_url[:80]}")
+        img_bytes = _download_image(img_url, dl_session, referer=source_url)
         if not img_bytes:
+            print(f"    ✗ Échec image {idx+1}")
             continue
         ext = "jpg"
         m = re.search(r"\.(jpg|jpeg|png|webp)(\?.*)?$", img_url, re.I)
@@ -262,12 +283,34 @@ def _create_ad(data: dict, user, dry_run: bool = False) -> bool:
         media = AdMedia(ad=ad, is_primary=(idx == 0))
         media.image.save(filename, ContentFile(img_bytes), save=False)
         media._watermark_applied = True   # on bypass le filigrane à l'import
+        # Générer le thumbnail maintenant (Celery peut ne pas tourner en dev)
+        _generate_thumbnail(media, img_bytes)
         media.save()
         photo_count += 1
+        print(f"    ✓ Image {idx+1} sauvegardée ({len(img_bytes)//1024}ko)")
         if photo_count >= 3:
             break
 
     return True
+
+
+def _generate_thumbnail(media: AdMedia, img_bytes: bytes) -> None:
+    """Génère un thumbnail 320×320 sans filigrane et l'attache au média (avant save)."""
+    try:
+        img = Image.open(BytesIO(img_bytes))
+        if img.mode not in ("RGB", "RGBA"):
+            img = img.convert("RGB")
+        elif img.mode == "RGBA":
+            img = img.convert("RGB")
+        img.thumbnail((320, 320), Image.Resampling.LANCZOS)
+        buf = BytesIO()
+        img.save(buf, format="WEBP", quality=55, optimize=True)
+        buf.seek(0)
+        base = re.sub(r"\.[^.]+$", "", media.image.name or "image")
+        thumb_name = f"{base}_thumb.webp"
+        media.thumbnail.save(thumb_name, ContentFile(buf.read()), save=False)
+    except Exception as e:
+        logger.warning("Thumbnail non généré pour %s : %s", media.image.name, e)
 
 
 class Command(BaseCommand):
@@ -278,18 +321,25 @@ class Command(BaseCommand):
         parser.add_argument("--delay", type=float, default=2.0, help="Délai en secondes entre chaque annonce (défaut: 2)")
         parser.add_argument("--dry-run", action="store_true", help="Affiche ce qui serait importé sans rien écrire en base")
         parser.add_argument("--start-page", type=int, default=1, help="Page de départ (défaut: 1)")
+        parser.add_argument("--backfill-images", action="store_true", help="Re-télécharge les images des annonces jedolo qui n'en ont pas encore")
 
     def handle(self, *args, **options):
         pages = options["pages"]
         delay = options["delay"]
         dry_run = options["dry_run"]
         start_page = options["start_page"]
+        backfill = options["backfill_images"]
 
         user = _get_system_user()
+        session = requests.Session()
+
+        if backfill:
+            self._backfill_images(session, delay)
+            return
+
         self.stdout.write(f"Utilisateur système : {user.username}")
         self.stdout.write(f"Pages : {start_page} → {start_page + pages - 1} | délai : {delay}s | dry-run : {dry_run}")
 
-        session = requests.Session()
         total_created = 0
         total_skipped = 0
         total_errors = 0
@@ -331,7 +381,7 @@ class Command(BaseCommand):
                     continue
 
                 try:
-                    created = _create_ad(data, user, dry_run=dry_run)
+                    created = _create_ad(data, user, dry_run=dry_run, session=session)
                     if created:
                         total_created += 1
                         self.stdout.write(
@@ -351,5 +401,65 @@ class Command(BaseCommand):
                 f"  Créées  : {total_created}\n"
                 f"  Ignorées (doublons) : {total_skipped}\n"
                 f"  Erreurs : {total_errors}"
+            )
+        )
+
+    def _backfill_images(self, session: requests.Session, delay: float) -> None:
+        """Re-télécharge les images des annonces jedolo qui n'en ont pas encore."""
+        from ads.models import AdMedia
+
+        ads_no_img = (
+            Ad.objects.filter(additional_data__source="jedolo")
+            .exclude(id__in=AdMedia.objects.values("ad_id"))
+        )
+        total = ads_no_img.count()
+        self.stdout.write(f"Backfill images : {total} annonce(s) jedolo sans images trouvée(s)")
+
+        done = 0
+        errors = 0
+        for ad in ads_no_img:
+            source_url = ad.additional_data.get("source_url", "")
+            jedolo_id = ad.additional_data.get("jedolo_id", "")
+            if not source_url:
+                self.stderr.write(f"  ✗ Pas de source_url pour pk={ad.pk} (jedolo_id={jedolo_id}), ignoré")
+                errors += 1
+                continue
+
+            self.stdout.write(f"  → {ad.title[:60]} ({jedolo_id})")
+            data = _scrape_ad_detail(source_url, session)
+            if not data or not data["image_urls"]:
+                self.stderr.write(f"    ✗ Aucune image trouvée sur {source_url}")
+                errors += 1
+                time.sleep(delay)
+                continue
+
+            photo_count = 0
+            for idx, img_url in enumerate(data["image_urls"]):
+                img_bytes = _download_image(img_url, session, referer=source_url)
+                if not img_bytes:
+                    continue
+                ext = "jpg"
+                m = re.search(r"\.(jpg|jpeg|png|webp)(\?.*)?$", img_url, re.I)
+                if m:
+                    ext = m.group(1).lower()
+                filename = f"jedolo_{jedolo_id or ad.pk}_{idx}.{ext}"
+                media = AdMedia(ad=ad, is_primary=(idx == 0))
+                media.image.save(filename, ContentFile(img_bytes), save=False)
+                media._watermark_applied = True
+                _generate_thumbnail(media, img_bytes)
+                media.save()
+                photo_count += 1
+                self.stdout.write(f"    ✓ Image {idx+1} ({len(img_bytes)//1024}ko)")
+                if photo_count >= 3:
+                    break
+
+            done += 1
+            time.sleep(delay)
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\n═══ Backfill terminé ═══\n"
+                f"  Traitées : {done}\n"
+                f"  Erreurs  : {errors}"
             )
         )
