@@ -1,5 +1,4 @@
 import time as _time
-import random as _random
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -33,9 +32,8 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     q = request.GET.get("q", "").strip()
     boost = request.GET.get("boost", "").strip()  # urgent | premium | boosted
 
-    # Bucket de 2 minutes : change toutes les 2 min → les annonces boostées
-    # changent de position toutes les 2 min (nouvelle clé de cache = nouveau rendu).
-    time_bucket = int(_time.time() / 120)
+    # Bucket de 5 minutes : la rotation des annonces boostées change toutes les 5 min.
+    time_bucket = int(_time.time() / 300)
 
     # Cache uniquement pour les utilisateurs anonymes (évite de servir la nav
     # "Se connecter" aux utilisateurs connectés). La clé inclut time_bucket pour
@@ -89,20 +87,16 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     boosted_ads = [a for a in active_ads if a.is_premium or a.is_boosted or a.is_urgent]
     regular_ads = [a for a in active_ads if not (a.is_premium or a.is_boosted or a.is_urgent)]
 
-    # Mélange des annonces boostées dans la liste normale avec RNG seedé par
-    # time_bucket : positions stables 2 min, puis nouvelles positions.
-    # Algorithme O(n) : on choisit n positions cibles parmi len(regular)+len(boosted)
-    # puis on insère en une passe, sans list.insert() répété.
-    rng = _random.Random(time_bucket)
-    total = len(regular_ads) + len(boosted_ads)
-    if boosted_ads and total > 0:
-        # Choisir des positions distinctes pour les boostées, triées desc pour insérer
-        positions = sorted(rng.sample(range(total), min(len(boosted_ads), total)), reverse=True)
-        final_list = regular_ads[:]
-        for pos, ad in zip(positions, boosted_ads):
-            final_list.insert(pos, ad)
-    else:
-        final_list = regular_ads[:]
+    # Rotation round-robin des boostées toutes les 5 minutes :
+    # chaque annonce boostée passe à son tour en tête de liste.
+    # L'offset change avec time_bucket (= int(now/300)), ce qui invalide aussi le cache.
+    if boosted_ads:
+        n = len(boosted_ads)
+        offset = time_bucket % n
+        boosted_ads = boosted_ads[offset:] + boosted_ads[:offset]
+
+    # Boostées toujours en haut, annonces normales en bas
+    final_list = boosted_ads + regular_ads
 
     # Annonces expirées toujours en bas
     expired_ads = list(apply_filters(
