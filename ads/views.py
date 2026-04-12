@@ -129,9 +129,11 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         cities = list(City.objects.all())
         cache.set("all_cities", cities, 86400)  # 24h
 
+    _visible_statuses = [Ad.Status.APPROVED, Ad.Status.EXPIRED]
+
     total_approved_ads = cache.get("total_approved_ads_count")
     if total_approved_ads is None:
-        total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED).count()
+        total_approved_ads = Ad.objects.filter(status__in=_visible_statuses).count()
         cache.set("total_approved_ads_count", total_approved_ads, 300)
 
     city_counts = cache.get("city_ad_counts")
@@ -141,7 +143,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             City.objects
             .annotate(ad_count=_Count(
                 "ad",
-                filter=Q(ad__status=Ad.Status.APPROVED)
+                filter=Q(ad__status__in=_visible_statuses)
             ))
             .filter(ad_count__gt=0)
             .order_by("-ad_count")[:12]
@@ -152,7 +154,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     if category_counts is None:
         from django.db.models import Count as _Count
         category_counts = dict(
-            Ad.objects.filter(status=Ad.Status.APPROVED)
+            Ad.objects.filter(status__in=_visible_statuses)
             .values("category")
             .annotate(n=_Count("id"))
             .values_list("category", "n")
