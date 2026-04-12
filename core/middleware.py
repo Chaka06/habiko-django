@@ -1,5 +1,4 @@
 import ipaddress
-import re
 
 from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponse
 from django.shortcuts import redirect
@@ -54,19 +53,6 @@ def _is_cloudflare_ip(ip_str: str) -> bool:
     except ValueError:
         return False
 
-# Chemins allauth : exemption CSRF pour tous les formulaires d’auth
-AUTH_CSRF_EXEMPT_PATHS = ("/auth/login/", "/auth/signup/", "/auth/password/reset/")
-AUTH_CSRF_EXEMPT_RESET_KEY = re.compile(r"^/auth/password/reset/key/[0-9A-Za-z]+-.+")
-
-
-def _is_auth_form_post(request: HttpRequest) -> bool:
-    """POST vers login, signup ou réinitialisation mot de passe."""
-    if request.method != "POST":
-        return False
-    path = (request.path or "").rstrip("/")
-    if path in (p.rstrip("/") for p in AUTH_CSRF_EXEMPT_PATHS):
-        return True
-    return bool(AUTH_CSRF_EXEMPT_RESET_KEY.match(request.path))
 
 
 class RedirectMiddleware:
@@ -136,20 +122,6 @@ class CloudflareMiddleware:
         response = self.get_response(request)
         return response
 
-
-class CsrfExemptPasswordResetFromKeyMiddleware:
-    """
-    Exempte du CSRF tous les formulaires d’auth (connexion, inscription, réinitialisation mot de passe).
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request: HttpRequest):
-        if _is_auth_form_post(request):
-            # Django n'utilise pas request.csrf_exempt mais getattr(callback, 'csrf_exempt').
-            # _dont_enforce_csrf_checks est reconnu par CsrfViewMiddleware (tests + notre cas).
-            request._dont_enforce_csrf_checks = True
-        return self.get_response(request)
 
 
 class EnsureCsrfCookieForAuthMiddleware:

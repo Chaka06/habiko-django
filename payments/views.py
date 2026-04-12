@@ -361,6 +361,21 @@ def geniuspay_webhook(request: HttpRequest) -> HttpResponse:
         payment.gateway_response = body
 
         if event == "payment.success" or gp_status == "completed":
+            # Vérifier que le montant payé correspond au montant attendu
+            paid_amount = data.get("amount")
+            if paid_amount is not None:
+                try:
+                    paid_int = int(float(paid_amount))
+                except (ValueError, TypeError):
+                    paid_int = 0
+                if paid_int < payment.amount:
+                    logger.error(
+                        "GeniusPay webhook: montant insuffisant ref=%s payé=%s attendu=%s — rejeté",
+                        reference, paid_amount, payment.amount,
+                    )
+                    payment.status = Payment.Status.FAILED
+                    payment.save(update_fields=["status", "gateway_response"])
+                    return HttpResponse("OK", status=200)
             _activate_ad_for_payment(payment)
         elif event in ("payment.failed", "payment.cancelled", "payment.expired") or gp_status in ("failed", "cancelled", "expired"):
             payment.status = Payment.Status.FAILED
