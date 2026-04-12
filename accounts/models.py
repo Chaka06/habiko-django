@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils import timezone
 from .validators import E164_VALIDATOR
-import random
+import secrets
 
 
 class CustomUser(AbstractUser):
@@ -87,21 +87,25 @@ class EmailOTP(models.Model):
         PASSWORD_CHANGE = "password_change", _("Password change")
         LOGIN_DEVICE = "login_device", _("Login device notification")
 
+    MAX_ATTEMPTS = 5  # Nombre max de tentatives avant invalidation de l'OTP
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps"
     )
-    code = models.CharField(max_length=5)
+    code = models.CharField(max_length=6)
     purpose = models.CharField(max_length=32, choices=Purpose.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_used = models.BooleanField(default=False)
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self) -> str:  # pragma: no cover
         return f"OTP({self.user_id},{self.purpose},{self.code})"
 
     @staticmethod
     def generate_code() -> str:
-        return f"{random.randint(0, 99999):05d}"
+        """6 chiffres cryptographiquement sûrs (secrets, pas random)."""
+        return f"{secrets.randbelow(1_000_000):06d}"
 
     @classmethod
     def create_otp(cls, user, purpose: str, ttl_seconds: int = 600) -> "EmailOTP":
@@ -116,7 +120,16 @@ class EmailOTP(models.Model):
         return otp
 
     def is_valid(self, code: str) -> bool:
-        return not self.is_used and self.code == code and timezone.now() <= self.expires_at
+        """Vérifie le code et incrémente le compteur d'échecs si incorrect."""
+        if self.is_used or timezone.now() > self.expires_at:
+            return False
+        if self.failed_attempts >= self.MAX_ATTEMPTS:
+            return False
+        if self.code != code:
+            self.failed_attempts += 1
+            self.save(update_fields=["failed_attempts"])
+            return False
+        return True
 
 
 class Account(models.Model):

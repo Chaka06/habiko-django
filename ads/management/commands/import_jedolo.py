@@ -263,6 +263,8 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
             image_urls.append(href)
 
     image_urls = [u if u.startswith("http") else "https:" + u for u in image_urls[:5]]
+    # Sécurité SSRF : n'accepter que les images provenant du CDN officiel jedolo
+    image_urls = [u for u in image_urls if u.startswith("https://cdn.jedolo.com/")]
 
     # ── ID jedolo ──
     jedolo_id = _extract_jedolo_id(full_url)
