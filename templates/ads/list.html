@@ -279,7 +279,7 @@
   {% for ad in ads %}
     <a href="/ads/{{ ad.slug }}" class="group relative block rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-48" style="{% if ad.is_premium or ad.is_boosted or ad.is_urgent %}background:#fefce8;{% else %}background:#fff;{% endif %}">
       <div class="flex h-full">
-        <div class="w-40 flex-shrink-0 bg-slate-100">
+        <div class="w-40 flex-shrink-0 bg-slate-100" style="position:relative;">
           {% if ad.media.count %}
             {% with media=ad.media.first %}
               {% if media.image %}
@@ -310,6 +310,20 @@
           {% else %}
             <img src="{{ placeholder_img }}" alt="Annonce" class="w-full h-full object-cover" loading="lazy" width="160" height="160">
           {% endif %}
+          <!-- Badges boost/VIP/urgent — sur l'image, en haut à gauche -->
+          {% if ad.is_boosted and ad.boost_interval_hours == 3 %}
+          <span style="position:absolute;top:6px;left:6px;display:inline-flex;align-items:center;gap:3px;background:#7c3aed;color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.3);">
+            <i class='bx bxs-crown' style="font-size:12px;"></i> VIP
+          </span>
+          {% elif ad.is_boosted %}
+          <span style="position:absolute;top:6px;left:6px;display:inline-flex;align-items:center;gap:3px;background:#2563eb;color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.3);">
+            <i class='bx bxs-rocket' style="font-size:12px;"></i> Boost
+          </span>
+          {% elif ad.is_urgent %}
+          <span style="position:absolute;top:6px;left:6px;display:inline-flex;align-items:center;gap:3px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.3);">
+            <i class='bx bx-alarm' style="font-size:12px;"></i> Urgent
+          </span>
+          {% endif %}
         </div>
         <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
           <div class="min-w-0">
@@ -322,7 +336,7 @@
             </p>
             <!-- Description brève -->
             {% if ad.description_sanitized %}
-            <p class="text-xs text-gray-500 mt-0.5 overflow-hidden leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.description_sanitized }}</p>
+            <p class="text-sm text-gray-500 mt-1 overflow-hidden leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ ad.description_sanitized }}</p>
             {% endif %}
           </div>
           <!-- Bas de carte : date + 1 tag -->
