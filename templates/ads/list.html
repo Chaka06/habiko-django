@@ -193,12 +193,12 @@
   <div style="position:relative;display:inline-block;">
     <button id="cities-more-btn"
             data-label="+{{ city_counts|length|add:-3 }} villes"
-            onclick="var d=document.getElementById('cities-dropdown');d.classList.toggle('hidden');this.textContent=d.classList.contains('hidden')?this.dataset.label:'✕ Fermer';"
+            onclick="var d=document.getElementById('cities-dropdown');var open=d.style.display==='flex';d.style.display=open?'none':'flex';this.textContent=open?this.dataset.label:'✕ Fermer';"
             style="display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid #e5e7eb;background:#f3f4f6;color:#6b7280;cursor:pointer;">
       +{{ city_counts|length|add:-3 }} villes
     </button>
-    <div id="cities-dropdown" class="hidden"
-         style="position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:50;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.12);">
+    <div id="cities-dropdown"
+         style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px;flex-direction:column;gap:6px;z-index:50;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.12);">
       {% for c in city_counts %}
         {% if forloop.counter > 3 %}
         <a href="/ads/bizi-{{ c.slug }}/"
