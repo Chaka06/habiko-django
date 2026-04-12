@@ -31,6 +31,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     except (ValueError, TypeError):
         page = 1
     q = request.GET.get("q", "").strip()
+    boost = request.GET.get("boost", "").strip()  # urgent | premium | boosted
 
     # Bucket de 2 minutes : change toutes les 2 min → les annonces boostées
     # changent de position toutes les 2 min (nouvelle clé de cache = nouveau rendu).
@@ -42,7 +43,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     cache_key = None
     if not q and not request.user.is_authenticated:
         version = get_ad_list_version()
-        cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{page}:{time_bucket}"
+        cache_key = f"ad_list:v{version}:{city}:{category}:{provider}:{boost}:{page}:{time_bucket}"
         cached = cache.get(cache_key)
         if cached is not None:
             return cached
@@ -75,10 +76,14 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         return qs
 
     # Annonces actives : boosted séparées des normales pour mélange aléatoire
-    active_qs = apply_filters(
-        common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
-        .order_by("-created_at")
-    )
+    base_approved = common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+    if boost == "urgent":
+        base_approved = base_approved.filter(is_urgent=True)
+    elif boost == "premium":
+        base_approved = base_approved.filter(is_premium=True)
+    elif boost == "boosted":
+        base_approved = base_approved.filter(is_boosted=True)
+    active_qs = apply_filters(base_approved.order_by("-created_at"))
     active_ads = list(active_qs)
 
     boosted_ads = [a for a in active_ads if a.is_premium or a.is_boosted or a.is_urgent]
@@ -127,7 +132,32 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     total_approved_ads = cache.get("total_approved_ads_count")
     if total_approved_ads is None:
         total_approved_ads = Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True).count()
-        cache.set("total_approved_ads_count", total_approved_ads, 300)  # 5 min
+        cache.set("total_approved_ads_count", total_approved_ads, 300)
+
+    city_counts = cache.get("city_ad_counts")
+    if city_counts is None:
+        from django.db.models import Count as _Count
+        city_counts = list(
+            City.objects
+            .annotate(ad_count=_Count(
+                "ad",
+                filter=Q(ad__status=Ad.Status.APPROVED, ad__image_processing_done=True)
+            ))
+            .filter(ad_count__gt=0)
+            .order_by("-ad_count")[:12]
+        )
+        cache.set("city_ad_counts", city_counts, 300)
+
+    category_counts = cache.get("category_ad_counts")
+    if category_counts is None:
+        from django.db.models import Count as _Count
+        category_counts = dict(
+            Ad.objects.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+            .values("category")
+            .annotate(n=_Count("id"))
+            .values_list("category", "n")
+        )
+        cache.set("category_ad_counts", category_counts, 300)
 
     response = render(
         request,
@@ -142,6 +172,8 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             "category_choices": Ad.Category.choices,
             "seo_city_text": getattr(request, "_seo_city_text", ""),
             "total_approved_ads": total_approved_ads,
+            "city_counts": city_counts,
+            "category_counts": category_counts,
         },
     )
 

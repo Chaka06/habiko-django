@@ -144,6 +144,71 @@
     {{ total_approved_ads|default:"0" }} annonce{{ total_approved_ads|pluralize }} vérifiée{{ total_approved_ads|pluralize }} en ce moment
   </p>
 </header>
+<!-- ── Filtres rapides jedolo-style ───────────────────────────────── -->
+<div class="mb-3 flex flex-wrap gap-2">
+  <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=urgent"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
+       {% if request.GET.boost == 'urgent' %}bg-red-500 text-white border-red-500{% else %}bg-white text-red-500 border-red-300 hover:bg-red-50{% endif %}">
+    🔥 Urgent
+  </a>
+  <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=premium"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
+       {% if request.GET.boost == 'premium' %}bg-yellow-400 text-white border-yellow-400{% else %}bg-white text-yellow-600 border-yellow-300 hover:bg-yellow-50{% endif %}">
+    ⭐ VIP / Premium
+  </a>
+  <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=boosted"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
+       {% if request.GET.boost == 'boosted' %}bg-pink-500 text-white border-pink-500{% else %}bg-white text-pink-600 border-pink-300 hover:bg-pink-50{% endif %}">
+    🚀 Boosté
+  </a>
+  {% if request.GET.boost %}
+  <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}{% endif %}"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition">
+    ✕ Tout afficher
+  </a>
+  {% endif %}
+</div>
+
+<!-- ── Villes avec compteurs ──────────────────────────────────────── -->
+{% if city_counts %}
+<div class="mb-3">
+  <div class="flex flex-wrap gap-2">
+    {% for c in city_counts %}
+    <a href="/ads/bizi-{{ c.slug }}/"
+       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
+         {% if selected_city and selected_city.slug == c.slug %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
+      📍 {{ c.name }}
+      <span class="{% if selected_city and selected_city.slug == c.slug %}text-pink-100{% else %}text-gray-400{% endif %}">{{ c.ad_count }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Catégories avec compteurs ─────────────────────────────────── -->
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="{% if selected_city %}/ads/bizi-{{ selected_city.slug }}/{% else %}/ads/{% endif %}"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
+       {% if not selected_category %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
+    Toutes <span class="{% if not selected_category %}text-pink-100{% else %}text-gray-400{% endif %}">{{ total_approved_ads }}</span>
+  </a>
+  <a href="{% if selected_city %}/ads/escort-girl-{{ selected_city.slug }}/{% else %}/ads/escort-girl/{% endif %}"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
+       {% if selected_category == 'escorte_girl' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
+    💋 Escort Girl <span class="{% if selected_category == 'escorte_girl' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.escorte_girl|default:"0" }}</span>
+  </a>
+  <a href="{% if selected_city %}/ads/escort-boy-{{ selected_city.slug }}/{% else %}/ads/escort-boy/{% endif %}"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
+       {% if selected_category == 'escorte_boy' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
+    👦 Escort Boy <span class="{% if selected_category == 'escorte_boy' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.escorte_boy|default:"0" }}</span>
+  </a>
+  <a href="{% if selected_city %}/ads/transgenre-{{ selected_city.slug }}/{% else %}/ads/transgenre/{% endif %}"
+     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
+       {% if selected_category == 'transgenre' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
+    🏳️‍⚧️ Transgenre <span class="{% if selected_category == 'transgenre' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.transgenre|default:"0" }}</span>
+  </a>
+</div>
+
 <section class="mb-4 md:mb-6">
   <form id="adsSearchForm" class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3" method="get">
     <div class="col-span-2 md:col-span-2 relative">
