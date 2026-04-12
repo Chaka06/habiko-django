@@ -180,13 +180,36 @@
 
 <!-- ── Villes avec compteurs ──────────────────────────────────────── -->
 {% if city_counts %}
-<div class="mb-3 flex flex-wrap gap-2">
+<div class="mb-3 flex flex-wrap gap-2 items-center">
   {% for c in city_counts %}
-  <a href="/ads/bizi-{{ c.slug }}/"
-     class="kf-pill kf-pill-city {% if selected_city and selected_city.slug == c.slug %}active{% endif %}">
-    📍 {{ c.name }} <span class="kf-count">{{ c.ad_count }}</span>
-  </a>
+    {% if forloop.counter <= 3 %}
+    <a href="/ads/bizi-{{ c.slug }}/"
+       class="kf-pill kf-pill-city {% if selected_city and selected_city.slug == c.slug %}active{% endif %}">
+      📍 {{ c.name }} <span class="kf-count">{{ c.ad_count }}</span>
+    </a>
+    {% endif %}
   {% endfor %}
+  {% if city_counts|length > 3 %}
+  <div style="position:relative;display:inline-block;">
+    <button id="cities-more-btn"
+            onclick="var d=document.getElementById('cities-dropdown');d.classList.toggle('hidden');this.textContent=d.classList.contains('hidden')?'+{{ city_counts|length|add:\"-3\" }} villes':'✕ Fermer';"
+            style="display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1.5px solid #e5e7eb;background:#f3f4f6;color:#6b7280;cursor:pointer;">
+      +{{ city_counts|length|add:"-3" }} villes
+    </button>
+    <div id="cities-dropdown" class="hidden"
+         style="position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;z-index:50;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.12);">
+      {% for c in city_counts %}
+        {% if forloop.counter > 3 %}
+        <a href="/ads/bizi-{{ c.slug }}/"
+           class="kf-pill kf-pill-city {% if selected_city and selected_city.slug == c.slug %}active{% endif %}"
+           style="justify-content:space-between;width:100%;">
+          📍 {{ c.name }} <span class="kf-count">{{ c.ad_count }}</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endif %}
 

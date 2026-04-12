@@ -80,12 +80,59 @@ def _get_or_create_city(slug_part: str) -> City:
 
 
 def _get_system_user() -> User:
-    """Retourne le premier superuser ou le premier user disponible."""
+    """Retourne le premier superuser (utilisé uniquement en fallback)."""
     user = User.objects.filter(is_superuser=True).first()
     if not user:
         user = User.objects.first()
     if not user:
         raise RuntimeError("Aucun utilisateur trouvé en base — crée d'abord un superuser.")
+    return user
+
+
+def _get_or_create_jedolo_user(phone: str, display_name: str, city_slug: str) -> User:
+    """
+    Retourne ou crée un user jedolo identifié par son numéro de téléphone.
+    Username = jedolo_<phone_digits> pour éviter les doublons.
+    """
+    from accounts.models import Profile
+
+    # Normaliser : garder uniquement les chiffres + le + initial
+    phone_clean = re.sub(r"[^\d+]", "", phone)
+    if phone_clean and not phone_clean.startswith("+"):
+        # Numéro ivoirien sans indicatif → ajouter +225
+        if len(phone_clean) == 10 and phone_clean.startswith("0"):
+            phone_clean = "+225" + phone_clean[1:]
+        elif len(phone_clean) == 9:
+            phone_clean = "+225" + phone_clean
+
+    digits = re.sub(r"\D", "", phone_clean)
+    username = f"jedolo_{digits}" if digits else f"jedolo_{display_name[:20].replace(' ', '_').lower()}"
+
+    user = User.objects.filter(username=username).first()
+    if user:
+        return user
+
+    # Créer le user
+    user = User(
+        username=username,
+        phone_e164=phone_clean or "",
+        role="provider",
+        is_active=True,
+    )
+    user.set_unusable_password()
+    user.save()
+
+    # Mettre à jour le profil (créé automatiquement par le signal)
+    try:
+        profile = user.profile
+        profile.display_name = display_name[:120] if display_name else username
+        # Ville du profil
+        city = _get_or_create_city(city_slug)
+        profile.city = city
+        profile.save()
+    except Exception:
+        pass
+
     return user
 
 
@@ -220,6 +267,22 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
     # ── ID jedolo ──
     jedolo_id = _extract_jedolo_id(full_url)
 
+    # ── Téléphone ──
+    phone = ""
+    tel_link = soup.find("a", href=re.compile(r"^tel:"))
+    if tel_link:
+        phone = tel_link["href"].replace("tel:", "").strip()
+    if not phone:
+        # Fallback : chercher dans le texte
+        m_phone = re.search(r"(\+225[\d\s]{8,}|0[157]\d{8})", soup.get_text())
+        if m_phone:
+            phone = re.sub(r"\s+", "", m_phone.group(1))
+
+    # ── Nom du profil ──
+    # Jedolo n'affiche pas de pseudo séparé — on utilise les 3 premiers mots du titre
+    words = re.sub(r"[^\w\s]", "", title).split()
+    display_name = " ".join(words[:4]) if words else title[:40]
+
     return {
         "title": title,
         "description": description,
@@ -227,11 +290,13 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
         "city_slug": city_slug,
         "image_urls": image_urls,
         "jedolo_id": jedolo_id,
-        "source_url": full_url,  # stockée en base pour le backfill
+        "source_url": full_url,
+        "phone": phone,
+        "display_name": display_name,
     }
 
 
-def _create_ad(data: dict, user, dry_run: bool = False, session: requests.Session = None) -> bool:
+def _create_ad(data: dict, fallback_user, dry_run: bool = False, session: requests.Session = None) -> bool:
     """Crée l'annonce + médias en base. Retourne True si créée."""
     # Déduplication par jedolo_id
     jedolo_id = data.get("jedolo_id")
@@ -241,8 +306,26 @@ def _create_ad(data: dict, user, dry_run: bool = False, session: requests.Sessio
     city = _get_or_create_city(data["city_slug"])
 
     if dry_run:
-        print(f"  [DRY-RUN] {data['title'][:60]} | {data['category']} | {city.name} | {len(data['image_urls'])} photo(s)")
+        boost_tag = ""
+        if data.get("is_boosted"):
+            boost_tag = " [VIP]" if data.get("boost_interval_hours") == 3 else " [BOOST]"
+        elif data.get("is_urgent"):
+            boost_tag = " [URGENT]"
+        print(f"  [DRY-RUN] {data['title'][:55]} | {data['category']} | {city.name} | tel={data.get('phone','?')} | {len(data['image_urls'])} photo(s){boost_tag}")
         return True
+
+    # Créer ou récupérer le user propre à cette annonce
+    phone = data.get("phone", "")
+    display_name = data.get("display_name", data["title"][:40])
+    if phone:
+        user = _get_or_create_jedolo_user(phone, display_name, data["city_slug"])
+    else:
+        user = fallback_user
+
+    now = timezone.now()
+    is_boosted = data.get("is_boosted", False)
+    boost_interval_hours = data.get("boost_interval_hours") or 2
+    is_urgent = data.get("is_urgent", False)
 
     ad = Ad(
         user=user,
@@ -258,7 +341,13 @@ def _create_ad(data: dict, user, dry_run: bool = False, session: requests.Sessio
             "source": "jedolo",
             "source_url": data.get("source_url", ""),
         },
-        expires_at=timezone.now() + timezone.timedelta(days=365),
+        expires_at=now + timezone.timedelta(days=365),
+        # Statut boost/urgent importé depuis jedolo
+        is_boosted=is_boosted,
+        boost_interval_hours=boost_interval_hours if is_boosted else 2,
+        boost_expires_at=now + timezone.timedelta(days=30) if is_boosted else None,
+        is_urgent=is_urgent,
+        urgent_until=now + timezone.timedelta(days=30) if is_urgent else None,
     )
     ad.save()
 
@@ -353,21 +442,49 @@ class Command(BaseCommand):
                 self.stderr.write(f"  Impossible de charger la page {page_num}, on continue.")
                 continue
 
-            # Extraire les liens d'annonces
-            ad_links = []
+            # Extraire les liens d'annonces + statut boost/premium depuis la page liste
+            ad_items = []  # list of dicts: {url, is_boosted, boost_interval_hours, is_urgent}
+            seen_urls = set()
             for a in soup.find_all("a", href=re.compile(r"/rencontre-[^/]+/.+-\d+\.html")):
                 href = a["href"]
                 full = href if href.startswith("http") else "https:" + href
-                if full not in ad_links:
-                    ad_links.append(full)
+                if full in seen_urls:
+                    continue
+                seen_urls.add(full)
 
-            if not ad_links:
+                # Détecter le statut boost/premium depuis la card parente
+                card = a.find_parent(class_=re.compile(r"\bcard\b"))
+                is_boosted = False
+                boost_interval_hours = None
+                is_urgent = False
+
+                if card:
+                    card_classes = " ".join(card.get("class", []))
+                    # VIP : contient un <span class="ribbon-vip"> à l'intérieur
+                    if card.find(class_="ribbon-vip"):
+                        is_boosted = True
+                        boost_interval_hours = 3  # tier VIP
+                    elif "featured-box" in card_classes:
+                        is_boosted = True
+                        boost_interval_hours = 2  # tier Boost
+                    elif "ribbon-box" in card_classes:
+                        is_urgent = True
+
+                ad_items.append({
+                    "url": full,
+                    "is_boosted": is_boosted,
+                    "boost_interval_hours": boost_interval_hours,
+                    "is_urgent": is_urgent,
+                })
+
+            if not ad_items:
                 self.stdout.write("  Aucun lien trouvé sur cette page, fin du scraping.")
                 break
 
-            self.stdout.write(f"  {len(ad_links)} annonce(s) trouvée(s)")
+            self.stdout.write(f"  {len(ad_items)} annonce(s) trouvée(s)")
 
-            for ad_url in ad_links:
+            for item in ad_items:
+                ad_url = item["url"]
                 jedolo_id = _extract_jedolo_id(ad_url)
                 if jedolo_id and not dry_run:
                     if Ad.objects.filter(additional_data__jedolo_id=jedolo_id).exists():
@@ -380,12 +497,22 @@ class Command(BaseCommand):
                     self.stderr.write(f"  ✗ Échec scraping : {ad_url}")
                     continue
 
+                # Injecter les flags boost/urgent détectés sur la page liste
+                data["is_boosted"] = item["is_boosted"]
+                data["boost_interval_hours"] = item["boost_interval_hours"]
+                data["is_urgent"] = item["is_urgent"]
+
                 try:
                     created = _create_ad(data, user, dry_run=dry_run, session=session)
                     if created:
                         total_created += 1
+                        boost_label = ""
+                        if item["is_boosted"]:
+                            boost_label = f" [VIP]" if item["boost_interval_hours"] == 3 else " [BOOST]"
+                        elif item["is_urgent"]:
+                            boost_label = " [URGENT]"
                         self.stdout.write(
-                            f"  ✓ {'[DRY]' if dry_run else 'Créée'} : {data['title'][:55]} ({data['category']}, {data['city_slug']})"
+                            f"  ✓ {'[DRY]' if dry_run else 'Créée'} : {data['title'][:50]} ({data['category']}, {data['city_slug']}){boost_label}"
                         )
                     else:
                         total_skipped += 1
