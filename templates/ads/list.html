@@ -144,68 +144,69 @@
     {{ total_approved_ads|default:"0" }} annonce{{ total_approved_ads|pluralize }} vérifiée{{ total_approved_ads|pluralize }} en ce moment
   </p>
 </header>
-<!-- ── Filtres rapides jedolo-style ───────────────────────────────── -->
+<!-- ── Filtres rapides (inline styles = pas de purge Tailwind) ──────── -->
+<style>
+  .kf-pill { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; border:1.5px solid; text-decoration:none; transition:opacity .15s; }
+  .kf-pill:hover { opacity:.85; }
+  .kf-pill-red   { background:#fff; color:#ef4444; border-color:#fca5a5; }
+  .kf-pill-red.active   { background:#ef4444; color:#fff; border-color:#ef4444; }
+  .kf-pill-gold  { background:#fff; color:#d97706; border-color:#fcd34d; }
+  .kf-pill-gold.active  { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+  .kf-pill-pink  { background:#fff; color:#db2777; border-color:#f9a8d4; }
+  .kf-pill-pink.active  { background:#db2777; color:#fff; border-color:#db2777; }
+  .kf-pill-gray  { background:#f3f4f6; color:#6b7280; border-color:#e5e7eb; }
+  .kf-pill-city  { background:#fff; color:#374151; border-color:#e5e7eb; font-weight:600; }
+  .kf-pill-city.active  { background:#be185d; color:#fff; border-color:#be185d; }
+  .kf-pill-city .kf-count { color:#9ca3af; }
+  .kf-pill-city.active .kf-count { color:rgba(255,255,255,.7); }
+  .kf-pill-cat  { background:#fff; color:#374151; border-color:#e5e7eb; font-weight:600; }
+  .kf-pill-cat.active  { background:#be185d; color:#fff; border-color:#be185d; }
+  .kf-pill-cat .kf-count { color:#9ca3af; }
+  .kf-pill-cat.active .kf-count { color:rgba(255,255,255,.7); }
+</style>
+
 <div class="mb-3 flex flex-wrap gap-2">
   <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=urgent"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
-       {% if request.GET.boost == 'urgent' %}bg-red-500 text-white border-red-500{% else %}bg-white text-red-500 border-red-300 hover:bg-red-50{% endif %}">
-    🔥 Urgent
-  </a>
+     class="kf-pill kf-pill-red {% if request.GET.boost == 'urgent' %}active{% endif %}">🔥 Urgent</a>
   <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=premium"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
-       {% if request.GET.boost == 'premium' %}bg-yellow-400 text-white border-yellow-400{% else %}bg-white text-yellow-600 border-yellow-300 hover:bg-yellow-50{% endif %}">
-    ⭐ VIP / Premium
-  </a>
+     class="kf-pill kf-pill-gold {% if request.GET.boost == 'premium' %}active{% endif %}">⭐ VIP / Premium</a>
   <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}boost=boosted"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border transition
-       {% if request.GET.boost == 'boosted' %}bg-pink-500 text-white border-pink-500{% else %}bg-white text-pink-600 border-pink-300 hover:bg-pink-50{% endif %}">
-    🚀 Boosté
-  </a>
+     class="kf-pill kf-pill-pink {% if request.GET.boost == 'boosted' %}active{% endif %}">🚀 Boosté</a>
   {% if request.GET.boost %}
   <a href="?{% if request.GET.city %}city={{ request.GET.city }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}{% endif %}"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition">
-    ✕ Tout afficher
-  </a>
+     class="kf-pill kf-pill-gray">✕ Tout afficher</a>
   {% endif %}
 </div>
 
 <!-- ── Villes avec compteurs ──────────────────────────────────────── -->
 {% if city_counts %}
-<div class="mb-3">
-  <div class="flex flex-wrap gap-2">
-    {% for c in city_counts %}
-    <a href="/ads/bizi-{{ c.slug }}/"
-       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
-         {% if selected_city and selected_city.slug == c.slug %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
-      📍 {{ c.name }}
-      <span class="{% if selected_city and selected_city.slug == c.slug %}text-pink-100{% else %}text-gray-400{% endif %}">{{ c.ad_count }}</span>
-    </a>
-    {% endfor %}
-  </div>
+<div class="mb-3 flex flex-wrap gap-2">
+  {% for c in city_counts %}
+  <a href="/ads/bizi-{{ c.slug }}/"
+     class="kf-pill kf-pill-city {% if selected_city and selected_city.slug == c.slug %}active{% endif %}">
+    📍 {{ c.name }} <span class="kf-count">{{ c.ad_count }}</span>
+  </a>
+  {% endfor %}
 </div>
 {% endif %}
 
 <!-- ── Catégories avec compteurs ─────────────────────────────────── -->
 <div class="mb-4 flex flex-wrap gap-2">
   <a href="{% if selected_city %}/ads/bizi-{{ selected_city.slug }}/{% else %}/ads/{% endif %}"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
-       {% if not selected_category %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
-    Toutes <span class="{% if not selected_category %}text-pink-100{% else %}text-gray-400{% endif %}">{{ total_approved_ads }}</span>
+     class="kf-pill kf-pill-cat {% if not selected_category %}active{% endif %}">
+    Toutes <span class="kf-count">{{ total_approved_ads }}</span>
   </a>
   <a href="{% if selected_city %}/ads/escort-girl-{{ selected_city.slug }}/{% else %}/ads/escort-girl/{% endif %}"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
-       {% if selected_category == 'escorte_girl' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
-    💋 Escort Girl <span class="{% if selected_category == 'escorte_girl' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.escorte_girl|default:"0" }}</span>
+     class="kf-pill kf-pill-cat {% if selected_category == 'escorte_girl' %}active{% endif %}">
+    💋 Escort Girl <span class="kf-count">{{ category_counts.escorte_girl|default:"0" }}</span>
   </a>
   <a href="{% if selected_city %}/ads/escort-boy-{{ selected_city.slug }}/{% else %}/ads/escort-boy/{% endif %}"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
-       {% if selected_category == 'escorte_boy' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
-    👦 Escort Boy <span class="{% if selected_category == 'escorte_boy' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.escorte_boy|default:"0" }}</span>
+     class="kf-pill kf-pill-cat {% if selected_category == 'escorte_boy' %}active{% endif %}">
+    👦 Escort Boy <span class="kf-count">{{ category_counts.escorte_boy|default:"0" }}</span>
   </a>
   <a href="{% if selected_city %}/ads/transgenre-{{ selected_city.slug }}/{% else %}/ads/transgenre/{% endif %}"
-     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border transition
-       {% if selected_category == 'transgenre' %}bg-pink-600 text-white border-pink-600{% else %}bg-white text-gray-700 border-gray-200 hover:border-pink-400 hover:text-pink-600{% endif %}">
-    🏳️‍⚧️ Transgenre <span class="{% if selected_category == 'transgenre' %}text-pink-100{% else %}text-gray-400{% endif %}">{{ category_counts.transgenre|default:"0" }}</span>
+     class="kf-pill kf-pill-cat {% if selected_category == 'transgenre' %}active{% endif %}">
+    🏳️‍⚧️ Transgenre <span class="kf-count">{{ category_counts.transgenre|default:"0" }}</span>
   </a>
 </div>
 
