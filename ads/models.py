@@ -189,7 +189,7 @@ def _apply_watermark_sync(pk: int) -> None:
         media._watermark_applied = False
         result = media._add_watermark_and_thumbnail()
         if result:
-            media.save(update_fields=["image", "thumbnail"])
+            media.save(update_fields=["image", "thumbnail", "has_watermark"])
     except AdMedia.DoesNotExist:
         pass
     except Exception as e:
@@ -203,6 +203,7 @@ class AdMedia(models.Model):
     # Miniature optimisée pour les listes / aperçus (beaucoup plus légère que l'originale)
     thumbnail = models.ImageField(upload_to="ads/thumbnails/", blank=True, null=True)
     is_primary = models.BooleanField(default=False)
+    has_watermark = models.BooleanField(default=False, help_text="Filigrane appliqué sur cette image")
     _watermark_applied = False  # Flag pour éviter de réappliquer le filigrane
 
     def clean(self):
@@ -417,6 +418,7 @@ class AdMedia(models.Model):
             thumb_output.close()
 
             self._watermark_applied = True
+            self.has_watermark = True
             return True
 
         except Exception as e:

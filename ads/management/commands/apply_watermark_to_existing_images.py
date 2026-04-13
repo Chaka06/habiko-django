@@ -49,13 +49,16 @@ class Command(BaseCommand):
         
         self.stdout.write(f"Logo trouvé: {logo_path}")
         
-        # Récupérer toutes les images
-        all_media = AdMedia.objects.all()
+        # Traiter uniquement les images sans filigrane (idempotent : safe à chaque déploiement)
+        all_media = AdMedia.objects.filter(has_watermark=False)
         if limit:
             all_media = all_media[:limit]
-        
+
         total = all_media.count()
-        self.stdout.write(f"Traitement de {total} image(s)...")
+        if total == 0:
+            self.stdout.write(self.style.SUCCESS("✓ Toutes les images ont déjà un filigrane."))
+            return
+        self.stdout.write(f"Traitement de {total} image(s) sans filigrane...")
         
         processed = 0
         errors = 0
@@ -77,7 +80,7 @@ class Command(BaseCommand):
                     # _add_watermark_and_thumbnail ouvre l'image depuis le storage (S3/Supabase ou local)
                     result = media._add_watermark_and_thumbnail()
                     if result:
-                        media.save(update_fields=["image", "thumbnail"])
+                        media.save(update_fields=["image", "thumbnail", "has_watermark"])
                         processed += 1
                         self.stdout.write(
                             self.style.SUCCESS(f"  ✓ Filigrane appliqué: {media.image.name} (Ad #{media.ad_id})")
