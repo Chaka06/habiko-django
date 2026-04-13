@@ -375,7 +375,7 @@
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
           <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium" style="min-width:2.5rem;text-align:center;display:inline-block;">{{ num }}</span>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
           <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}"
              class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium hover:bg-gray-50 transition" style="min-width:2.5rem;text-align:center;display:inline-block;">
             {{ num }}
