@@ -3,6 +3,7 @@ import time as _time
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.db.models import Q, F, Case, When, Value, IntegerField
 from django.core.cache import cache
 from django.db import connection
@@ -10,7 +11,7 @@ from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
-from .models import Ad, City, Favorite
+from .models import Ad, AdMedia, City, Favorite
 from core.context_processors import get_ad_list_version
 
 
@@ -364,3 +365,55 @@ def favorites_list(request: HttpRequest) -> HttpResponse:
         .prefetch_related("ad__media")
     )
     return render(request, "ads/favorites.html", {"favorites": favs})
+
+
+@csrf_exempt
+def cron_apply_watermarks(request: HttpRequest) -> JsonResponse:
+    """
+    Endpoint appelé par Vercel Cron toutes les heures pour appliquer le filigrane
+    aux images qui n'en ont pas encore (traitement par lots de 10).
+
+    Sécurité : accepte uniquement les requêtes Vercel Cron (X-Vercel-Cron: 1)
+    ou les requêtes avec le bon CRON_SECRET en header.
+    """
+    is_vercel_cron = request.META.get("HTTP_X_VERCEL_CRON") == "1"
+    secret = getattr(settings, "CRON_SECRET", "")
+    has_secret = secret and request.META.get("HTTP_X_CRON_SECRET") == secret
+
+    if not is_vercel_cron and not has_secret:
+        return JsonResponse({"error": "forbidden"}, status=403)
+
+    # Nombre total restant avant traitement
+    remaining_before = AdMedia.objects.filter(has_watermark=False).count()
+    if remaining_before == 0:
+        return JsonResponse({"ok": True, "processed": 0, "remaining": 0})
+
+    batch = list(AdMedia.objects.filter(has_watermark=False)[:10])
+    processed = 0
+    errors = 0
+    t0 = _time.monotonic()
+
+    for media in batch:
+        # Stopper si on approche 50 secondes (Vercel function timeout ~60s)
+        if _time.monotonic() - t0 > 50:
+            break
+        try:
+            media._watermark_applied = False
+            result = media._add_watermark_and_thumbnail()
+            if result:
+                media.save(update_fields=["image", "thumbnail", "has_watermark"])
+                processed += 1
+            else:
+                errors += 1
+        except Exception as exc:
+            import logging as _logging
+            _logging.getLogger(__name__).warning("cron_apply_watermarks media=%s : %s", media.pk, exc)
+            errors += 1
+
+    remaining_after = AdMedia.objects.filter(has_watermark=False).count()
+    return JsonResponse({
+        "ok": True,
+        "processed": processed,
+        "errors": errors,
+        "remaining": remaining_after,
+    })

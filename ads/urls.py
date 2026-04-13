@@ -50,6 +50,8 @@ urlpatterns = [
     *_seo_patterns,
     path("<slug:slug>/", views.ad_detail, name="ad_detail"),
     path("<slug:slug>/record-view/", views.record_ad_view, name="record_ad_view"),
+    # Cron Vercel : filigrane des images par lots
+    path("cron/watermarks/", views.cron_apply_watermarks, name="cron_apply_watermarks"),
     # URLs pour actions admin
     path("admin/approve/<int:ad_id>/", admin_views.approve_ad, name="ads_ad_approve"),
     path("admin/reject/<int:ad_id>/", admin_views.reject_ad, name="ads_ad_reject"),
