@@ -182,6 +182,21 @@ class Ad(models.Model):
     get_subcategories_display.short_description = "Sous-catégories"
 
 
+def _apply_watermark_sync(pk: int) -> None:
+    """Applique le filigrane à un AdMedia existant (fallback synchrone sans Celery)."""
+    try:
+        media = AdMedia.objects.get(pk=pk)
+        media._watermark_applied = False
+        result = media._add_watermark_and_thumbnail()
+        if result:
+            media.save(update_fields=["image", "thumbnail"])
+    except AdMedia.DoesNotExist:
+        pass
+    except Exception as e:
+        import logging as _logging
+        _logging.getLogger(__name__).warning("_apply_watermark_sync pk=%s : %s", pk, e)
+
+
 class AdMedia(models.Model):
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="media")
     image = models.ImageField(upload_to="ads/")
@@ -442,13 +457,15 @@ class AdMedia(models.Model):
             # Sauvegarder d'abord pour obtenir le chemin du fichier (upload brut = réponse rapide)
             super().save(*args, **kwargs)
 
-            # Filigrane + miniature : en async (Celery) pour ne pas bloquer le dépôt d'annonce (15s → <2s)
+            # Filigrane + miniature : en async (Celery) si Redis disponible, sinon synchrone.
             if image_changed and self.image:
                 if getattr(settings, "USE_ASYNC_IMAGE_PROCESSING", True):
                     from ads.tasks import process_ad_media_image
                     transaction.on_commit(lambda: process_ad_media_image.delay(self.pk))
-                # Sans Redis (Vercel), on sauvegarde l'image brute sans traitement synchrone
-                # pour ne pas bloquer la requête HTTP (~13s évités).
+                elif not self._watermark_applied:
+                    # Sans Redis (Vercel) : appliquer le filigrane synchroniquement.
+                    # L'image est en mémoire si c'est un nouvel upload (file.seek(0) dans la méthode).
+                    transaction.on_commit(lambda pk=self.pk: _apply_watermark_sync(pk))
 
             # Ensure only one primary
             if self.is_primary:

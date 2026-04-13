@@ -373,9 +373,14 @@ def _create_ad(data: dict, fallback_user, dry_run: bool = False, session: reques
         filename = f"jedolo_{jedolo_id or ad.pk}_{idx}.{ext}"
         media = AdMedia(ad=ad, is_primary=(idx == 0))
         media.image.save(filename, ContentFile(img_bytes), save=False)
-        media._watermark_applied = True   # on bypass le filigrane à l'import
-        # Générer le thumbnail maintenant (Celery peut ne pas tourner en dev)
-        _generate_thumbnail(media, img_bytes)
+        # Injecter les bytes en mémoire pour que _add_watermark_and_thumbnail
+        # les lise sans re-télécharger depuis S3 (Celery indisponible sur Vercel)
+        from io import BytesIO as _BytesIO
+        media.image.file = _BytesIO(img_bytes)
+        result = media._add_watermark_and_thumbnail()
+        if not result:
+            # Fallback : thumbnail sans filigrane si Pillow échoue
+            _generate_thumbnail(media, img_bytes)
         media.save()
         photo_count += 1
         print(f"    ✓ Image {idx+1} sauvegardée ({len(img_bytes)//1024}ko)")
@@ -574,8 +579,11 @@ class Command(BaseCommand):
                 filename = f"jedolo_{jedolo_id or ad.pk}_{idx}.{ext}"
                 media = AdMedia(ad=ad, is_primary=(idx == 0))
                 media.image.save(filename, ContentFile(img_bytes), save=False)
-                media._watermark_applied = True
-                _generate_thumbnail(media, img_bytes)
+                from io import BytesIO as _BytesIO
+                media.image.file = _BytesIO(img_bytes)
+                result = media._add_watermark_and_thumbnail()
+                if not result:
+                    _generate_thumbnail(media, img_bytes)
                 media.save()
                 photo_count += 1
                 self.stdout.write(f"    ✓ Image {idx+1} ({len(img_bytes)//1024}ko)")

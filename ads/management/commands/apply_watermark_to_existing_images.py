@@ -62,29 +62,19 @@ class Command(BaseCommand):
         
         for media in all_media:
             try:
-                if not media.image:
+                if not media.image or not media.image.name:
                     continue
-                
-                # Vérifier que le fichier existe
-                if hasattr(media.image, 'path'):
-                    if not os.path.exists(media.image.path):
-                        self.stdout.write(
-                            self.style.WARNING(f"  ⚠ Fichier introuvable: {media.image.name}")
-                        )
-                        errors += 1
-                        continue
-                
+
                 # Réinitialiser le flag pour forcer l'application du filigrane
                 media._watermark_applied = False
-                
+
                 if dry_run:
                     self.stdout.write(f"  [DRY-RUN] Traiterait: {media.image.name} (Ad #{media.ad_id})")
                 else:
-                    # Afficher le chemin de l'image pour debug
-                    image_path = media.image.path if hasattr(media.image, 'path') else media.image.name
-                    self.stdout.write(f"  Traitement: {image_path}")
-                    
+                    self.stdout.write(f"  Traitement: {media.image.name}")
+
                     # Appliquer le filigrane + régénérer le thumbnail
+                    # _add_watermark_and_thumbnail ouvre l'image depuis le storage (S3/Supabase ou local)
                     result = media._add_watermark_and_thumbnail()
                     if result:
                         media.save(update_fields=["image", "thumbnail"])
