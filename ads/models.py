@@ -105,6 +105,10 @@ class Ad(models.Model):
     boost_interval_hours = models.PositiveSmallIntegerField(
         default=2, help_text=_("Intervalle de remontée en tête (heures) : 2h, 3h ou 4h selon forfait")
     )
+    bumped_at = models.DateTimeField(
+        null=True, blank=True, db_index=True,
+        help_text=_("Dernière remontée en tête de liste. Égal à created_at pour les annonces normales, mis à jour automatiquement pour les annonces boostées.")
+    )
 
     features = models.ManyToManyField(Feature, through="AdFeature", blank=True)
 
@@ -119,7 +123,7 @@ class Ad(models.Model):
     )
 
     class Meta:
-        ordering = ["-is_premium", "-is_urgent", "-created_at"]
+        ordering = ["-bumped_at", "-created_at"]
         indexes = [
             # Index couvrant la requête principale (status+image_done → ordre premium/urgent/date)
             models.Index(
@@ -168,6 +172,9 @@ class Ad(models.Model):
         # Durée de vie par défaut : 5 jours
         if not self.expires_at:
             self.expires_at = timezone.now() + timezone.timedelta(days=5)
+        # bumped_at = created_at pour les nouvelles annonces (sera mis à jour par le cron pour les boostées)
+        if not self.bumped_at:
+            self.bumped_at = self.created_at or timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:  # pragma: no cover

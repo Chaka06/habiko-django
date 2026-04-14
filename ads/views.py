@@ -74,7 +74,11 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             qs = qs.filter(q_search)
         return qs
 
-    # Annonces actives : boosted séparées des normales pour mélange aléatoire
+    # Annonces actives triées par bumped_at DESC (style jedolo) :
+    # - Les annonces boostées remontent automatiquement via le cron /ads/cron/bump/
+    #   selon leur boost_interval_hours (VIP=3h, Boost=2h, TOP=1h)
+    # - Les annonces normales restent à leur position de création (bumped_at = created_at)
+    # - Les urgentes apparaissent toujours en haut via is_urgent sort
     base_approved = common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
     if boost == "urgent":
         base_approved = base_approved.filter(is_urgent=True)
@@ -82,27 +86,16 @@ def ad_list(request: HttpRequest) -> HttpResponse:
         base_approved = base_approved.filter(is_premium=True)
     elif boost == "boosted":
         base_approved = base_approved.filter(is_boosted=True)
-    active_qs = apply_filters(base_approved.order_by("-created_at"))
-    active_ads = list(active_qs)
 
-    boosted_ads = [a for a in active_ads if a.is_premium or a.is_boosted or a.is_urgent]
-    regular_ads = [a for a in active_ads if not (a.is_premium or a.is_boosted or a.is_urgent)]
-
-    # Rotation round-robin des boostées toutes les 5 minutes :
-    # chaque annonce boostée passe à son tour en tête de liste.
-    # L'offset change avec time_bucket (= int(now/300)), ce qui invalide aussi le cache.
-    if boosted_ads:
-        n = len(boosted_ads)
-        offset = time_bucket % n
-        boosted_ads = boosted_ads[offset:] + boosted_ads[:offset]
-
-    # Boostées toujours en haut, annonces normales en bas
-    final_list = boosted_ads + regular_ads
+    active_qs = apply_filters(
+        base_approved.order_by("-is_urgent", "-bumped_at", "-created_at")
+    )
+    final_list = list(active_qs)
 
     # Annonces expirées toujours en bas
     expired_ads = list(apply_filters(
         common_qs.filter(status=Ad.Status.EXPIRED, image_processing_done=True)
-        .order_by("-created_at")
+        .order_by("-bumped_at", "-created_at")
     ))
     final_list.extend(expired_ads)
 
@@ -368,6 +361,59 @@ def favorites_list(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
+def cron_bump_ads(request: HttpRequest) -> JsonResponse:
+    """
+    Endpoint appelé par Vercel Cron toutes les heures pour remonter automatiquement
+    les annonces boostées en tête de liste (style jedolo).
+
+    Logique :
+      - VIP   (boost_interval_hours=3) → bumpe toutes les 3h
+      - Boost (boost_interval_hours=2) → bumpe toutes les 2h
+      - TOP   (boost_interval_hours=1) → bumpe toutes les 1h
+    """
+    import time as _time_mod
+    is_vercel_cron = request.META.get("HTTP_X_VERCEL_CRON") == "1"
+    secret = getattr(settings, "CRON_SECRET", "")
+    has_secret = secret and request.META.get("HTTP_X_CRON_SECRET") == secret
+    if not is_vercel_cron and not has_secret:
+        return JsonResponse({"error": "forbidden"}, status=403)
+
+    from django.utils import timezone as _tz
+    from datetime import timedelta as _td
+
+    now = _tz.now()
+    bumped = 0
+
+    # Annonces boostées actives (boost non expiré)
+    boosted = Ad.objects.filter(
+        status=Ad.Status.APPROVED,
+        is_boosted=True,
+        boost_expires_at__gt=now,
+    ).only("id", "bumped_at", "boost_interval_hours")
+
+    for ad in boosted:
+        interval = _td(hours=max(1, ad.boost_interval_hours or 2))
+        last = ad.bumped_at or now - interval  # si jamais initialisé
+        if (now - last) >= interval:
+            Ad.objects.filter(pk=ad.pk).update(bumped_at=now)
+            bumped += 1
+
+    # Idem pour les annonces premium
+    premiums = Ad.objects.filter(
+        status=Ad.Status.APPROVED,
+        is_premium=True,
+        premium_until__gt=now,
+    ).only("id", "bumped_at")
+
+    for ad in premiums:
+        last = ad.bumped_at or now - _td(hours=1)
+        if (now - last) >= _td(hours=1):
+            Ad.objects.filter(pk=ad.pk).update(bumped_at=now)
+            bumped += 1
+
+    return JsonResponse({"ok": True, "bumped": bumped, "checked_at": now.isoformat()})
+
+
 def cron_apply_watermarks(request: HttpRequest) -> JsonResponse:
     """
     Endpoint appelé par Vercel Cron toutes les heures pour appliquer le filigrane

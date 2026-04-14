@@ -245,24 +245,44 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
     # ── Ville ──
     city_slug = _extract_city_slug_from_url(full_url)
 
-    # ── Images ──
+    # ── Images ── (carousel principal de CETTE annonce uniquement)
     image_urls = []
-    # Images pleine résolution : cdn.jedolo.com/ci/CODE.jpg (sans "thumbs/tn_")
-    for img in soup.find_all("img"):
-        src = img.get("src", "") or img.get("data-src", "")
-        if "cdn.jedolo.com" in src:
-            # Convertir thumbnail en pleine résolution
-            full = re.sub(r"thumbs/tn_", "", src)
-            if full not in image_urls:
-                image_urls.append(full)
 
-    # Galerie via liens <a href="...cdn.jedolo.com...">
-    for a in soup.find_all("a", href=re.compile(r"cdn\.jedolo\.com")):
-        href = a["href"]
-        if href not in image_urls:
-            image_urls.append(href)
+    # jedolo structure : #ab-carouselIndicators > .carousel-inner > .carousel-item > img[data-src]
+    # Les items non-actifs utilisent data-src (lazy-load), seul l'actif a src.
+    # Les annonces similaires en bas de page utilisent src + thumbs/tn_ → on les ignore.
+    carousel = (
+        soup.find("div", {"id": "ab-carouselIndicators"})
+        or soup.find("div", class_="carousel-inner")
+    )
 
-    image_urls = [u if u.startswith("http") else "https:" + u for u in image_urls[:5]]
+    if carousel:
+        for img in carousel.find_all("img"):
+            # Priorité : data-src (lazy), puis src
+            for attr in ("data-src", "src", "data-lazy", "data-original"):
+                val = img.get(attr, "")
+                if "cdn.jedolo.com" in val and "thumbs/tn_" not in val:
+                    full = val if val.startswith("http") else "https:" + val
+                    if full not in image_urls:
+                        image_urls.append(full)
+                    break
+    else:
+        # Fallback : supprimer les sections d'annonces similaires (row-cols = grid d'autres annonces)
+        soup_copy = BeautifulSoup(str(soup), "html.parser")
+        for section in soup_copy.find_all(class_=re.compile(r"row-cols|related|similar|suggestion", re.I)):
+            section.decompose()
+        for tag in soup_copy.find_all(["aside", "footer"]):
+            tag.decompose()
+        for img in soup_copy.find_all("img"):
+            for attr in ("data-src", "src", "data-lazy"):
+                val = img.get(attr, "")
+                if "cdn.jedolo.com" in val and "thumbs/tn_" not in val:
+                    full = val if val.startswith("http") else "https:" + val
+                    if full not in image_urls:
+                        image_urls.append(full)
+                    break
+
+    image_urls = image_urls[:5]
     # Sécurité SSRF : n'accepter que les images provenant du CDN officiel jedolo
     image_urls = [u for u in image_urls if u.startswith("https://cdn.jedolo.com/")]
 
@@ -384,7 +404,7 @@ def _create_ad(data: dict, fallback_user, dry_run: bool = False, session: reques
         media.save()
         photo_count += 1
         print(f"    ✓ Image {idx+1} sauvegardée ({len(img_bytes)//1024}ko)")
-        if photo_count >= 3:
+        if photo_count >= 5:  # max 5 images par annonce (limite KIABA)
             break
 
     return True
@@ -418,6 +438,7 @@ class Command(BaseCommand):
         parser.add_argument("--dry-run", action="store_true", help="Affiche ce qui serait importé sans rien écrire en base")
         parser.add_argument("--start-page", type=int, default=1, help="Page de départ (défaut: 1)")
         parser.add_argument("--backfill-images", action="store_true", help="Re-télécharge les images des annonces jedolo qui n'en ont pas encore")
+        parser.add_argument("--delete-jedolo", action="store_true", help="Supprime TOUTES les annonces importées depuis jedolo (source='jedolo')")
 
     def handle(self, *args, **options):
         pages = options["pages"]
@@ -425,6 +446,14 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
         start_page = options["start_page"]
         backfill = options["backfill_images"]
+        delete_jedolo = options["delete_jedolo"]
+
+        if delete_jedolo:
+            count = Ad.objects.filter(additional_data__source="jedolo").count()
+            self.stdout.write(f"Suppression de {count} annonce(s) jedolo en cours...")
+            deleted, _ = Ad.objects.filter(additional_data__source="jedolo").delete()
+            self.stdout.write(self.style.SUCCESS(f"✓ {deleted} objet(s) supprimé(s) (annonces + médias associés)."))
+            return
 
         user = _get_system_user()
         session = requests.Session()
@@ -467,14 +496,22 @@ class Command(BaseCommand):
 
                 if card:
                     card_classes = " ".join(card.get("class", []))
-                    # VIP : contient un <span class="ribbon-vip"> à l'intérieur
+                    # Niveaux jedolo (du plus élevé au plus bas) :
+                    # VIP   : ribbon-vip + border-success + border-warning + border-danger + featured-box x2
+                    # BOOST : featured-box + ribbon-box + border-warning (sans ribbon-vip)
+                    # TOP   : top-ad-box + border-success (sans featured-box ni ribbon-vip)
+                    # Particulier : card basique
                     if card.find(class_="ribbon-vip"):
                         is_boosted = True
                         boost_interval_hours = 3  # tier VIP
                     elif "featured-box" in card_classes:
                         is_boosted = True
                         boost_interval_hours = 2  # tier Boost
-                    elif "ribbon-box" in card_classes:
+                    elif "top-ad-box" in card_classes:
+                        is_boosted = True
+                        boost_interval_hours = 1  # tier TOP (intermédiaire)
+                    # Urgent : badge-danger indépendant du tier (détecté séparément)
+                    if card.find("span", class_="badge-danger") or card.find(string=re.compile(r"Urgent", re.I)):
                         is_urgent = True
 
                 ad_items.append({
@@ -587,7 +624,7 @@ class Command(BaseCommand):
                 media.save()
                 photo_count += 1
                 self.stdout.write(f"    ✓ Image {idx+1} ({len(img_bytes)//1024}ko)")
-                if photo_count >= 3:
+                if photo_count >= 5:  # max 5 images par annonce (limite KIABA)
                     break
 
             done += 1

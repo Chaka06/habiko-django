@@ -20,6 +20,10 @@
     {
       "path": "/ads/cron/watermarks/",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/ads/cron/bump/",
+      "schedule": "0 * * * *"
     }
   ]
 }
