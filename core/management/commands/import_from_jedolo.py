@@ -252,15 +252,11 @@ class Command(BaseCommand):
                     )
                     
                     # Convertir la catégorie string en valeur du modèle
-                    category_value = ad_data["category"]
-                    if category_value == "rencontres_escort":
-                        category_value = Ad.Category.RENCONTRES_ESCORTES
-                    elif category_value == "massages_services":
-                        category_value = Ad.Category.MASSAGES_SERVICES
-                    elif category_value == "produits_adultes":
-                        category_value = Ad.Category.PRODUITS_ADULTES
-                    else:
-                        category_value = Ad.Category.RENCONTRES_ESCORTES
+                    category_value = random.choice([
+                        Ad.Category.ESCORTE_GIRL,
+                        Ad.Category.ESCORTE_BOY,
+                        Ad.Category.TRANSGENRE,
+                    ])
                     
                     # Créer l'annonce avec les vraies données
                     ad = Ad.objects.create(

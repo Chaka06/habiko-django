@@ -466,8 +466,14 @@ if USE_SUPABASE_STORAGE:
     # Supabase S3 exige souvent le path-style (pas le virtual-hosted)
     AWS_S3_ADDRESSING_STYLE = "path"
     if os.environ.get("SUPABASE_STORAGE_PUBLIC_URL"):
-        AWS_S3_CUSTOM_DOMAIN = os.environ.get("SUPABASE_STORAGE_PUBLIC_URL", "").replace("https://", "").replace("http://", "")
-        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STORAGE_BUCKET_NAME}/"
+        _pub_url = os.environ.get("SUPABASE_STORAGE_PUBLIC_URL", "")
+        AWS_S3_CUSTOM_DOMAIN = _pub_url.replace("https://", "").replace("http://", "").rstrip("/")
+        # R2 (r2.dev) sert les fichiers depuis la racine du bucket (pas de nom de bucket dans le path)
+        # Supabase (/storage/v1/object/public) inclut le nom du bucket dans le path
+        if "r2.dev" in _pub_url or "r2cloudflarestorage" in _pub_url:
+            MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+        else:
+            MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STORAGE_BUCKET_NAME}/"
     else:
         # Supabase sert les fichiers publics via /object/public/, pas via l'API S3. On dérive l'URL publique depuis l'endpoint S3.
         _endpoint = os.environ.get("SUPABASE_S3_ENDPOINT", "").rstrip("/")
