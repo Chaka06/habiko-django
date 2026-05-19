@@ -290,20 +290,61 @@ def _scrape_ad_detail(url: str, session: requests.Session) -> dict | None:
     jedolo_id = _extract_jedolo_id(full_url)
 
     # ── Téléphone ──
+    # jedolo cache le numéro dans le modal #ShowPhones (format "05 55 96 7252" avec espaces)
     phone = ""
-    tel_link = soup.find("a", href=re.compile(r"^tel:"))
-    if tel_link:
-        phone = tel_link["href"].replace("tel:", "").strip()
+
+    # 1. Modal ShowPhones — source la plus fiable (numéro complet avec opérateur)
+    modal = soup.find(id="ShowPhones")
+    if modal:
+        # Le numéro est dans <li class="list-group-item-info"><strong>05 55 96 7252</strong>
+        for li in modal.find_all("li", class_=re.compile(r"list-group-item")):
+            raw = li.get_text(strip=True)
+            # Supprimer le nom de l'opérateur (MTN, Orange, Moov, Wave) et extraire les chiffres
+            digits = re.sub(r"[^\d]", "", raw)
+            if 8 <= len(digits) <= 12:
+                # Reconstituer le numéro E.164 ivoirien
+                if digits.startswith("225") and len(digits) >= 11:
+                    phone = "+" + digits
+                elif digits.startswith("0") and len(digits) == 10:
+                    phone = "+225" + digits[1:]
+                elif len(digits) == 8:
+                    phone = "+225" + digits
+                elif len(digits) == 10 and digits.startswith("05"):
+                    phone = "+225" + digits
+                else:
+                    phone = "+225" + digits[-8:]
+                if phone:
+                    break
+
+    # 2. Lien tel: direct dans la page
     if not phone:
-        # Fallback : chercher dans le texte
-        m_phone = re.search(r"(\+225[\d\s]{8,}|0[157]\d{8})", soup.get_text())
+        tel_link = soup.find("a", href=re.compile(r"^tel:"))
+        if tel_link:
+            phone = tel_link["href"].replace("tel:", "").strip()
+
+    # 3. Regex dans tout le texte (numéros avec/sans espaces)
+    if not phone:
+        m_phone = re.search(r"(\+225[\d\s]{8,}|0[157]\d[\d\s]{7,})", soup.get_text())
         if m_phone:
             phone = re.sub(r"\s+", "", m_phone.group(1))
 
-    # ── Nom du profil ──
-    # Jedolo n'affiche pas de pseudo séparé — on utilise les 3 premiers mots du titre
-    words = re.sub(r"[^\w\s]", "", title).split()
-    display_name = " ".join(words[:4]) if words else title[:40]
+    # Normaliser : garder uniquement chiffres et +
+    if phone:
+        phone = re.sub(r"[^\d+]", "", phone)
+        if not phone.startswith("+") and len(phone) >= 8:
+            phone = "+225" + phone[-8:]
+
+    # ── Nom du profil ── (prénom affiché dans le modal ShowPhones si disponible)
+    display_name = ""
+    if modal:
+        title_el = modal.find("h4", class_="modal-title")
+        if title_el:
+            strong = title_el.find("strong")
+            if strong:
+                display_name = strong.get_text(strip=True)[:120]
+    if not display_name:
+        words = re.sub(r"[^\w\s]", "", title).split()
+        display_name = " ".join(words[:4]) if words else title[:40]
 
     return {
         "title": title,
@@ -341,6 +382,22 @@ def _create_ad(data: dict, fallback_user, dry_run: bool = False, session: reques
     display_name = data.get("display_name", data["title"][:40])
     if phone:
         user = _get_or_create_jedolo_user(phone, display_name, data["city_slug"])
+    elif jedolo_id:
+        # Pas de téléphone visible (jedolo le cache) : créer un user unique par jedolo_id
+        username = f"jedolo_{jedolo_id}"
+        user = User.objects.filter(username=username).first()
+        if not user:
+            from accounts.models import Profile
+            user = User(username=username, role="provider", is_active=True)
+            user.set_unusable_password()
+            user.save()
+            try:
+                profile = user.profile
+                profile.display_name = display_name[:120] if display_name else username
+                profile.city = _get_or_create_city(data["city_slug"])
+                profile.save()
+            except Exception:
+                pass
     else:
         user = fallback_user
 

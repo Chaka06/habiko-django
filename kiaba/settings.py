@@ -325,7 +325,9 @@ else:
         DATABASES["default"]["OPTIONS"]["sslmode"] = "prefer"
         # Réutiliser les connexions DB en production (sauf Vercel serverless)
         DATABASES["default"]["CONN_MAX_AGE"] = 0 if os.environ.get("VERCEL") == "1" else 60
-        DATABASES["default"]["ATOMIC_REQUESTS"] = True
+        # ATOMIC_REQUESTS désactivé sur Vercel (serverless) : chaque connexion est déjà jetée
+        # après la requête (CONN_MAX_AGE=0), le wrapper transaction est superflu et coûteux
+        DATABASES["default"]["ATOMIC_REQUESTS"] = False if os.environ.get("VERCEL") == "1" else True
     else:
         # Fallback : utiliser les variables individuelles
         postgres_host = env("POSTGRES_HOST", default="")
