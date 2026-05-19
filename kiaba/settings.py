@@ -364,6 +364,13 @@ else:
         }
 
 
+# Hashers : PBKDF2 en premier (plus rapide que Argon2/bcrypt par défaut Django 5.x).
+# Le nombre d'itérations est suffisant pour la sécurité tout en restant rapide.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

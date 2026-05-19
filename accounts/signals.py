@@ -38,7 +38,8 @@ def remember_old_password(sender, instance: CustomUser, **kwargs):  # pragma: no
         instance._old_password = None
         return
     try:
-        old = CustomUser.objects.get(pk=instance.pk)
+        # Utiliser only("password") pour éviter de charger toutes les colonnes
+        old = CustomUser.objects.only("password").get(pk=instance.pk)
         instance._old_password = old.password
     except CustomUser.DoesNotExist:
         instance._old_password = None

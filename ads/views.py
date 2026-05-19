@@ -74,30 +74,36 @@ def ad_list(request: HttpRequest) -> HttpResponse:
             qs = qs.filter(q_search)
         return qs
 
-    # Annonces actives triées par bumped_at DESC (style jedolo) :
-    # - Les annonces boostées remontent automatiquement via le cron /ads/cron/bump/
-    #   selon leur boost_interval_hours (VIP=3h, Boost=2h, TOP=1h)
-    # - Les annonces normales restent à leur position de création (bumped_at = created_at)
-    # - Les urgentes apparaissent toujours en haut via is_urgent sort
-    base_approved = common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
-    if boost == "urgent":
-        base_approved = base_approved.filter(is_urgent=True)
-    elif boost == "premium":
-        base_approved = base_approved.filter(is_premium=True)
-    elif boost == "boosted":
-        base_approved = base_approved.filter(is_boosted=True)
-
-    active_qs = apply_filters(
-        base_approved.order_by("-is_urgent", "-bumped_at", "-created_at")
-    )
-    final_list = list(active_qs)
-
-    # Annonces expirées toujours en bas
-    expired_ads = list(apply_filters(
-        common_qs.filter(status=Ad.Status.EXPIRED, image_processing_done=True)
-        .order_by("-bumped_at", "-created_at")
-    ))
-    final_list.extend(expired_ads)
+    # Annonces triées : approuvées d'abord (urgent > bumped_at), expirées en bas.
+    # On utilise une annotation CASE pour déléguer l'ordre à la DB (évite list() en RAM).
+    if boost:
+        # Filtre boost : uniquement les annonces approuvées correspondantes
+        base_approved = common_qs.filter(status=Ad.Status.APPROVED, image_processing_done=True)
+        if boost == "urgent":
+            base_approved = base_approved.filter(is_urgent=True)
+        elif boost == "premium":
+            base_approved = base_approved.filter(is_premium=True)
+        elif boost == "boosted":
+            base_approved = base_approved.filter(is_boosted=True)
+        final_qs = apply_filters(
+            base_approved.order_by("-is_urgent", "-bumped_at", "-created_at")
+        )
+    else:
+        # Liste complète : approuvées puis expirées, ordre géré par la DB
+        from django.db.models import Case, When, Value, IntegerField as _IntField
+        all_visible = common_qs.filter(
+            status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED],
+            image_processing_done=True,
+        ).annotate(
+            _status_order=Case(
+                When(status=Ad.Status.APPROVED, then=Value(0)),
+                default=Value(1),
+                output_field=_IntField(),
+            )
+        )
+        final_qs = apply_filters(all_visible).order_by(
+            "_status_order", "-is_urgent", "-bumped_at", "-created_at"
+        )
 
     selected_city = None
     selected_category = None
@@ -109,7 +115,7 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     if category:
         selected_category = category
 
-    paginator = Paginator(final_list, 10)
+    paginator = Paginator(final_qs, 10)
     page_obj = paginator.get_page(page)
 
     cities = cache.get("all_cities")
@@ -274,8 +280,18 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
         if cached is not None:
             return cached
 
-    # Annonce archivée/expirée → 410 Gone (signal fort pour Google : désindexer cette URL)
-    if Ad.objects.filter(slug=slug, status=Ad.Status.ARCHIVED).exists():
+    # Une seule requête : fetch l'annonce et décide ensuite selon son statut
+    ad = (
+        Ad.objects.filter(slug=slug)
+        .select_related("city", "user", "user__profile")
+        .prefetch_related("media")
+        .first()
+    )
+    if not ad:
+        from django.http import Http404
+        raise Http404
+
+    if ad.status == Ad.Status.ARCHIVED:
         from django.template.loader import render_to_string
         return HttpResponse(
             render_to_string("core/404.html", {"reason": "expired"}, request=request),
@@ -283,12 +299,9 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
             content_type="text/html",
         )
 
-    ad = get_object_or_404(
-        Ad.objects.filter(status__in=[Ad.Status.APPROVED, Ad.Status.EXPIRED], image_processing_done=True)
-        .select_related("city", "user", "user__profile")
-        .prefetch_related("media"),
-        slug=slug,
-    )
+    if ad.status not in [Ad.Status.APPROVED, Ad.Status.EXPIRED] or not ad.image_processing_done:
+        from django.http import Http404
+        raise Http404
 
     # Annonces similaires : une seule requête (même catégorie, priorité même ville)
     similar_ads = (
