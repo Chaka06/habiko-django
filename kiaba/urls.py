@@ -51,7 +51,15 @@ def sitemap_https(request: HttpRequest) -> HttpResponse:
     response["X-Content-Type-Options"] = "nosniff"
     return response
 
+def bing_auth(request: HttpRequest) -> HttpResponse:
+    """Vérification Bing Webmaster Tools."""
+    return HttpResponse(
+        '<?xml version="1.0"?>\n<users>\n    <user>4A39A04EB0119F3A74DA50066531293A</user>\n</users>',
+        content_type="application/xml",
+    )
+
 urlpatterns = [
+    path("BingSiteAuth.xml", bing_auth, name="bing_auth"),
     path("admin/", admin.site.urls),
     path("auth/", include("allauth.urls")),
     path("accounts/", include("accounts.urls")),
