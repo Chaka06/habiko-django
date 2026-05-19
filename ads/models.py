@@ -360,8 +360,8 @@ class AdMedia(models.Model):
                 img_rgb.save(
                     output,
                     format="WEBP",
-                    quality=60,
-                    method=6,
+                    quality=82,
+                    method=4,
                     optimize=True,
                 )
                 img_format = "WEBP"
@@ -405,15 +405,15 @@ class AdMedia(models.Model):
             # Générer la miniature (toujours depuis l'image en mémoire — pas de .path avec S3/Supabase)
             thumb_img = (img.convert("RGB") if img.mode != "RGB" else img.copy())
 
-            THUMBNAIL_SIZE = (320, 320)
+            THUMBNAIL_SIZE = (600, 600)
             thumb_img.thumbnail(THUMBNAIL_SIZE, Image.Resampling.LANCZOS)
 
             thumb_output = BytesIO()
             thumb_img.save(
                 thumb_output,
                 format="WEBP",
-                quality=50,
-                method=6,
+                quality=78,
+                method=4,
                 optimize=True,
             )
             thumb_output.seek(0)
