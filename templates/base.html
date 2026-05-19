@@ -1234,5 +1234,31 @@
         <p class="text-gray-700 font-medium">Chargement...</p>
       </div>
     </div>
+
+  <script>
+  // Prefetch sur hover : charge la page cible avant le clic → navigation instantanée
+  (function() {
+    const prefetched = new Set();
+    const origin = location.origin;
+    function prefetch(url) {
+      if (!url || prefetched.has(url) || !url.startsWith(origin)) return;
+      prefetched.add(url);
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      link.as = 'document';
+      document.head.appendChild(link);
+    }
+    document.addEventListener('mouseover', function(e) {
+      const a = e.target.closest('a[href]');
+      if (a) prefetch(a.href);
+    }, { passive: true });
+    // Touch : prefetch au touchstart (mobile)
+    document.addEventListener('touchstart', function(e) {
+      const a = e.target.closest('a[href]');
+      if (a) prefetch(a.href);
+    }, { passive: true });
+  })();
+  </script>
   </body>
 </html>

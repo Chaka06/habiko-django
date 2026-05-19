@@ -174,9 +174,10 @@ def ad_list(request: HttpRequest) -> HttpResponse:
     )
 
     if cache_key is not None:
-        # TTL aligné sur le bucket de 2 min (120s) pour que le cache ne survive pas
-        # à la prochaine rotation de positions.
         cache.set(cache_key, response, 120)
+        # CDN Vercel : cache la page liste au niveau edge (sans toucher Python)
+        # stale-while-revalidate : Vercel sert l'ancienne version pendant le renouvellement
+        response["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
 
     return response
 
@@ -321,7 +322,8 @@ def ad_detail(request: HttpRequest, slug: str) -> HttpResponse:
     response = render(request, "ads/detail.html", {"ad": ad, "similar_ads": similar_ads, "is_favorited": is_favorited})
 
     if not request.user.is_authenticated:
-        cache.set(f"ad_detail:{slug}", response, 120)  # 2 min, anonymes seulement
+        cache.set(f"ad_detail:{slug}", response, 120)
+        response["Cache-Control"] = "public, s-maxage=120, stale-while-revalidate=600"
 
     return response
 
