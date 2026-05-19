@@ -58,7 +58,30 @@ def bing_auth(request: HttpRequest) -> HttpResponse:
         content_type="application/xml",
     )
 
+
+def robots_txt(request: HttpRequest) -> HttpResponse:
+    """robots.txt avec référence au sitemap pour Google et Bing."""
+    content = """User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /accounts/payment/
+Disallow: /dashboard/
+
+Sitemap: https://ci-kiaba.com/sitemap.xml
+"""
+    return HttpResponse(content, content_type="text/plain")
+
+
 urlpatterns = [
+    path("robots.txt", robots_txt, name="robots_txt"),
     path("BingSiteAuth.xml", bing_auth, name="bing_auth"),
     path("admin/", admin.site.urls),
     path("auth/", include("allauth.urls")),
