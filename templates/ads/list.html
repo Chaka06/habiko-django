@@ -324,6 +324,13 @@
             <i class='bx bx-alarm' style="font-size:12px;"></i> Urgent
           </span>
           {% endif %}
+          {% with photo_count=ad.media.count %}
+          {% if photo_count > 1 %}
+          <span style="position:absolute;bottom:6px;right:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:999px;backdrop-filter:blur(2px);">
+            <i class='bx bx-camera' style="font-size:11px;"></i> {{ photo_count }}
+          </span>
+          {% endif %}
+          {% endwith %}
         </div>
         <div class="flex-1 p-2 flex flex-col justify-between min-w-0 overflow-hidden">
           <div class="min-w-0">
