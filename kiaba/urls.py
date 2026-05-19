@@ -51,6 +51,14 @@ def sitemap_https(request: HttpRequest) -> HttpResponse:
     response["X-Content-Type-Options"] = "nosniff"
     return response
 
+INDEXNOW_KEY = "6d8dbee3906c43479fba2cabb14b07fe"
+
+
+def indexnow_key_file(request: HttpRequest) -> HttpResponse:
+    """Fichier de vérification IndexNow requis par Bing."""
+    return HttpResponse(INDEXNOW_KEY, content_type="text/plain")
+
+
 def bing_auth(request: HttpRequest) -> HttpResponse:
     """Vérification Bing Webmaster Tools."""
     return HttpResponse(
@@ -83,6 +91,7 @@ Sitemap: https://ci-kiaba.com/sitemap.xml
 urlpatterns = [
     path("robots.txt", robots_txt, name="robots_txt"),
     path("BingSiteAuth.xml", bing_auth, name="bing_auth"),
+    path("6d8dbee3906c43479fba2cabb14b07fe.txt", indexnow_key_file, name="indexnow_key"),
     path("admin/", admin.site.urls),
     path("auth/", include("allauth.urls")),
     path("accounts/", include("accounts.urls")),

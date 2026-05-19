@@ -464,6 +464,13 @@ def _create_ad(data: dict, fallback_user, dry_run: bool = False, session: reques
         if photo_count >= 5:  # max 5 images par annonce (limite KIABA)
             break
 
+    # Soumettre l'URL à IndexNow (Bing) dès que l'annonce est créée
+    try:
+        from core.indexnow import submit_ad
+        submit_ad(ad)
+    except Exception:
+        pass
+
     return True
 
 

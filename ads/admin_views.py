@@ -34,6 +34,12 @@ def approve_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
 
     from core.context_processors import invalidate_site_metrics_cache
     invalidate_site_metrics_cache()
+    # Soumettre l'URL à IndexNow (Bing) dès approbation
+    try:
+        from core.indexnow import submit_ad
+        submit_ad(ad)
+    except Exception:
+        pass
     messages.success(request, f"Annonce '{ad.title}' approuvée avec succès.")
     return redirect("admin:ads_ad_changelist")
 
