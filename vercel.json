@@ -19,11 +19,11 @@
   "crons": [
     {
       "path": "/ads/cron/watermarks/",
-      "schedule": "0 * * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/ads/cron/bump/",
-      "schedule": "0 * * * *"
+      "schedule": "0 4 * * *"
     }
   ]
 }
