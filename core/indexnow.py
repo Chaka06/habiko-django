@@ -3,6 +3,7 @@ IndexNow — Soumet les URLs en temps réel à Bing/Yandex dès publication.
 Appelé automatiquement quand une annonce est approuvée.
 """
 import logging
+import threading
 import requests
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,10 @@ def submit_urls(urls: list[str]) -> bool:
         return False
 
 
-def submit_ad(ad) -> bool:
-    """Soumet l'URL d'une annonce à IndexNow."""
+def submit_ad(ad) -> None:
+    """Soumet l'URL d'une annonce à IndexNow en arrière-plan (non bloquant)."""
     url = f"https://{SITE_HOST}/ads/{ad.slug}/"
-    return submit_urls([url])
+    def _run():
+        submit_urls([url])
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Profil de {{ profile.display_name|default:profile_user.username }} · KIABA Rencontres{% endblock %}
 {% block description %}Profil de {{ profile.display_name|default:profile_user.username }} et ses annonces sur KIABA Rencontres.{% endblock %}
+{% block canonical_url %}https://ci-kiaba.com/accounts/u/{{ profile_user.username }}/{% endblock %}
+{% block og_url %}https://ci-kiaba.com/accounts/u/{{ profile_user.username }}/{% endblock %}
+{% block og_title %}Profil de {{ profile.display_name|default:profile_user.username }} · KIABA{% endblock %}
+{% block og_description %}Profil de {{ profile.display_name|default:profile_user.username }} et ses annonces sur KIABA Rencontres Côte d'Ivoire.{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
   <!-- Colonne profil -->

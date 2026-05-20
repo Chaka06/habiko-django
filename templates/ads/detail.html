@@ -6,6 +6,14 @@
 {% block hreflang_fr_ci %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
 {% block hreflang_default %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
 {% block canonical_url %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
+{% block og_url %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
+{% block og_title %}{{ ad.title }} – {{ ad.get_category_display }} {{ ad.city.name }} · KIABA{% endblock %}
+{% block og_description %}{{ ad.title }} – {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire. Contactez directement par WhatsApp, SMS ou appel.{% endblock %}
+{% block og_image %}{% if ad.media.first %}{% if ad.media.first.thumbnail %}{{ ad.media.first.thumbnail.url }}{% else %}{{ ad.media.first.image.url }}{% endif %}{% else %}https://ci-kiaba.com/static/img/og-default.jpg{% endif %}{% endblock %}
+{% block twitter_url %}https://ci-kiaba.com/ads/{{ ad.slug }}/{% endblock %}
+{% block twitter_title %}{{ ad.title }} – {{ ad.get_category_display }} {{ ad.city.name }} · KIABA{% endblock %}
+{% block twitter_description %}{{ ad.title }} – {{ ad.get_category_display }} à {{ ad.city.name }}, Côte d'Ivoire.{% endblock %}
+{% block twitter_image %}{% if ad.media.first %}{% if ad.media.first.thumbnail %}{{ ad.media.first.thumbnail.url }}{% else %}{{ ad.media.first.image.url }}{% endif %}{% else %}https://ci-kiaba.com/static/img/og-default.jpg{% endif %}{% endblock %}
 {% block structured_data %}
 <script type="application/ld+json">
 {

@@ -147,7 +147,7 @@ def post(request: HttpRequest) -> HttpResponse:
                 profile.save()
 
             request.user.phone_e164 = phone1
-            request.user.save()
+            request.user.save(update_fields=["phone_e164"])
 
             # Déterminer le statut selon si le profil est validé
             is_verified = profile.is_verified
@@ -289,7 +289,7 @@ def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
                 profile.save()
 
             request.user.phone_e164 = phone1
-            request.user.save()
+            request.user.save(update_fields=["phone_e164"])
 
             # Gérer les nouvelles images - remplacer toutes les images existantes
             new_images = request.FILES.getlist("images")

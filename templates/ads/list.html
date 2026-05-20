@@ -32,7 +32,7 @@
 
 {% block extra_head %}
   {% for ad in ads %}
-    {% if forloop.first and ad.media.count %}
+    {% if forloop.first and ad.media.all %}
       {% with media=ad.media.first %}
         <link rel="preload" href="{% if media.thumbnail %}{{ media.thumbnail.url }}{% else %}{{ media.image.url }}{% endif %}" as="image" />
       {% endwith %}
@@ -280,7 +280,7 @@
     <a href="/ads/{{ ad.slug }}" class="group relative block rounded-xl border border-pink-500 overflow-hidden shadow-sm hover:shadow-md transition h-48" style="{% if ad.is_premium or ad.is_boosted or ad.is_urgent %}background:#fefce8;{% else %}background:#fff;{% endif %}">
       <div class="flex h-full">
         <div class="w-40 flex-shrink-0 bg-slate-100" style="position:relative;">
-          {% if ad.media.count %}
+          {% if ad.media.all %}
             {% with media=ad.media.first %}
               {% if media.image %}
               <img
@@ -324,7 +324,7 @@
             <i class='bx bx-alarm' style="font-size:12px;"></i> Urgent
           </span>
           {% endif %}
-          {% with photo_count=ad.media.count %}
+          {% with photo_count=ad.media.all|length %}
           {% if photo_count > 1 %}
           <span style="position:absolute;bottom:6px;right:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:999px;backdrop-filter:blur(2px);">
             <i class='bx bx-camera' style="font-size:11px;"></i> {{ photo_count }}
