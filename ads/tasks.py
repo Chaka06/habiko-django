@@ -51,10 +51,18 @@ def expire_ads():
     from django.conf import settings
 
     now = timezone.now()
-    expired = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED).select_related("user", "city")
-    count = 0
+    expired_qs = Ad.objects.filter(expires_at__lte=now, status=Ad.Status.APPROVED)
 
-    for ad in expired:
+    # 1 seul UPDATE bulk au lieu de N UPDATE individuels
+    expired_ads = list(expired_qs.select_related("user", "city"))
+    count = len(expired_ads)
+    if not count:
+        return "0 annonces expirées"
+
+    expired_qs.update(status=Ad.Status.EXPIRED, updated_at=now)
+
+    # Emails envoyés séparément après l'UPDATE
+    for ad in expired_ads:
         try:
             EmailService.send_email(
                 subject=f"Votre annonce '{ad.title}' a expiré",
@@ -69,10 +77,6 @@ def expire_ads():
             )
         except Exception as e:
             logger.warning("Email expiration annonce %s: %s", ad.id, e)
-
-        ad.status = Ad.Status.EXPIRED
-        ad.save(update_fields=["status", "updated_at"])
-        count += 1
 
     return f"{count} annonces expirées"
 

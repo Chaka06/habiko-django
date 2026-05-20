@@ -48,6 +48,8 @@ def google_verification(_: object) -> HttpResponse:
 
 
 def ads_txt(_: object) -> HttpResponse:
-    response = HttpResponse("", content_type="text/plain; charset=utf-8")
+    # Pas de publicité programmatique — déclaration explicite IAB
+    content = "placeholder.example.com, placeholder, DIRECT, f08c47fec0942fa0\n"
+    response = HttpResponse(content, content_type="text/plain; charset=utf-8")
     response["Cache-Control"] = "public, max-age=3600"
     return response

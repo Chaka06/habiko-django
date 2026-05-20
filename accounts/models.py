@@ -77,7 +77,11 @@ def create_profile(sender, instance, created, **kwargs):  # pragma: no cover
         # Note: Account n'est plus créé automatiquement car le système de paiement est désactivé
 
 
-models.signals.post_save.connect(create_profile, sender=CustomUser)
+models.signals.post_save.connect(
+    create_profile,
+    sender=CustomUser,
+    dispatch_uid="accounts.create_profile_on_user_create",
+)
 
 # Create your models here.
 
