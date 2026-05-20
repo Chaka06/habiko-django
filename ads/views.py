@@ -429,6 +429,7 @@ def cron_bump_ads(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"ok": True, "bumped": bumped, "checked_at": now.isoformat()})
 
 
+@csrf_exempt
 def cron_apply_watermarks(request: HttpRequest) -> JsonResponse:
     """
     Endpoint appelé par Vercel Cron toutes les heures pour appliquer le filigrane

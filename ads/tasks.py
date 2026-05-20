@@ -22,7 +22,7 @@ def process_ad_media_image(self, media_id: int):
         if not media.image:
             return f"AdMedia {media_id}: pas d'image"
         if media._add_watermark_and_thumbnail():
-            media.save(update_fields=["image", "thumbnail"])
+            media.save(update_fields=["image", "thumbnail", "has_watermark"])
         # L'annonce n'apparaît en liste que lorsque toutes les photos ont filigrane + miniature
         ad = media.ad
         pending = AdMedia.objects.filter(ad=ad).filter(Q(thumbnail="") | Q(thumbnail__isnull=True))
