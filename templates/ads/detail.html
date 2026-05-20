@@ -21,7 +21,7 @@
   "@type": ["WebPage", "Service"],
   "name": "{{ ad.title|escapejs }} – {% if ad.category == 'escorte_girl' %}Bizi Girl{% elif ad.category == 'escorte_boy' %}Escort Boy{% else %}Transgenre{% endif %} {{ ad.city.name }}",
   "description": "{{ ad.description_sanitized|truncatewords:50|escapejs }}",
-  "url": "https://ci-kiaba.com/ads/{{ ad.slug }}",
+  "url": "https://ci-kiaba.com/ads/{{ ad.slug }}/",
   "serviceType": "{{ ad.get_category_display }}",
   "areaServed": {
     "@type": "City",

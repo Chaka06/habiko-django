@@ -57,6 +57,8 @@ def age_gate(request: HttpRequest) -> HttpResponse:
 def favicon(request: HttpRequest) -> HttpResponse:
     """Servir le favicon — 204 No Content si le fichier n'existe pas (browsers l'acceptent)."""
     import os
+    if not settings.STATICFILES_DIRS:
+        return HttpResponse(status=204)
     favicon_path = os.path.join(settings.STATICFILES_DIRS[0], "favicon.png")
     if os.path.exists(favicon_path):
         return serve(request, "favicon.png", document_root=settings.STATICFILES_DIRS[0])
@@ -249,7 +251,7 @@ def post(request: HttpRequest) -> HttpResponse:
 def edit_ad(request: HttpRequest, ad_id: int) -> HttpResponse:
     """Modifier une annonce existante"""
     try:
-        ad = Ad.objects.get(id=ad_id, user=request.user)
+        ad = Ad.objects.select_related("city").get(id=ad_id, user=request.user)
     except Ad.DoesNotExist:
         messages.error(request, "Annonce non trouvée.")
         return redirect("/dashboard/")

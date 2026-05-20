@@ -406,25 +406,29 @@ def cron_bump_ads(request: HttpRequest) -> JsonResponse:
         boost_expires_at__gt=now,
     ).only("id", "bumped_at", "boost_interval_hours")
 
-    for ad in boosted:
-        interval = _td(hours=max(1, ad.boost_interval_hours or 2))
-        last = ad.bumped_at or now - interval  # si jamais initialisé
-        if (now - last) >= interval:
-            Ad.objects.filter(pk=ad.pk).update(bumped_at=now)
-            bumped += 1
+    # Bulk update : 1 seule requête pour toutes les annonces boostées éligibles
+    boosted_ids = [
+        ad.pk for ad in boosted
+        if (now - (ad.bumped_at or now - _td(hours=max(1, ad.boost_interval_hours or 2))))
+           >= _td(hours=max(1, ad.boost_interval_hours or 2))
+    ]
+    if boosted_ids:
+        Ad.objects.filter(pk__in=boosted_ids).update(bumped_at=now)
+        bumped += len(boosted_ids)
 
-    # Idem pour les annonces premium
+    # Idem pour les annonces premium — 1 seule requête
     premiums = Ad.objects.filter(
         status=Ad.Status.APPROVED,
         is_premium=True,
         premium_until__gt=now,
     ).only("id", "bumped_at")
-
-    for ad in premiums:
-        last = ad.bumped_at or now - _td(hours=1)
-        if (now - last) >= _td(hours=1):
-            Ad.objects.filter(pk=ad.pk).update(bumped_at=now)
-            bumped += 1
+    premium_ids = [
+        ad.pk for ad in premiums
+        if (now - (ad.bumped_at or now - _td(hours=1))) >= _td(hours=1)
+    ]
+    if premium_ids:
+        Ad.objects.filter(pk__in=premium_ids).update(bumped_at=now)
+        bumped += len(premium_ids)
 
     return JsonResponse({"ok": True, "bumped": bumped, "checked_at": now.isoformat()})
 

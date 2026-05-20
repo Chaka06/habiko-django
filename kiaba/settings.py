@@ -322,7 +322,7 @@ else:
             DATABASES["default"]["OPTIONS"] = {}
         # Utiliser 'prefer' qui essaie SSL mais ne l'exige pas strictement
         # Cela évite les problèmes de validation de certificat
-        DATABASES["default"]["OPTIONS"]["sslmode"] = "prefer"
+        DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
         # Réutiliser les connexions DB en production (sauf Vercel serverless)
         DATABASES["default"]["CONN_MAX_AGE"] = 0 if os.environ.get("VERCEL") == "1" else 60
         # ATOMIC_REQUESTS désactivé sur Vercel (serverless) : chaque connexion est déjà jetée
@@ -617,7 +617,7 @@ CSRF_FAILURE_VIEW = "core.views.csrf_failure"
 # ne pas être posé ou envoyé dans ce contexte.
 CSRF_USE_SESSIONS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
+# SECURE_BROWSER_XSS_FILTER supprimé (déprécié Django 4+, ignoré silencieusement)
 X_FRAME_OPTIONS = "DENY"
 # Configuration des cookies CSRF et Session
 # En production (HTTPS), activer Secure pour les cookies
@@ -689,11 +689,11 @@ EMAIL_BACKEND = env(
 # Identité d'envoi
 DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
-    default="KIABA Rencontres <no-replay@ci-kiaba.com>",
+    default="KIABA Rencontres <no-reply@ci-kiaba.com>",
 )
 SERVER_EMAIL = env(
     "SERVER_EMAIL",
-    default="KIABA Rencontres Errors <no-replay@ci-kiaba.com>",
+    default="KIABA Rencontres Errors <no-reply@ci-kiaba.com>",
 )
 
 # Paramètres SMTP (LWS, Brevo, SendGrid, etc.)

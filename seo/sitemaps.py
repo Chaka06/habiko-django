@@ -36,8 +36,9 @@ class StaticSitemap(KiabaSitemapBase):
         return reverse(item)
 
     def lastmod(self, item):
-        from django.utils import timezone
-        return timezone.now()
+        # Date fixe — évite un recrawl inutile à chaque requête
+        from django.utils.timezone import datetime, utc
+        return datetime(2026, 5, 20, tzinfo=utc)
 
 
 class AdSitemap(KiabaSitemapBase):

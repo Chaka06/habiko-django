@@ -506,7 +506,7 @@ def _activate_ad_for_payment(payment: Payment) -> None:
         ad.save(update_fields=[
             "status", "expires_at",
             "is_boosted", "boost_expires_at", "boost_interval_hours",
-            "is_premium", "premium_until",
+            "is_premium", "premium_until", "bumped_at",
         ])
 
         # Approbation automatique des nouvelles annonces
